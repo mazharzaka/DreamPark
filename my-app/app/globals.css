@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@theme inline {
+  --color-primary: #b5161e;
+  --color-secondary: #005caa;
+  --color-tertiary: #755700;
+  --color-surface: #f6f6f6;
+  --color-surface-container-low: #f0f1f1;
+  --color-surface-container-lowest: #ffffff;
+  --color-outline-variant: #acadad;
+  --color-on-surface: #2d2f2f;
+  --color-emerald: #10b981;
+
+  --font-sans: var(--font-plus-jakarta-sans);
+  --font-arabic: var(--font-ibm-plex-arabic);
+  --font-cairo: var(--font-cairo);
+
+  --shadow-ambient: 0 20px 40px 0 rgba(45, 47, 47, 0.05);
+
+  --text-display-lg: 3.5rem;
+}
+
+@utility glassmorphism {
+  backdrop-filter: blur(20px);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans), sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-arabic), sans-serif;
+}
+
+[dir="rtl"] h1, 
+[dir="rtl"] h2, 
+[dir="rtl"] h3 {
+  font-family: var(--font-cairo), sans-serif;
+  line-height: 1.3;
+}

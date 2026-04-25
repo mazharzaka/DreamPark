@@ -1,0 +1,227 @@
+{
+  "Navigation": {
+    "parkInfo": "Park Info",
+    "attractions": "Attractions",
+    "dining": "Dining",
+    "map": "Map"
+  },
+  "Actions": {
+    "bookNow": "Book Now"
+  },
+  "Hero": {
+    "games": "Games"
+  },
+  "Ticketsets": {
+    "title": "Ticket <span>Sets</span>",
+    "openStatus": "Open Today: 9AM - 11PM",
+    "viewAll": "View All",
+    "subtitle": "Discover our unique experiences and enjoy your time at Dream Park."
+  },
+  "Attractions": {
+    "title": "Our <span>Games</span>",
+    "openStatus": "Open Today: 9AM - 11PM",
+    "viewAll": "View All"
+  },
+  "DreamZoo": {
+    "title": "Dream <span>Zoo</span>",
+    "animals": "Our <span>Animals</span>",
+    "description": "Embark on a journey through nature's most extraordinary habitats.",
+    "cta": "Explore Wildlife",
+    "openStatus": "Open Today: 9AM - 11PM",
+    "viewAll": "View All",
+    "features": {
+      "safari": {
+        "title": "Safari Experience",
+        "description": "Get close to majestic animals in their natural habitats."
+      },
+      "conservation": {
+        "title": "Conservation Heart",
+        "description": "Learn about our efforts to protect endangered species."
+      },
+      "interactive": {
+        "title": "Wild Encounters",
+        "description": "Interactive sessions with our resident animals."
+      }
+    },
+    "zones": {
+      "lion": "King's Pride (Lion)",
+      "giraffe": "Skyline Heights (Giraffe)",
+      "elephant": "Gentle Giants (Elephant)"
+    }
+  },
+  "Explore": {
+    "title": "Park <span>Explorer</span>",
+    "description": "Navigate your way through the magic of Dream Park.",
+    "cta": "View Details",
+    "categories": {
+      "Rides": "Rides",
+      "Zoo": "Zoo",
+      "Water": "Water",
+      "Facilities": "Facilities"
+    }
+  },
+  "Tickets": {
+    "step01": "Select Pass 01",
+    "step02": "Choose Time 02",
+    "step03": "Add-ons 03",
+    "mostPopular": "Most Popular",
+    "person": "person",
+    "tiers": {
+      "diamond": {
+        "name": "Diamond",
+        "edition": "Diamond Edition",
+        "cta": "Select Diamond",
+        "features": {
+          "magicPass": "Unlimited Magic Pass",
+          "lounge": "VIP Lounge Access",
+          "discount": "Merch & Dining Off 25%"
+        }
+      },
+      "gold": {
+        "name": "Gold",
+        "edition": "Gold Edition",
+        "cta": "Select Gold",
+        "features": {
+          "fastTrack": "Fast-Track for 5 Rides",
+          "parking": "Premium Parking Included",
+          "discount": "Dining Discount 10%"
+        }
+      },
+      "silver": {
+        "name": "Silver",
+        "edition": "Silver Edition",
+        "cta": "Select Silver",
+        "features": {
+          "access": "All Theme Park Access",
+          "parking": "Standard Parking",
+          "magicPass": "Magic Pass Access"
+        }
+      }
+    }
+  },
+  "Portal": {
+    "OurHeroes": {
+      "title": "Our <span>Heroes</span>",
+      "subtitle": "Witness the pure joy of discovery through the eyes of our youngest explorers."
+    }
+  },
+  "Dopy": {
+    "title": "Dopy <span>Welcome</span>",
+    "subtitle": "Join Dopy and his little ones on unforgettable adventures!"
+  },
+  "Merch": {
+    "pageTitle": "Explore our <span>Merch</span>",
+    "pageSubtitle": "Discover all the amazing merch and attractions DreamPark has to offer."
+  },
+  "Games": {
+    "pageTitle": "All <span>Games</span>",
+    "pageSubtitle": "Discover all the amazing games and attractions DreamPark has to offer.",
+    "noGamesFound": "No games found for this category.",
+    "Categories": {
+      "all": "All Games",
+      "thrill": "Thrill Rides",
+      "family": "Family Fun",
+      "kids": "Kids Zone"
+    },
+    "Items": {
+      "game1": {
+        "title": "Tiger Encounter",
+        "description": "Meet the majestic tigers in our specialized habitat."
+      },
+      "game2": {
+        "title": "Panda Playground",
+        "description": "Fun for the whole family with our playful pandas."
+      },
+      "game3": {
+        "title": "Lion King Safari",
+        "description": "A gentle ride perfect for the little ones."
+      },
+      "game4": {
+        "title": "Wild Drop",
+        "description": "Experience the ultimate adrenaline rush!"
+      },
+      "game5": {
+        "title": "Family Splash",
+        "description": "A refreshing water ride for everyone."
+      },
+      "game6": {
+        "title": "Little Explorer",
+        "description": "Safe and fun adventures for toddlers."
+      }
+    }
+  },
+  "Animals": {
+    "pageTitle": "Animals <span>Page</span>",
+    "pageSubtitle": "Discover all the amazing animals DreamPark has to offer.",
+    "noAnimalsFound": "No animals found for this category.",
+    "Categories": {
+      "all": "All Animals",
+      "mammals": "Mammals",
+      "birds": "Birds",
+      "reptiles": "Reptiles"
+    },
+    "Items": {
+      "animal1": {
+        "title": "Tiger",
+        "description": "Meet the majestic tigers in our specialized habitat."
+      },
+      "animal2": {
+        "title": "Panda",
+        "description": "Fun for the whole family with our playful pandas."
+      },
+      "animal3": {
+        "title": "Lion",
+        "description": "A gentle ride perfect for the little ones."
+      },
+      "animal4": {
+        "title": "Elephant",
+        "description": "Experience the ultimate adrenaline rush!"
+      },
+      "animal5": {
+        "title": "Monkey",
+        "description": "A refreshing water ride for everyone."
+      },
+      "animal6": {
+        "title": "Zebra",
+        "description": "Safe and fun adventures for toddlers."
+      }
+    }
+  },
+  "Auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account to continue your magical journey.",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create an account"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join DreamPark today and unlock exclusive benefits.",
+      "submit": "Sign Up",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign In"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••"
+    },
+    "social": {
+      "or": "Or continue with",
+      "google": "Google",
+      "apple": "Apple"
+    },
+    "errors": {
+      "required": "This field is required",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordUppercase": "Must contain at least one uppercase letter",
+      "passwordNumber": "Must contain at least one number",
+      "passwordSpecial": "Must contain at least one special character"
+    }
+  }
+}
