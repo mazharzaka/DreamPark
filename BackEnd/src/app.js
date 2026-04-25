@@ -4,6 +4,10 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
 import heroRoutes from './routes/heroRoutes.js';
+import attractionRoutes from './routes/attractionRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+
+import errorMiddleware from './middlewares/errorMiddleware.js';
 
 // ── Environment ────────────────────────────────────────────────────────────────
 dotenv.config();
@@ -18,16 +22,11 @@ app.use(express.json());
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
 app.use('/api/hero', heroRoutes);
+app.use('/api/attractions', attractionRoutes);
+app.use('/api/auth', authRoutes);
 
 // ── Centralized Error Handler ──────────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.error('[Error]', err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    error: err.message || 'Internal Server Error',
-  });
-});
+app.use(errorMiddleware);
 
 // ── Database + Server Bootstrap ────────────────────────────────────────────────
 mongoose
