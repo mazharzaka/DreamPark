@@ -1,10 +1,11 @@
-﻿# DreamPark Development Guidelines
+# DreamPark Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2026-04-25
 
 ## Active Technologies
 
 - Node.js / ES Modules + Express, Mongoose, Cors, Dotenv (009-attractions-api)
+- Node.js (ES Modules) + swagger-jsdoc, swagger-ui-express (012-swagger-api-docs)
 
 ## Project Structure
 
@@ -24,6 +25,7 @@ Node.js / ES Modules: Follow standard conventions
 
 ## Recent Changes
 
+- 012-swagger-api-docs: Added swagger-jsdoc and swagger-ui-express
 - 009-attractions-api: Added Node.js / ES Modules + Express, Mongoose, Cors, Dotenv
 
 <!-- MANUAL ADDITIONS START -->

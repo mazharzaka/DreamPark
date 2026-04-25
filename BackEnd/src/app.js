@@ -7,6 +7,9 @@ import heroRoutes from './routes/heroRoutes.js';
 import attractionRoutes from './routes/attractionRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './config/swagger.js';
+
 import errorMiddleware from './middlewares/errorMiddleware.js';
 
 // ── Environment ────────────────────────────────────────────────────────────────
@@ -24,6 +27,9 @@ app.use(express.json());
 app.use('/api/hero', heroRoutes);
 app.use('/api/attractions', attractionRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
 
 // ── Centralized Error Handler ──────────────────────────────────────────────────
 app.use(errorMiddleware);

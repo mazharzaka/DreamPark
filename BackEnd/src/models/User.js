@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       required: [true, 'Please specify your gender'],
-      enum: ['male', 'female', 'other'],
+      enum: ['male', 'female'],
     },
     dateOfBirth: {
       type: Date,
@@ -57,7 +57,7 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
-  next();
+  // next();
 });
 
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
