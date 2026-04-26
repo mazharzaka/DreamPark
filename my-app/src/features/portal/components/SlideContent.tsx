@@ -45,7 +45,7 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
       {/* Background Image Optimized */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={slide.image || ""}
+          src={slide?.imageUrl || ""}
           alt={slide.title}
           fill
           priority={isActive}
@@ -65,22 +65,21 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
         animate={isActive ? "visible" : "hidden"}
         className="relative z-10 max-w-4xl xl:max-w-5xl 2xl:max-w-7xl pt-20"
       >
-        {slide.tagline && (
+        {/* {slide.tagline && (
           <motion.span
             variants={itemVariants}
             className="inline-block px-4 py-1 mb-6 text-xs font-bold tracking-[0.3em] text-white/80 uppercase bg-white/10 backdrop-blur-md rounded-full border border-white/10"
           >
             {slide.tagline}
           </motion.span>
-        )}
+        )} */}
 
         <motion.h1
           variants={itemVariants}
           className={`text-6xl md:text-8xl lg:text-[7rem] 2xl:text-[10rem] font-bold text-white leading-[0.9] mb-8 select-none ${isRtl ? 'font-cairo' : 'font-sans'}`}
         >
-          {slide.title}
-          <br />
-          <span className="text-primary">{slide.titleAccent}</span>
+          {slide.title + " "}
+          <span className="text-primary">{slide.subtitle}</span>
         </motion.h1>
 
         <motion.p
@@ -91,11 +90,9 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
         </motion.p>
 
         <motion.div variants={itemVariants} className="flex gap-4 justify-start">
-          {slide.buttons.map((btn, idx) => (
-            <EditorialButton key={idx} variant={btn.variant}>
-              {btn.label}
-            </EditorialButton>
-          ))}
+          <EditorialButton variant={"secondary"}>
+            {slide.ctaText}
+          </EditorialButton>
         </motion.div>
       </motion.div>
     </div>

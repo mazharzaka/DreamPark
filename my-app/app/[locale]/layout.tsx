@@ -6,7 +6,7 @@ import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic, Cairo, Plus_Jakarta_Sans } fro
 import "../globals.css";
 import { Header } from "@/src/components/layout/Header";
 import LocalePersistence from "@/src/components/ui/LocalePersistence";
-
+import StoreProvider from "@/app/StoreProvider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -63,10 +63,12 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>
-          <LocalePersistence />
-          <Header />
+          <StoreProvider>
+            <LocalePersistence />
+            <Header />
 
-          {children}
+            {children}
+          </StoreProvider>
         </NextIntlClientProvider>
       </body>
     </html>

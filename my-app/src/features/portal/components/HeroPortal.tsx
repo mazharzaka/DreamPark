@@ -9,11 +9,11 @@ import { MOCK_DOBY } from "../data/mockHeroes";
 import { Ticketsets } from "./Ticketsets";
 import Merch from "./Merch";
 
-export function HeroPortal() {
+export function HeroPortal({ data }: { data: any }) {
   return (
     <div className="w-full bg-white min-h-screen">
       <div className="relative w-full h-screen overflow-hidden">
-        <HeroSlider />
+        <HeroSlider slides={data?.data?.slides || []} isLoading={data?.isLoading || false} />
       </div>
       <AdrenalineWorlds title="Attractions" attractions={MOCK_ATTRACTIONS} />
       <DreamZoo />

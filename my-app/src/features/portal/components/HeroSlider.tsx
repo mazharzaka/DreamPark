@@ -14,8 +14,17 @@ import '../styles/slider.css';
 
 import { useLocale } from 'next-intl';
 
-export function HeroSlider() {
-  const { slides, isLoading } = useHeroData();
+interface Slides {
+  title: string;
+  subtitle: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+  _id: string;
+  imageUrl: string;
+}
+
+export function HeroSlider({ slides, isLoading }: { slides: Slides[], isLoading: boolean }) {
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
@@ -52,7 +61,7 @@ export function HeroSlider() {
         className="w-full h-full"
       >
         {slides.map((slide) => (
-          <SwiperSlide key={slide.id}>
+          <SwiperSlide key={slide._id}>
             {({ isActive }) => (
               <SlideContent slide={slide} isActive={isActive} />
             )}

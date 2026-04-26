@@ -5,15 +5,14 @@ export interface HeroAction {
 }
 
 export interface HeroSlide {
-  id: string;
-  tagline?: string;
   title: string;
-  titleAccent?: string;
+  subtitle: string;
   description: string;
-  image: string;
-  buttons: HeroAction[];
+  ctaText: string;
+  ctaLink: string;
+  _id: string;
+  imageUrl: string;
 }
-
 export interface AttractionTag {
   label: string;
   variant?: "white" | "dark" | "outline" | "green";

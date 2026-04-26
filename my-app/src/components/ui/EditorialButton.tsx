@@ -19,12 +19,12 @@ export function EditorialButton({ children, variant = "primary", className, ...p
   };
 
   return (
-    <button 
+    <button
       className={cn(
         "px-10 py-5 rounded-full font-sans font-extrabold text-sm tracking-widest uppercase flex items-center justify-center min-w-[64px] min-h-[64px]",
         variants[variant],
         className
-      )} 
+      )}
       {...props}
     >
       {children}
