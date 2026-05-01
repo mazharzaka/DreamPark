@@ -70,12 +70,12 @@ export function HeroSlider({ slides, isLoading }: { slides: Slides[], isLoading:
       </Swiper>
 
       {/* Navigation Buttons - Flipped for RTL */}
-      <button className={`slider-nav-btn hidden md:flex items-center justify-center slider-nav-prev`}>
+      {/* <button className={`slider-nav-btn hidden md:flex items-center justify-center slider-nav-prev`}>
         <ChevronLeft size={24} />
       </button>
       <button className={`slider-nav-btn hidden md:flex items-center justify-center slider-nav-next`}>
         <ChevronRight size={24} />
-      </button>
+      </button> */}
     </section>
   );
 }

@@ -49,13 +49,15 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
           alt={slide.title}
           fill
           priority={isActive}
-          className={`object-cover transition-transform duration-[10000ms] ${isActive ? 'scale-100' : 'scale-110'}`}
+          quality={100}
+          className={`object-cover transition-transform duration-[15000ms] ease-out ${isActive ? 'scale-100' : 'scale-110'}`}
           sizes="100vw"
         />
-        {/* Gradient mirrored for RTL */}
-        <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/80 lg:bg-gradient-to-${isRtl ? 'l' : 'r'} lg:from-black/80 lg:via-black/30 lg:to-transparent`} />
-        {/* Top/Bottom editorial gradients */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent" />
+        {/* Base dark tint to mask pixelation and noise - lightened */}
+        <div className="absolute inset-0 bg-black/10 z-1" />
+
+        {/* Dynamic Gradient for text legibility - Lightened for better visibility of the image */}
+        <div className={`absolute inset-0 z-2 bg-gradient-to-b from-black/30 via-transparent to-black/40 lg:bg-gradient-to-${isRtl ? 'l' : 'r'} lg:from-black/70 lg:via-black/30 lg:to-transparent`} />
       </div>
 
       {/* Content shifted off-center for "Layout Energy" */}
@@ -76,10 +78,10 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
 
         <motion.h1
           variants={itemVariants}
-          className={`text-6xl md:text-8xl lg:text-[7rem] 2xl:text-[10rem] font-bold text-white leading-[0.9] mb-8 select-none ${isRtl ? 'font-cairo' : 'font-sans'}`}
+          className={`text-6xl ${isRtl ? 'font-cairo' : 'font-sans'} md:text-8xl lg:text-[7rem] 2xl:text-[10rem] font-bold text-white leading-[0.9] mb-8 select-none drop-shadow-2xl`}
         >
           {slide.title + " "}
-          <span className="text-primary">{slide.subtitle}</span>
+          <span className="text-primary drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)]">{slide.subtitle}</span>
         </motion.h1>
 
         <motion.p
@@ -90,7 +92,7 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
         </motion.p>
 
         <motion.div variants={itemVariants} className="flex gap-4 justify-start">
-          <EditorialButton variant={"secondary"}>
+          <EditorialButton variant={"secondary"} className={`${isRtl ? 'font-poppins' : 'font-cairo !text-2xl'}`}>
             {slide.ctaText}
           </EditorialButton>
         </motion.div>
