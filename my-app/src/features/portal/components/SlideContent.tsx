@@ -1,4 +1,6 @@
 'use client';
+import { useState, useEffect } from 'react';
+
 
 import { motion } from 'framer-motion';
 import { HeroSlide } from '../types';
@@ -8,11 +10,14 @@ import Image from 'next/image';
 interface SlideContentProps {
   slide: HeroSlide;
   isActive: boolean;
+  isFirst?: boolean;
+  isMounted?: boolean;
 }
 
 import { useLocale } from 'next-intl';
 
-export function SlideContent({ slide, isActive }: SlideContentProps) {
+export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideContentProps) {
+
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
@@ -45,12 +50,12 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
       {/* Background Image Optimized */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={slide?.imageUrl || ""}
-          alt={slide.title}
+          src={slide?.imageUrl || "/hero-slider/1.png"}
+          alt={slide?.title || ""}
           fill
-          priority={isActive}
+          priority={isFirst}
           quality={100}
-          className={`object-cover transition-transform duration-[15000ms] ease-out ${isActive ? 'scale-100' : 'scale-110'}`}
+          className={`object-cover transition-transform duration-[15000ms] ease-out ${(isActive && isMounted) ? 'scale-100' : 'scale-110'}`}
           sizes="100vw"
         />
         {/* Base dark tint to mask pixelation and noise - lightened */}
@@ -81,7 +86,7 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
           className={`text-6xl ${isRtl ? 'font-cairo' : 'font-sans'} md:text-8xl lg:text-[7rem] 2xl:text-[10rem] font-bold text-white leading-[0.9] mb-8 select-none drop-shadow-2xl`}
         >
           {slide.title + " "}
-          <span className="text-primary drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)]">{slide.subtitle}</span>
+          <span className="ml-4 text-primary drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)]">{slide.subtitle}</span>
         </motion.h1>
 
         <motion.p
@@ -92,7 +97,7 @@ export function SlideContent({ slide, isActive }: SlideContentProps) {
         </motion.p>
 
         <motion.div variants={itemVariants} className="flex gap-4 justify-start">
-          <EditorialButton variant={"secondary"} className={`${isRtl ? 'font-poppins' : 'font-cairo !text-2xl'}`}>
+          <EditorialButton variant={"secondary"} className={`${isRtl ? 'font-cairo !text-2xl' : 'font-poppins'}`}>
             {slide.ctaText}
           </EditorialButton>
         </motion.div>

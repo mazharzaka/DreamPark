@@ -7,11 +7,19 @@ import { Link } from '@/src/i18n/routing';
 
 function renderAttractionCard(attr: Attraction, locale: string) {
   const isRtl = locale === 'ar';
-  const colSpanClass = attr.layout.colSpan === 2 ? 'md:col-span-2' : 'md:col-span-1';
-  const rowSpanClass = attr.layout.rowSpan === 2 ? 'md:row-span-2' : 'md:row-span-1';
+  const colSpanClass =
+    attr.layout.colSpan === 4 ? 'md:col-span-4' :
+      attr.layout.colSpan === 3 ? 'md:col-span-3' :
+        attr.layout.colSpan === 2 ? 'md:col-span-2' :
+          'md:col-span-1';
+
+  const rowSpanClass =
+    attr.layout.rowSpan === 4 ? 'md:row-span-4' :
+      attr.layout.rowSpan === 3 ? 'md:row-span-3' :
+        attr.layout.rowSpan === 2 ? 'md:row-span-2' :
+          'md:row-span-1';
 
   const baseClasses = `relative rounded-3xl overflow-hidden group ${colSpanClass} ${rowSpanClass} shadow-sm`;
-
   const getFallbackGradient = (style: string) => {
     switch (style) {
       case 'crimson': return 'from-red-900 to-red-600';
@@ -86,7 +94,7 @@ function renderAttractionCard(attr: Attraction, locale: string) {
             <Rocket className="w-5 h-5 mb-auto text-white" />
             <div>
               <h3 className={`text-lg font-medium tracking-wide uppercase mb-2 text-white/90 leading-tight ${isRtl ? 'font-cairo' : 'font-sans'}`}>
-                {attr.title.split(' ')[0]}<br />{attr.title.split(' ')[1]}
+                {attr.title.split(' ')[0]}<br />{attr.title.split(' ').slice(1).join(' ')}
               </h3>
               <div className="text-[10px] text-white/60 uppercase tracking-widest">{attr.waitTime}</div>
             </div>
@@ -98,7 +106,7 @@ function renderAttractionCard(attr: Attraction, locale: string) {
             <Droplet className="w-5 h-5 mb-auto text-white" />
             <div>
               <h3 className={`text-lg font-medium tracking-wide uppercase mb-2 text-white/90 leading-tight ${isRtl ? 'font-cairo' : 'font-sans'}`}>
-                {attr.title.split(' ')[0]}<br />{attr.title.split(' ')[1]}
+                {attr.title.split(' ')[0]}<br />{attr.title.split(' ').slice(1).join(' ')}
               </h3>
               <div className="text-[10px] text-white/60 uppercase tracking-widest">{attr.waitTime}</div>
             </div>
@@ -115,7 +123,7 @@ function renderAttractionCard(attr: Attraction, locale: string) {
               <div className="text-start lg:text-end">
                 <div className="text-4xl font-black italic items-baseline flex gap-1 lg:justify-end">
                   {attr.waitTime?.split(' ')[0]}
-                  <span className="text-2xl not-italic uppercase font-bold">{attr.waitTime?.split(' ')[1]}</span>
+                  <span className="text-2xl not-italic uppercase font-bold">{attr.waitTime?.split(' ').slice(1).join(' ')}</span>
                 </div>
                 <div className="text-[9px] uppercase tracking-widest text-white/70">CURRENT WAIT</div>
               </div>
@@ -158,7 +166,7 @@ export function AdrenalineWorlds({ attractions, title, link = "games" }: { attra
           </div>
 
         </div>
-        <div className="shrink-0 flex items-center mb-10  justify-end w-full lg:self-end self-start">
+        <div className="shrink-0 flex items-center mb-10 justify-end w-full lg:self-end self-start">
           <Link
             href={`/${link}`}
             className="flex items-center gap-2  text-primary hover:text-primary/80 text-xs font-bold  transition-colors uppercase tracking-wide"

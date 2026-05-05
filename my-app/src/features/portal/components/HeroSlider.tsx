@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
+
 import { Autoplay, Navigation, Pagination, EffectFade } from 'swiper/modules';
 import { useHeroData } from '../hooks/useHeroData';
 import { SlideContent } from './SlideContent';
@@ -27,6 +29,11 @@ interface Slides {
 export function HeroSlider({ slides, isLoading }: { slides: Slides[], isLoading: boolean }) {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   if (isLoading) {
     return (
@@ -60,10 +67,10 @@ export function HeroSlider({ slides, isLoading }: { slides: Slides[], isLoading:
         }}
         className="w-full h-full"
       >
-        {slides.map((slide) => (
+        {slides.map((slide, index) => (
           <SwiperSlide key={slide._id}>
             {({ isActive }) => (
-              <SlideContent slide={slide} isActive={isActive} />
+              <SlideContent slide={slide} isActive={isActive} isFirst={index === 0} isMounted={isMounted} />
             )}
           </SwiperSlide>
         ))}

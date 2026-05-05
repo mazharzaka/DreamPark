@@ -51,6 +51,10 @@ export const addAttraction = catchAsync(async (req, res, next) => {
     req.body.image = req.file.path;
   }
 
+  // Cast boolean strings
+  if (req.body.isFastTrack) req.body.isFastTrack = req.body.isFastTrack === 'true';
+  if (req.body.bookPass) req.body.bookPass = req.body.bookPass === 'true';
+
   const newAttraction = await Attraction.create(req.body);
 
   // FR-014: Emit server-side console log entry
@@ -74,9 +78,30 @@ export const updateAttraction = catchAsync(async (req, res, next) => {
     req.body.image = req.file.path;
   }
 
+  const updateData = {};
+
+  // Process and filter body for partial updates
+  Object.keys(req.body).forEach((key) => {
+    // Handle nested layout fields (support both object and dot notation/flat fields)
+    if (key === 'layout' && typeof req.body.layout === 'object') {
+      Object.keys(req.body.layout).forEach((subKey) => {
+        updateData[`layout.${subKey}`] = req.body.layout[subKey];
+      });
+    } else if (key.startsWith('layout.')) {
+      updateData[key] = req.body[key];
+    } else if (key === 'isFastTrack' || key === 'bookPass') {
+      // Cast boolean strings
+      updateData[key] = req.body[key] === 'true';
+    } else if (req.body[key] !== undefined && req.body[key] !== '') {
+      // Only update fields that are provided and not empty strings
+      // (Except for images/files where we might want to clear them, but here we handle that separately)
+      updateData[key] = req.body[key];
+    }
+  });
+
   const updatedAttraction = await Attraction.findByIdAndUpdate(
     id,
-    req.body,
+    { $set: updateData },
     { new: true, runValidators: true }
   );
 
@@ -116,3 +141,55 @@ export const deleteAttraction = catchAsync(async (req, res, next) => {
   });
 });
 
+/**
+ * GET /api/attractions/:lang/:pageKey
+ * Fetch localized attractions by pageKey with pagination and sorting.
+ */
+export const getAttractionsByLangAndPage = catchAsync(async (req, res, next) => {
+  const { lang, pageKey } = req.params;
+  const { page = 1, limit = 10, sort = 'createdAt', order = 'desc' } = req.query;
+
+  if (lang !== 'ar' && lang !== 'en') {
+    return next(new AppError('Language must be either ar or en', 400));
+  }
+
+  const filter = { pageKey };
+
+  const pageNumber = parseInt(page, 10);
+  const limitNumber = parseInt(limit, 10);
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const sortDirection = order === 'desc' ? -1 : 1;
+  const sortOptions = { [sort]: sortDirection };
+
+  const totalItems = await Attraction.countDocuments(filter);
+  const totalPages = Math.ceil(totalItems / limitNumber);
+
+  const attractions = await Attraction.find(filter)
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(limitNumber);
+
+  // Map localized fields
+  const mappedAttractions = attractions.map((attr) => {
+    const attrObj = attr.toObject();
+    return {
+      ...attrObj,
+      name: lang === 'ar' ? attrObj.name_ar : attrObj.name_en,
+      description: lang === 'ar' ? attrObj.description_ar : attrObj.description_en,
+    };
+  });
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      items: mappedAttractions,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: pageNumber,
+        limit: limitNumber
+      }
+    },
+  });
+});

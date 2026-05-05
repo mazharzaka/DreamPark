@@ -1,9 +1,15 @@
-import { Attraction, ticketsetType } from "../types";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import Attraction from '../models/Attraction.js';
 
-export const MOCK_ATTRACTIONS: Attraction[] = [
+dotenv.config({ path: './.env' });
+
+const attractions = [
+  // GAMES
   {
-    id: "crimson-velocity",
+    name: "CRIMSON VELOCITY",
     title: "CRIMSON VELOCITY",
+    category: "games",
     image: "/games/discovery.png",
     tags: [
       { label: "HIGH THRILL", variant: "white" },
@@ -18,9 +24,10 @@ export const MOCK_ATTRACTIONS: Attraction[] = [
     },
   },
   {
-    id: "TopSpin",
+    name: "TopSpin",
     title: "TopSpin",
-    category: "FAMILY FRIENDLY",
+    category: "games",
+    subtitle: "FAMILY FRIENDLY",
     image: "/games/Top.jpg",
     waitTime: "15 MIN WAIT",
     bookPass: true,
@@ -31,10 +38,10 @@ export const MOCK_ATTRACTIONS: Attraction[] = [
     },
   },
   {
-    id: "nebula",
+    name: "Rocket",
     title: "Rocket",
+    category: "games",
     image: "/games/rocket.jpg",
-
     icon: "Rocket",
     waitTime: "WAIT: 20M",
     layout: {
@@ -44,8 +51,9 @@ export const MOCK_ATTRACTIONS: Attraction[] = [
     },
   },
   {
-    id: "amazon-plunge",
+    name: "AMAZON PLUNGE",
     title: "AMAZON PLUNGE",
+    category: "games",
     image: "/games/coster.jpg",
     icon: "Droplet",
     waitTime: "WAIT: 65M",
@@ -56,9 +64,10 @@ export const MOCK_ATTRACTIONS: Attraction[] = [
     },
   },
   {
-    id: "the-Rocket",
+    name: "THE ROCKET",
     title: "THE ROCKET",
-    category: "EXTREME THRILL",
+    category: "games",
+    subtitle: "EXTREME THRILL",
     image: "/games/rocket.jpg",
     waitTime: "90 MIN",
     layout: {
@@ -68,8 +77,9 @@ export const MOCK_ATTRACTIONS: Attraction[] = [
     },
   },
   {
-    id: "midas-mountain",
+    name: "MIDAS MOUNTAIN",
     title: "MIDAS MOUNTAIN",
+    category: "games",
     subtitle: "Interactive Treasure Hunt Experience",
     image: "/games/home.webp",
     layout: {
@@ -78,43 +88,11 @@ export const MOCK_ATTRACTIONS: Attraction[] = [
       customStyle: "midas",
     },
   },
-];
-
-export const MOCK_TICKETSETS: ticketsetType[] = [
+  // ANIMALS
   {
-    id: "crimson-velocity",
-    title: "CRIMSON VELOCITY",
-    image: "/ticketsets/TicketSets1.jpg",
-    layout: {
-      colSpan: 2,
-      rowSpan: 2,
-    },
-  },
-  {
-    id: "TopSpin",
-    title: "TopSpin",
-    image: "/ticketsets/TicketSets2.jpg",
-
-    layout: {
-      colSpan: 2,
-      rowSpan: 1,
-    },
-  },
-  {
-    id: "TopSpin2",
-    title: "TopSpin",
-    image: "/ticketsets/TicketSets3.jpg",
-    layout: {
-      colSpan: 2,
-      rowSpan: 1,
-    },
-  },
-];
-
-export const MOCK_ANIMALS: Attraction[] = [
-  {
-    id: "lion",
+    name: "Lion",
     title: "Lion",
+    category: "animals",
     image: "/animals/animal1.png",
     tags: [
       { label: "HIGH THRILL", variant: "white" },
@@ -129,9 +107,10 @@ export const MOCK_ANIMALS: Attraction[] = [
     },
   },
   {
-    id: "TopSpin",
-    title: "TopSpin",
-    category: "FAMILY FRIENDLY",
+    name: "TopSpin Animal",
+    title: "TopSpin Animal",
+    category: "animals",
+    subtitle: "FAMILY FRIENDLY",
     image: "/animals/animal2.png",
     waitTime: "15 MIN WAIT",
     bookPass: true,
@@ -142,10 +121,10 @@ export const MOCK_ANIMALS: Attraction[] = [
     },
   },
   {
-    id: "nebula",
-    title: "Rocket",
+    name: "Rocket Animal",
+    title: "Rocket Animal",
+    category: "animals",
     image: "/animals/animal3.png",
-
     icon: "Rocket",
     waitTime: "WAIT: 20M",
     layout: {
@@ -155,8 +134,9 @@ export const MOCK_ANIMALS: Attraction[] = [
     },
   },
   {
-    id: "amazon-plunge",
-    title: "AMAZON PLUNGE",
+    name: "AMAZON PLUNGE Animal",
+    title: "AMAZON PLUNGE Animal",
+    category: "animals",
     image: "/animals/animal4.png",
     icon: "Droplet",
     waitTime: "WAIT: 65M",
@@ -167,3 +147,23 @@ export const MOCK_ANIMALS: Attraction[] = [
     },
   },
 ];
+
+const seedDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('Connected to DB');
+    
+    await Attraction.deleteMany();
+    console.log('Deleted existing attractions');
+    
+    await Attraction.insertMany(attractions);
+    console.log('Inserted new attractions');
+    
+    process.exit();
+  } catch (error) {
+    console.error('Error seeding DB:', error);
+    process.exit(1);
+  }
+};
+
+seedDB();
