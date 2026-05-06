@@ -43,6 +43,9 @@ export interface Attraction {
   category?: string;
   bookPass?: boolean;
   icon?: string; // name of icon like 'Rocket', 'Droplet'
+  description?: string;
+  riskLevel?: string;
+  ticketPrice?: string | number;
   layout: {
     colSpan: number;
     rowSpan: number;

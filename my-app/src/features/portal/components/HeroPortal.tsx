@@ -15,7 +15,6 @@ import { useLocale } from "next-intl";
 export function HeroPortal({ data }: { data: any }) {
   const locale = useLocale();
   const { data: attractions } = useGetAttractionsQuery({ lang: locale });
-  console.log(attractions)
   return (
     <div className="w-full bg-white min-h-screen">
       <div className="relative w-full h-screen overflow-hidden">
