@@ -117,6 +117,8 @@
     "pageTitle": "All <span>Games</span>",
     "pageSubtitle": "Discover all the amazing games and attractions DreamPark has to offer.",
     "noGamesFound": "No games found for this category.",
+    "loadingGames": "Loading games...",
+    "errorLoadingGames": "Error loading games. Please try again.",
     "Categories": {
       "all": "All Games",
       "thrill": "Thrill Rides",

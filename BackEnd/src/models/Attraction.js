@@ -86,6 +86,8 @@ const attractionSchema = new mongoose.Schema(
           enum: ['white', 'dark', 'outline', 'green'],
           default: 'white',
         },
+        type: String, // e.g., 'height', 'health', 'items', 'behavior'
+        text: String, // rule text
       },
     ],
     layout: {

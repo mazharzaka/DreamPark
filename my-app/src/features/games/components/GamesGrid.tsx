@@ -2,13 +2,15 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Game } from '../types';
 import { Product } from '../../portal/types';
+import Link from 'next/link';
 
 interface GamesGridProps {
   games?: Game[];
   products?: Product[];
+  locale: string;
 }
 
-export function GamesGrid({ games, products }: GamesGridProps) {
+export function GamesGrid({ games, products, locale }: GamesGridProps) {
   const t = useTranslations();
 
   if (games?.length === 0 && products?.length === 0) {
@@ -24,7 +26,7 @@ export function GamesGrid({ games, products }: GamesGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {games?.map((game) => (
-        <div key={game.id} className="group cursor-pointer">
+        <Link href={`/${locale}/games/${game.id}`} key={game.id} className="group cursor-pointer">
           <div className="relative w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-surface shadow-xl shadow-black/5 mb-4">
             <Image
               src={game.image}
@@ -42,7 +44,7 @@ export function GamesGrid({ games, products }: GamesGridProps) {
               {game.description || (game.descriptionKey ? t(game.descriptionKey) : '')}
             </p>
           </div>
-        </div>
+        </Link>
       ))}
       {products?.map((product) => (
         <div key={product.id} className="group cursor-pointer">

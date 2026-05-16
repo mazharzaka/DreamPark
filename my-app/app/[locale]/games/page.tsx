@@ -14,12 +14,12 @@ export default function GamesPage() {
   const [activeCategory, setActiveCategory] = useState('all');
 
   // Fetch games from backend
-  const { 
-    data: gamesData, 
-    isLoading, 
+  const {
+    data: gamesData,
+    isLoading,
     isFetching,
     isError,
-    error 
+    error
   } = useGetAttractionsQuery({
     lang: locale,
     pageKey: 'home',
@@ -30,7 +30,7 @@ export default function GamesPage() {
   const dynamicCategories = useMemo(() => {
     // We always want "All" as the first option
     const allCategory = { id: 'all', name: t('allGames') || 'All Games' };
-    
+
     // We only extract categories from the "all games" initial load or current data
     // to avoid categories disappearing when filtered.
     // However, the spec says "extract from initial 'all games' response".
@@ -52,7 +52,7 @@ export default function GamesPage() {
   // Map backend items to frontend Game interface
   const games: Game[] = useMemo(() => {
     if (!gamesData?.data?.items) return [];
-    
+
     return gamesData.data.items.map((item: any) => ({
       id: item._id,
       name: item.name,
@@ -64,7 +64,7 @@ export default function GamesPage() {
 
   // Handle filter error notification (dismissible, preserves previous results per Q2)
   const [filterError, setFilterError] = useState<string | null>(null);
-  
+
   // Update filterError when isError changes on a background fetch
   useMemo(() => {
     if (isError && gamesData) {
@@ -100,7 +100,7 @@ export default function GamesPage() {
           <p className="text-secondary/70 mb-8">
             {t('errorDescription') || 'We couldn\'t load the games right now. Please try refreshing the page.'}
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-8 py-3 bg-primary text-white rounded-full font-bold hover:scale-105 transition-transform"
           >
@@ -151,10 +151,10 @@ export default function GamesPage() {
 
         {/* Show a subtle loading overlay during category switches */}
         <div className={`relative transition-opacity duration-300 ${isFetching ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-          <GamesGrid games={games} />
+          <GamesGrid games={games} locale={locale} />
           {isFetching && (
             <div className="absolute inset-0 flex items-center justify-center">
-               <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           )}
         </div>
