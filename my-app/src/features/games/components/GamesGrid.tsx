@@ -36,10 +36,10 @@ export function GamesGrid({ games, products }: GamesGridProps) {
           </div>
           <div className="px-2">
             <h3 className="text-xl font-bold text-primary mb-2">
-              {t(game.titleKey)}
+              {game.name || (game.titleKey ? t(game.titleKey) : '')}
             </h3>
             <p className="text-sm text-secondary/70 line-clamp-2">
-              {t(game.descriptionKey)}
+              {game.description || (game.descriptionKey ? t(game.descriptionKey) : '')}
             </p>
           </div>
         </div>

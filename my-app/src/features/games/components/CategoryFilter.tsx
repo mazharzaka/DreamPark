@@ -30,7 +30,7 @@ export function CategoryFilter({
                 : 'bg-surface text-secondary/70 hover:bg-surface/80 border border-secondary/10 hover:border-secondary/20'
             }`}
           >
-            {t(category.nameKey)}
+            {category.name || (category.nameKey ? t(category.nameKey) : '')}
           </button>
         );
       })}

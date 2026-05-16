@@ -10,8 +10,9 @@ export const apiSlice = createApi({
     getHeroByPage: builder.query<any, { lang: string; pageKey: string }>({
       query: ({ lang, pageKey }) => `/hero/${lang}/${pageKey}`,
     }),
-    getAttractions: builder.query<any, { lang: string, category?: string }>({
-      query: () => `/attractions/en/home?page=1&limit=10&sort=createdAt&order=asc`,
+    getAttractions: builder.query<any, { lang: string; pageKey: string; category?: string }>({
+      query: ({ lang, pageKey, category }) =>
+        `/attractions/${lang}/${pageKey}?sort=createdAt&order=asc${category ? `&category=${category}` : ''}`,
     })
   })
 })

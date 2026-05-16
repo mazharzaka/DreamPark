@@ -147,13 +147,17 @@ export const deleteAttraction = catchAsync(async (req, res, next) => {
  */
 export const getAttractionsByLangAndPage = catchAsync(async (req, res, next) => {
   const { lang, pageKey } = req.params;
-  const { page = 1, limit = 10, sort = 'createdAt', order = 'desc' } = req.query;
+  const { page = 1, limit = 10, sort = 'createdAt', order = 'desc', category } = req.query;
 
   if (lang !== 'ar' && lang !== 'en') {
     return next(new AppError('Language must be either ar or en', 400));
   }
 
   const filter = { pageKey };
+
+  if (category) {
+    filter.category = category;
+  }
 
   const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);

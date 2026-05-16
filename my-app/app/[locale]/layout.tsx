@@ -7,6 +7,7 @@ import "../globals.css";
 import { Header } from "@/src/components/layout/Header";
 import LocalePersistence from "@/src/components/ui/LocalePersistence";
 import StoreProvider from "@/app/StoreProvider";
+import { SplashScreenWrapper } from "@/src/components/ui/SplashScreenWrapper";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -64,6 +65,7 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <StoreProvider>
+            <SplashScreenWrapper />
             <LocalePersistence />
             <Header />
 
