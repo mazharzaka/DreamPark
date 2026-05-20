@@ -59,7 +59,7 @@ export default async function GamePage({
   }
 
   return (
-    <main className="min-h-screen bg-[#050B18]">
+    <main className="min-h-screen bg-[#f6f6f6]">
       <GameHero attraction={attraction} locale={locale} />
 
       <div className="container px-4 py-16 mx-auto flex flex-col gap-12">

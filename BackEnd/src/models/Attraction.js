@@ -78,18 +78,27 @@ const attractionSchema = new mongoose.Schema(
     icon: {
       type: String,
     },
-    tags: [
-      {
-        label: String,
-        variant: {
-          type: String,
-          enum: ['white', 'dark', 'outline', 'green'],
-          default: 'white',
-        },
-        type: String, // e.g., 'height', 'health', 'items', 'behavior'
-        text: String, // rule text
-      },
-    ],
+    tags: {
+      rules: [
+        {
+          id: Number,
+          type: {
+            type: String,
+          },
+          text: String,
+        }
+      ],
+      badges: [
+        {
+          label: String,
+          variant: {
+            type: String,
+            enum: ['white', 'dark', 'outline', 'green'],
+            default: 'white',
+          }
+        }
+      ]
+    },
     layout: {
       colSpan: { type: Number, default: 1 },
       rowSpan: { type: Number, default: 1 },

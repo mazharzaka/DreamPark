@@ -24,7 +24,7 @@ export function GameHero({ attraction, locale }: GameHeroProps) {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050B18] via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f6f6f6] via-black/50 to-transparent" />
       </div>
 
       <div className="container relative z-10 px-4 pb-12 mx-auto">
@@ -54,15 +54,15 @@ export function GameHero({ attraction, locale }: GameHeroProps) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="flex gap-4 p-5 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl"
+            className="flex gap-4 p-5 rounded-3xl bg-white/80 backdrop-blur-md border border-white/40 shadow-xl shadow-[#2d2f2f]/5"
           >
-            <div className="flex flex-col items-center px-6 border-e border-white/10">
-              <span className="text-[10px] uppercase tracking-widest text-white/60 mb-1">Wait Time</span>
-              <span className="text-2xl font-bold text-white whitespace-nowrap">{attraction.waitingTime || '--'}</span>
+            <div className="flex flex-col items-center px-6 border-e border-neutral-200/50">
+              <span className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 font-bold">Wait Time</span>
+              <span className="text-2xl font-bold text-[#2d2f2f] whitespace-nowrap">{attraction.waitingTime || '--'}</span>
             </div>
             <div className="flex flex-col items-center px-6">
-              <span className="text-[10px] uppercase tracking-widest text-white/60 mb-1">Min Height</span>
-              <span className="text-2xl font-bold text-red-500 whitespace-nowrap">{attraction.minHeight || '--'}</span>
+              <span className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 font-bold">Min Height</span>
+              <span className="text-2xl font-bold text-[#b5161e] whitespace-nowrap">{attraction.minHeight || '--'}</span>
             </div>
           </motion.div>
         </div>

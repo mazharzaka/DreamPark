@@ -22,7 +22,10 @@ export interface Attraction {
   isFastTrack: boolean;
   bookPass: boolean;
   icon?: string;
-  tags?: { _id?: string; label?: string; variant?: string; type?: string; text?: string }[];
+  tags?: {
+    rules?: { id?: number; type?: string; text?: string; _id?: string }[];
+    badges?: { label?: string; variant?: string; _id?: string }[];
+  };
   layout?: LayoutOptions;
   createdAt: string;
   updatedAt: string;

@@ -23,11 +23,8 @@ const iconMap: Record<string, any> = {
 };
 
 export function TermsAndConditions({ attraction, locale }: TermsAndConditionsProps) {
-  // If no tags exist, don't render the section at all
-  if (!attraction.tags || attraction.tags.length === 0) return null;
-
-  // Filter tags to ensure we only show ones that have text or label
-  const rules = attraction.tags.filter(tag => tag.text || tag.label);
+  // If no safety rules exist, don't render the section at all
+  const rules = attraction.tags?.rules || [];
   
   if (rules.length === 0) return null;
 
@@ -40,13 +37,13 @@ export function TermsAndConditions({ attraction, locale }: TermsAndConditionsPro
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="bg-[#0A1122] rounded-[2rem] border border-white/5 p-8 md:p-12 shadow-2xl relative overflow-hidden"
+        className="bg-white rounded-[2rem] border border-neutral-100 p-8 md:p-12 shadow-xl shadow-[#2d2f2f]/3 relative overflow-hidden"
       >
-        <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-6 relative z-10">
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
+        <div className="flex items-center gap-4 mb-8 border-b border-neutral-100 pb-6 relative z-10">
+          <div className="p-3 bg-[#005caa]/10 text-[#005caa] rounded-xl">
             <AlertCircle size={28} />
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-wide">
+          <h2 className="text-2xl md:text-3xl font-black text-[#2d2f2f] tracking-wide">
             {sectionTitle}
           </h2>
         </div>
@@ -54,7 +51,7 @@ export function TermsAndConditions({ attraction, locale }: TermsAndConditionsPro
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           {rules.map((rule, index) => {
             const Icon = rule.type && iconMap[rule.type] ? iconMap[rule.type] : AlertCircle;
-            const displayText = rule.text || rule.label; // Fallback to label if text isn't available
+            const displayText = rule.text || "";
             
             return (
               <motion.div
@@ -63,12 +60,12 @@ export function TermsAndConditions({ attraction, locale }: TermsAndConditionsPro
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="flex items-start gap-4 p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5 group"
+                className="flex items-start gap-4 p-5 rounded-2xl bg-[#f0f1f1] hover:bg-[#e6e8e8] transition-colors border border-transparent group"
               >
-                <div className="p-2.5 rounded-lg bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform flex-shrink-0">
+                <div className="p-2.5 rounded-lg bg-[#005caa]/10 text-[#005caa] group-hover:scale-110 transition-transform flex-shrink-0">
                   <Icon size={20} />
                 </div>
-                <p className="text-white/80 leading-relaxed text-sm md:text-base pt-1">
+                <p className="text-neutral-700 leading-relaxed text-sm md:text-base pt-1">
                   {displayText}
                 </p>
               </motion.div>
@@ -77,7 +74,7 @@ export function TermsAndConditions({ attraction, locale }: TermsAndConditionsPro
         </div>
         
         {/* Subtle background gradients */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
       </motion.div>
     </section>
   );
