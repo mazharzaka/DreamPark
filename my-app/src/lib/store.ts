@@ -1,13 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { apiSlice } from './features/api/apiSlice'
+import { bookingsApi } from './features/api/bookingsApi'
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       [apiSlice.reducerPath]: apiSlice.reducer,
+      [bookingsApi.reducerPath]: bookingsApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(apiSlice.middleware),
+      getDefaultMiddleware()
+        .concat(apiSlice.middleware)
+        .concat(bookingsApi.middleware),
   })
 }
 

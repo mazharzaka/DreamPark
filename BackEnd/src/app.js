@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import heroRoutes from './routes/heroRoutes.js';
 import attractionRoutes from './routes/attractionRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import ticketingRoutes from './routes/ticketingRoutes.js';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
@@ -27,6 +28,7 @@ app.use(express.json());
 app.use('/api/hero', heroRoutes);
 app.use('/api/attractions', attractionRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/tickets', ticketingRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
