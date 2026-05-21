@@ -11,6 +11,16 @@ export const getTicketTypes = async (req, res, next) => {
   }
 };
 
+export const addTicketType = async (req, res, next) => {
+  try {
+    const { name, price, description, discount, isActive, nameAr, descriptionAr } = req.body;
+    const ticketType = await TicketType.create({ name, price, description, nameAr, descriptionAr, discount, isActive });
+    res.status(201).json({ success: true, data: ticketType });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createBooking = async (req, res, next) => {
   try {
     const { ticketTypeId, targetDate, quantity, email } = req.body;
@@ -34,21 +44,9 @@ export const createBooking = async (req, res, next) => {
 
     const totalPrice = ticketType.price * quantity;
 
-    // Mock User Auth (Fallback to creating a dummy user if none exists matching email)
-    // In production, this would use req.user from auth middleware
-    const userEmail = email || "test@example.com";
-    let user = await User.findOne({ email: userEmail });
+    const user = await User.findById(req.user.id);
     if (!user) {
-      user = await User.create({
-        name: "Test User",
-        email: userEmail,
-        password: "mockpassword123", // required by User schema
-        phoneNumber: "0000000000",
-        gender: "male",
-        dateOfBirth: new Date("1990-01-01"),
-        address: "Test Address",
-        role: "customer"
-      });
+      return res.status(404).json({ success: false, error: "User not found." });
     }
 
     const booking = await Booking.create({
@@ -76,7 +74,7 @@ export const verifyAndConfirmPayment = async (req, res, next) => {
     const { qrCodeId } = req.body;
 
     // Simulate Agent Role Check via middleware in production
-    
+
     // 1. Find Booking
     const booking = await Booking.findOne({ qrCodeId }).populate('ticketType user');
 
@@ -121,15 +119,15 @@ export const verifyAndConfirmPayment = async (req, res, next) => {
 
 export const updateTicketPrice = async (req, res, next) => {
   try {
-    const { ticketTypeId, newPrice } = req.body;
-    
+    const { ticketTypeId, newPrice, name, description, nameAr, discount, descriptionAr } = req.body;
+
     if (newPrice <= 0) {
       return res.status(400).json({ success: false, error: "Price must be a positive number." });
     }
 
     const updatedTicket = await TicketType.findByIdAndUpdate(
       ticketTypeId,
-      { price: newPrice },
+      { price: newPrice, name, description, nameAr, descriptionAr, discount },
       { new: true, runValidators: true }
     );
 

@@ -46,7 +46,7 @@ export default function MagicPassPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#f6f6f6] flex items-center justify-center p-6 rtl" dir="rtl">
+    <div className="min-h-screen bg-[#f6f6f6] flex items-center mt-22 justify-center p-6 rtl" dir="rtl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

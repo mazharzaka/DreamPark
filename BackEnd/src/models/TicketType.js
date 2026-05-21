@@ -7,6 +7,16 @@ const ticketTypeSchema = new mongoose.Schema(
       required: [true, 'Please provide a ticket name'],
       trim: true,
     },
+    nameAr: {
+      type: String,
+      required: [true, 'Please provide a ticket name'],
+      trim: true,
+    },
+    descriptionAr: {
+      type: String,
+      required: [true, 'Please provide a ticket description'],
+      trim: true,
+    },
     price: {
       type: Number,
       required: [true, 'Please provide a ticket price'],
@@ -15,7 +25,19 @@ const ticketTypeSchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
-    }
+    },
+
+    discount: {
+      type: Number,
+      default: 0,
+      min: [0, 'Discount cannot be negative'],
+      max: [100, 'Discount cannot be greater than 100'],
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
   },
   {
     timestamps: true,

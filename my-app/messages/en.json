@@ -66,6 +66,11 @@
     "step03": "Add-ons 03",
     "mostPopular": "Most Popular",
     "person": "person",
+    "cta": "Select Pass",
+    "egp": "EGP",
+    "heading": "Ticket <span>Sets</span>",
+    "description": "Discover our unique experiences and enjoy your time at Dream Park.",
+    "subtitle": "Discover our unique experiences and enjoy your time at Dream Park",
     "tiers": {
       "diamond": {
         "name": "Diamond",

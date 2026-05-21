@@ -24,7 +24,7 @@ export default function AgentScanPage() {
       { fps: 10, qrbox: { width: 250, height: 250 } },
       false
     );
-    scannerRef.current.render(onScanSuccess, () => {});
+    scannerRef.current.render(onScanSuccess, () => { });
 
     return () => {
       scannerRef.current?.clear().catch(console.error);
@@ -51,7 +51,7 @@ export default function AgentScanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f6f6] flex flex-col items-center justify-center p-6 rtl" dir="rtl">
+    <div className="min-h-screen bg-[#f6f6f6] flex flex-col mt-22 items-center justify-center p-6 rtl" dir="rtl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,11 +76,10 @@ export default function AgentScanPage() {
               initial={{ opacity: 0, height: 0, y: -20 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -20 }}
-              className={`rounded-2xl p-6 ${
-                feedback.type === "success"
+              className={`rounded-2xl p-6 ${feedback.type === "success"
                   ? "bg-emerald-50 text-emerald-800 shadow-[0_10px_30px_rgba(16,185,129,0.1)]"
                   : "bg-[#fff0f1] text-[#b5161e] shadow-[0_10px_30px_rgba(181,22,30,0.1)]"
-              }`}
+                }`}
             >
               <div className="flex items-center mb-4">
                 {feedback.type === "success" ? (
@@ -116,11 +115,10 @@ export default function AgentScanPage() {
 
               <button
                 onClick={resetScanner}
-                className={`mt-6 w-full py-3 rounded-full font-bold transition-all ${
-                  feedback.type === "success"
+                className={`mt-6 w-full py-3 rounded-full font-bold transition-all ${feedback.type === "success"
                     ? "bg-emerald-600 text-white hover:bg-emerald-700"
                     : "bg-[#b5161e] text-white hover:bg-[#9a1219]"
-                }`}
+                  }`}
               >
                 مسح تذكرة أخرى
               </button>

@@ -5,14 +5,15 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import { StepIndicator } from './StepIndicator';
 import { PassCard } from './PassCard';
-import { TICKET_TIERS } from '../lib/ticket-data';
+import { TICKET_TIERS, TicketProduct } from '../lib/ticket-data';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
 
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
-export function TicketsSection() {
+export function TicketsSection({ typesRes, typesLoading, typesError }: { typesRes: any, typesLoading: boolean, typesError: any }) {
   const t = useTranslations('Tickets');
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -22,6 +23,8 @@ export function TicketsSection() {
     // Logic for Step 02 would go here
   };
 
+  if (typesLoading) return <Loader2 className="w-12 h-12 text-[#005caa] animate-spin" />;
+  if (typesError) return <div className="text-red-500 text-center">Error fetching ticket types</div>;
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -51,7 +54,7 @@ export function TicketsSection() {
           viewport={{ once: true }}
           className="grid md:grid-cols-3 gap-6"
         >
-          {TICKET_TIERS.map((tier) => (
+          {typesRes?.map((tier: TicketProduct) => (
             <motion.div key={tier.id} variants={itemVariants}>
               <PassCard
                 tier={tier}

@@ -10,6 +10,7 @@ import { Ticketsets } from "./Ticketsets";
 import Merch from "./Merch";
 import { useGetAttractionsQuery } from "@/src/lib/features/api/apiSlice";
 import { useLocale } from "next-intl";
+import { useGetTicketTypesQuery } from "@/src/lib/features/api/bookingsApi";
 
 export function HeroPortal({ data }: { data: any }) {
   const locale = useLocale();
@@ -32,6 +33,8 @@ export function HeroPortal({ data }: { data: any }) {
     pageKey: 'srts',
     category: undefined
   });
+  const { data: typesRes, isLoading: typesLoading, error: typesError } = useGetTicketTypesQuery();
+
 
   return (
     <div className="w-full bg-white min-h-screen">
@@ -44,7 +47,7 @@ export function HeroPortal({ data }: { data: any }) {
       <Merch />
       <MapContainer />
       <Ticketsets title="Ticketsets" attractions={setsData?.data?.items} />
-      <TicketsSection />
+      <TicketsSection typesRes={typesRes?.data.slice(0, 3)} typesLoading={typesLoading} typesError={typesError} />
     </div>
   );
 }

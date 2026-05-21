@@ -38,7 +38,7 @@ export default function BookingsHistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f6f6] p-8 rtl" dir="rtl">
+    <div className="min-h-screen bg-[#f6f6f6] p-8 rtl mt-22" dir="rtl">
       <div className="max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
           <h1 className="text-[#005caa] text-4xl font-extrabold mb-2 font-['Plus_Jakarta_Sans']">
