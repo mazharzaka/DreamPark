@@ -1,27 +1,65 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { 
-  Sparkles, Crown, Users, Award, Ticket, Calendar, Phone, 
-  Plus, Minus, ArrowRight, ArrowLeft, Loader2, LogIn, CheckCircle2, AlertCircle 
+import {
+  Sparkles,
+  Crown,
+  Users,
+  Award,
+  Ticket,
+  Calendar,
+  Phone,
+  Plus,
+  Minus,
+  ArrowRight,
+  ArrowLeft,
+  Loader2,
+  LogIn,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
-import { 
-  useGetTicketTypesQuery, 
-  useCreateBookingMutation 
+import {
+  useGetTicketTypesQuery,
+  useCreateBookingMutation,
 } from "@/src/lib/features/api/bookingsApi";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { useAppSelector, useAppDispatch } from "@/src/lib/hooks";
+import {
+  setStep,
+  setSelectedCategory,
+  setSelectedTicketId,
+  setGeneratedPass,
+  resetBookingFlow,
+} from "@/src/lib/features/booking/bookingSlice";
+
+type BookingFormData = {
+  targetDate: string;
+  quantity: number;
+  phoneNumber: string;
+};
+
+type LoginFormData = {
+  loginEmail: string;
+  loginPassword: string;
+};
 
 // Lucide icon mapping helper
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
-    case "Sparkles": return Sparkles;
-    case "Crown": return Crown;
-    case "Users": return Users;
-    case "Award": return Award;
-    default: return Ticket;
+    case "Sparkles":
+      return Sparkles;
+    case "Crown":
+      return Crown;
+    case "Users":
+      return Users;
+    case "Award":
+      return Award;
+    default:
+      return Ticket;
   }
 };
 
@@ -34,40 +72,50 @@ export default function BookingFlow() {
   // Extract optional ticket ID segment from params: e.g. [[...id]] catch-all segment
   const ticketIdFromUrl = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-  // Step state: 1 = Select Ticket, 2 = Customize & Details, 3 = Confirmation
-  const [step, setStep] = useState<number>(1);
-  const [selectedCategory, setSelectedCategory] = useState<"INDIVIDUAL" | "GROUP">("INDIVIDUAL");
-  const [selectedTicketId, setSelectedTicketId] = useState<string>("");
-  const [targetDate, setTargetDate] = useState<string>("");
-  const [quantity, setQuantity] = useState<number>(1);
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  
+  const dispatch = useAppDispatch();
+
+  // Redux State
+  const { step, selectedCategory, selectedTicketId, generatedPass } =
+    useAppSelector((state) => state.booking);
+
+  // React Hook Form for Booking
+  const {
+    register: registerBooking,
+    handleSubmit: handleBookingSubmit,
+    watch: watchBooking,
+    setValue: setBookingValue,
+  } = useForm<BookingFormData>({
+    defaultValues: { targetDate: "", quantity: 1, phoneNumber: "" },
+  });
+  const targetDate = watchBooking("targetDate");
+  const quantity = watchBooking("quantity");
+  const phoneNumber = watchBooking("phoneNumber");
+
+  // React Hook Form for Login
+  const {
+    register: registerLogin,
+    handleSubmit: handleLoginSubmit,
+    reset: resetLogin,
+  } = useForm<LoginFormData>({
+    defaultValues: { loginEmail: "", loginPassword: "" },
+  });
+
   // Auth state local fallback
   const [token, setToken] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
-  const [loginEmail, setLoginEmail] = useState<string>("");
-  const [loginPassword, setLoginPassword] = useState<string>("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
 
-  // Success state booking details
-  const [generatedPass, setGeneratedPass] = useState<{
-    bookingId: string;
-    qrCodeId: string;
-    targetDate: string;
-    ticketName: string;
-    ticketNameAr: string;
-    quantity: number;
-    totalPrice: number;
-    color: string;
-  } | null>(null);
-
   // RTK Queries
-  const { data: ticketTypesRes, isLoading: isLoadingTickets } = useGetTicketTypesQuery();
-  const [createBooking, { isLoading: isBookingLoading, error: bookingError }] = useCreateBookingMutation();
+  const { data: ticketTypesRes, isLoading: isLoadingTickets } =
+    useGetTicketTypesQuery();
+  const [createBooking, { isLoading: isBookingLoading, error: bookingError }] =
+    useCreateBookingMutation();
 
   const ticketTypes = ticketTypesRes?.data ?? [];
-  const filteredTickets = ticketTypes.filter(ticket => ticket.category === selectedCategory);
+  const filteredTickets = ticketTypes.filter(
+    (ticket) => ticket.category === selectedCategory,
+  );
 
   // Sync token from localStorage
   useEffect(() => {
@@ -83,25 +131,31 @@ export default function BookingFlow() {
       if (ticketIdFromUrl) {
         // Try to match the ticket by ID, database UUID, or a friendly URL slug
         const matchedTicket = ticketTypes.find(
-          t => t.id === ticketIdFromUrl || 
-               t._id === ticketIdFromUrl ||
-               t.name?.toLowerCase().replace(/\s+/g, '-') === ticketIdFromUrl?.toLowerCase()
+          (t) =>
+            t.id === ticketIdFromUrl ||
+            t._id === ticketIdFromUrl ||
+            t.name?.toLowerCase().replace(/\s+/g, "-") ===
+              ticketIdFromUrl?.toLowerCase(),
         );
         if (matchedTicket) {
-          setSelectedTicketId(matchedTicket.id || matchedTicket._id || "");
-          setSelectedCategory(matchedTicket.category);
+          dispatch(
+            setSelectedTicketId(matchedTicket.id || matchedTicket._id || ""),
+          );
+          dispatch(setSelectedCategory(matchedTicket.category));
         } else {
           // Graceful fallback to first available ticket if invalid ID provided
-          setSelectedCategory(ticketTypes[0].category);
-          setSelectedTicketId(ticketTypes[0].id || ticketTypes[0]._id || "");
+          dispatch(setSelectedCategory(ticketTypes[0].category));
+          dispatch(
+            setSelectedTicketId(ticketTypes[0].id || ticketTypes[0]._id || ""),
+          );
         }
       } else {
         // Default when no ID is provided: select first ticket of the first category
         const defaultCat = ticketTypes[0].category;
-        setSelectedCategory(defaultCat);
-        const firstOfCat = ticketTypes.find(t => t.category === defaultCat);
+        dispatch(setSelectedCategory(defaultCat));
+        const firstOfCat = ticketTypes.find((t) => t.category === defaultCat);
         if (firstOfCat) {
-          setSelectedTicketId(firstOfCat.id || firstOfCat._id || "");
+          dispatch(setSelectedTicketId(firstOfCat.id || firstOfCat._id || ""));
         }
       }
     }
@@ -109,14 +163,16 @@ export default function BookingFlow() {
 
   // Handle manual category switch
   const handleCategoryChange = (cat: "INDIVIDUAL" | "GROUP") => {
-    setSelectedCategory(cat);
-    const firstOfCat = ticketTypes.find(ticket => ticket.category === cat);
+    dispatch(setSelectedCategory(cat));
+    const firstOfCat = ticketTypes.find((ticket) => ticket.category === cat);
     if (firstOfCat) {
-      setSelectedTicketId(firstOfCat.id || firstOfCat._id || "");
+      dispatch(setSelectedTicketId(firstOfCat.id || firstOfCat._id || ""));
     }
   };
 
-  const selectedTicket = ticketTypes.find(t => (t.id === selectedTicketId || t._id === selectedTicketId));
+  const selectedTicket = ticketTypes.find(
+    (t) => t.id === selectedTicketId || t._id === selectedTicketId,
+  );
 
   // Securely calculate total price factoring in discounts
   const calculatePricing = () => {
@@ -127,7 +183,7 @@ export default function BookingFlow() {
     return {
       base: base * quantity,
       discountAmt: discountAmt * quantity,
-      total: finalPricePerUnit * quantity
+      total: finalPricePerUnit * quantity,
     };
   };
 
@@ -145,9 +201,9 @@ export default function BookingFlow() {
   };
 
   // Handle checkout / JWT protection
-  const handleCheckoutSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmitBooking: SubmitHandler<BookingFormData> = async (data) => {
+    // data contains targetDate, quantity, phoneNumber but we also watch them
+
     if (!token) {
       setShowLoginModal(true);
       return;
@@ -162,41 +218,44 @@ export default function BookingFlow() {
         ticketTypeId: selectedTicketId,
         targetDate,
         quantity,
-        phoneNumber
+        phoneNumber,
       }).unwrap();
 
       if (response?.success) {
-        setGeneratedPass({
-          bookingId: response.data.bookingId,
-          qrCodeId: response.data.qrCodeId,
-          targetDate,
-          ticketName: selectedTicket?.name || "Single-Day Pass",
-          ticketNameAr: selectedTicket?.nameAr || "تذكرة المرح",
-          quantity,
-          totalPrice: pricing.total,
-          color: selectedTicket?.color || "#b5161e"
-        });
-        setStep(3); // Success Screen
+        dispatch(
+          setGeneratedPass({
+            bookingId: response.data.bookingId,
+            qrCodeId: response.data.qrCodeId,
+            targetDate,
+            ticketName: selectedTicket?.name || "Single-Day Pass",
+            ticketNameAr: selectedTicket?.nameAr || "تذكرة المرح",
+            quantity,
+            totalPrice: pricing.total,
+            color: selectedTicket?.color || "#b5161e",
+          }),
+        );
+        dispatch(dispatch(setStep(3))); // Success Screen
       }
     } catch (err) {
-      console.error("Booking error:", err);
+      console.log("Booking error:", err);
     }
   };
 
   // Inline login submit
-  const handleInlineLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    isLoggingIn ? null : setIsLoggingIn(true);
+  const onSubmitLogin: SubmitHandler<LoginFormData> = async (data) => {
+    const { loginEmail, loginPassword } = data;
+    if (!isLoggingIn) setIsLoggingIn(true);
     setLoginError(null);
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const res = await fetch(`${backendUrl}/api/auth/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
 
       const data = await res.json();
@@ -205,13 +264,20 @@ export default function BookingFlow() {
         localStorage.setItem("user", JSON.stringify(data.data.user));
         setToken(data.token);
         setShowLoginModal(false);
-        setLoginEmail("");
-        setLoginPassword("");
+
+        resetLogin();
       } else {
-        setLoginError(data.message || (isAr ? "البريد الإلكتروني أو كلمة المرور غير صحيحة" : "Invalid email or password"));
+        setLoginError(
+          data.message ||
+            (isAr
+              ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+              : "Invalid email or password"),
+        );
       }
     } catch (err) {
-      setLoginError(isAr ? "حدث خطأ أثناء الاتصال بالخادم" : "Error connecting to server");
+      setLoginError(
+        isAr ? "حدث خطأ أثناء الاتصال بالخادم" : "Error connecting to server",
+      );
     } finally {
       setIsLoggingIn(false);
     }
@@ -220,7 +286,12 @@ export default function BookingFlow() {
   const getBookingErrorMessage = () => {
     if (!bookingError) return null;
     if ("data" in bookingError) {
-      return (bookingError as any).data?.error || (isAr ? "حدث خطأ أثناء إنشاء الحجز" : "An error occurred during booking");
+      return (
+        (bookingError as { data?: { error?: string } })?.data?.error ||
+        (isAr
+          ? "حدث خطأ أثناء إنشاء الحجز"
+          : "An error occurred during booking")
+      );
     }
     return isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
   };
@@ -230,29 +301,33 @@ export default function BookingFlow() {
       {/* STEPS SEGMENTED CONTROLLER (No lines, strictly relies on background shades) */}
       {step < 3 && (
         <div className="max-w-xl mx-auto mb-10 bg-[#f0f1f1] p-1.5 rounded-full flex justify-between items-center relative shadow-inner">
-          <button 
+          <button
             type="button"
-            onClick={() => setStep(1)}
+            onClick={() => dispatch(setStep(1))}
             className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
-              step === 1 
-                ? "bg-white text-secondary shadow-md" 
+              step === 1
+                ? "bg-white text-secondary shadow-md"
                 : "text-on-surface/60 hover:text-on-surface"
             }`}
           >
-            <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">1</span>
+            <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">
+              1
+            </span>
             {t("step_select")}
           </button>
-          <button 
+          <button
             type="button"
-            onClick={() => selectedTicketId && setStep(2)}
+            onClick={() => selectedTicketId && dispatch(setStep(2))}
             disabled={!selectedTicketId}
             className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed ${
-              step === 2 
-                ? "bg-white text-secondary shadow-md" 
+              step === 2
+                ? "bg-white text-secondary shadow-md"
                 : "text-on-surface/60 hover:text-on-surface"
             }`}
           >
-            <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">2</span>
+            <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">
+              2
+            </span>
             {t("step_customize")}
           </button>
         </div>
@@ -276,8 +351,8 @@ export default function BookingFlow() {
                   type="button"
                   onClick={() => handleCategoryChange("INDIVIDUAL")}
                   className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${
-                    selectedCategory === "INDIVIDUAL" 
-                      ? "bg-white text-secondary shadow-md" 
+                    selectedCategory === "INDIVIDUAL"
+                      ? "bg-white text-secondary shadow-md"
                       : "text-on-surface/70 hover:text-on-surface"
                   }`}
                 >
@@ -287,8 +362,8 @@ export default function BookingFlow() {
                   type="button"
                   onClick={() => handleCategoryChange("GROUP")}
                   className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${
-                    selectedCategory === "GROUP" 
-                      ? "bg-white text-secondary shadow-md" 
+                    selectedCategory === "GROUP"
+                      ? "bg-white text-secondary shadow-md"
                       : "text-on-surface/70 hover:text-on-surface"
                   }`}
                 >
@@ -301,49 +376,64 @@ export default function BookingFlow() {
             {isLoadingTickets ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {[1, 2].map((i) => (
-                  <div key={i} className="h-96 bg-[#f0f1f1] rounded-[2.5rem] animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-96 bg-[#f0f1f1] rounded-[2.5rem] animate-pulse"
+                  />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {filteredTickets.map((ticket) => {
                   const IconComp = getIconComponent(ticket.icon || "");
-                  const isSelected = selectedTicketId === ticket.id || selectedTicketId === ticket._id;
-                  
+                  const isSelected =
+                    selectedTicketId === ticket.id ||
+                    selectedTicketId === ticket._id;
+
                   return (
                     <motion.div
                       key={ticket.id || ticket._id}
-                      onClick={() => setSelectedTicketId(ticket.id || ticket._id || "")}
+                      onClick={() =>
+                        dispatch(
+                          setSelectedTicketId(ticket.id || ticket._id || ""),
+                        )
+                      }
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md ${
-                        isSelected ? "ring-4 ring-secondary shadow-xl" : "hover:shadow-lg"
+                        isSelected
+                          ? "ring-4 ring-secondary shadow-xl"
+                          : "hover:shadow-lg"
                       }`}
                       style={{
-                        background: isSelected 
-                          ? `linear-gradient(135deg, #ffffff 0%, #fffcfc 100%)` 
-                          : "#ffffff"
+                        background: isSelected
+                          ? `linear-gradient(135deg, #ffffff 0%, #fffcfc 100%)`
+                          : "#ffffff",
                       }}
                     >
                       {/* Brand Pill Accent */}
-                      <div 
-                        className="absolute top-0 right-0 left-0 h-4" 
+                      <div
+                        className="absolute top-0 right-0 left-0 h-4"
                         style={{ backgroundColor: ticket.color || "#b5161e" }}
                       />
 
                       <div className="pt-4">
                         <div className="flex justify-between items-center mb-6">
-                          <div 
+                          <div
                             className="p-4 rounded-2xl text-white flex items-center justify-center shadow-lg"
-                            style={{ backgroundColor: ticket.color || "#b5161e" }}
+                            style={{
+                              backgroundColor: ticket.color || "#b5161e",
+                            }}
                           >
                             <IconComp className="w-6 h-6" />
                           </div>
-                          
+
                           {/* Discount tag */}
                           {!!ticket.discount && ticket.discount > 0 && (
                             <span className="bg-[#fff0f1] text-[#b5161e] px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-wider">
-                              {isAr ? `خصم ${ticket.discount}٪` : `${ticket.discount}% OFF`}
+                              {isAr
+                                ? `خصم ${ticket.discount}٪`
+                                : `${ticket.discount}% OFF`}
                             </span>
                           )}
                         </div>
@@ -355,8 +445,15 @@ export default function BookingFlow() {
 
                         {/* Description bullet list */}
                         <ul className="space-y-3 mb-8">
-                          {((isAr ? ticket.descriptionAr : ticket.description) || []).map((bullet: string, index: number) => (
-                            <li key={index} className="flex items-start gap-3 text-sm md:text-base text-on-surface/75 leading-relaxed">
+                          {(
+                            (isAr
+                              ? ticket.descriptionAr
+                              : ticket.description) || []
+                          ).map((bullet: string, index: number) => (
+                            <li
+                              key={index}
+                              className="flex items-start gap-3 text-sm md:text-base text-on-surface/75 leading-relaxed"
+                            >
                               <span className="w-2 h-2 rounded-full bg-secondary mt-2 flex-shrink-0" />
                               <span>{bullet}</span>
                             </li>
@@ -374,7 +471,8 @@ export default function BookingFlow() {
                             {!!ticket.discount && ticket.discount > 0 ? (
                               <>
                                 <span className="text-3xl font-black text-[#b5161e] font-sans">
-                                  {ticket.price * (1 - ticket.discount / 100)} {t("egp")}
+                                  {ticket.price * (1 - ticket.discount / 100)}{" "}
+                                  {t("egp")}
                                 </span>
                                 <span className="text-sm line-through text-on-surface/40">
                                   {ticket.price} {t("egp")}
@@ -389,10 +487,10 @@ export default function BookingFlow() {
                         </div>
 
                         {/* Tactile checkbox indicator */}
-                        <div 
+                        <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                            isSelected 
-                              ? "bg-secondary text-white scale-110" 
+                            isSelected
+                              ? "bg-secondary text-white scale-110"
                               : "bg-[#f0f1f1] text-transparent"
                           }`}
                         >
@@ -409,7 +507,7 @@ export default function BookingFlow() {
             <div className="flex justify-end pt-6">
               <button
                 type="button"
-                onClick={() => setStep(2)}
+                onClick={() => dispatch(setStep(2))}
                 disabled={!selectedTicketId}
                 className="bg-secondary text-white rounded-full px-12 py-5 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_15px_30px_rgba(117,87,0,0.25)]"
               >
@@ -430,8 +528,10 @@ export default function BookingFlow() {
             className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
           >
             {/* INPUT FORM (Left 7 Cols) */}
-            <form onSubmit={handleCheckoutSubmit} className="lg:col-span-7 bg-white rounded-[2.5rem] p-8 md:p-10 shadow-md space-y-8">
-              
+            <form
+              onSubmit={handleBookingSubmit(onSubmitBooking)}
+              className="lg:col-span-7 bg-white rounded-[2.5rem] p-8 md:p-10 shadow-md space-y-8"
+            >
               {/* CURRENTLY CONFIGURING TICKET TACTILE CARD (Anti-Confusion Indicator) */}
               <div className="bg-[#f0f1f1]/70 p-6 rounded-3xl shadow-inner">
                 <span className="block text-xs uppercase tracking-widest text-[#755700] font-black mb-1">
@@ -441,7 +541,10 @@ export default function BookingFlow() {
                   {isAr ? selectedTicket?.nameAr : selectedTicket?.name}
                 </h3>
                 <span className="inline-block mt-3 text-xs font-black bg-white text-on-surface/70 px-4.5 py-2 rounded-full shadow-sm">
-                  {t("category")}: {selectedTicket?.category === "INDIVIDUAL" ? t("individual") : t("group")}
+                  {t("category")}:{" "}
+                  {selectedTicket?.category === "INDIVIDUAL"
+                    ? t("individual")
+                    : t("group")}
                 </span>
               </div>
 
@@ -453,14 +556,18 @@ export default function BookingFlow() {
               {/* DATE PICKER & FAST BUTTONS */}
               <div className="space-y-4">
                 <label className="block text-sm font-black text-on-surface/80">
-                  {isAr ? `اختر يوم زيارتك الساحر لـ ${selectedTicket?.nameAr}` : `Select your magical visit date for ${selectedTicket?.name}`}
+                  {isAr
+                    ? `اختر يوم زيارتك الساحر لـ ${selectedTicket?.nameAr}`
+                    : `Select your magical visit date for ${selectedTicket?.name}`}
                 </label>
-                
+
                 {/* Fast Selector Buttons */}
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     type="button"
-                    onClick={() => setTargetDate(getTodayDateString())}
+                    onClick={() =>
+                      setBookingValue("targetDate", getTodayDateString())
+                    }
                     className={`py-4.5 rounded-2xl font-black text-sm transition-all ${
                       targetDate === getTodayDateString()
                         ? "bg-secondary text-white shadow-md"
@@ -471,7 +578,9 @@ export default function BookingFlow() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setTargetDate(getTomorrowDateString())}
+                    onClick={() =>
+                      setBookingValue("targetDate", getTomorrowDateString())
+                    }
                     className={`py-4.5 rounded-2xl font-black text-sm transition-all ${
                       targetDate === getTomorrowDateString()
                         ? "bg-secondary text-white shadow-md"
@@ -485,22 +594,27 @@ export default function BookingFlow() {
                       type="date"
                       required
                       min={getTodayDateString()}
-                      value={targetDate}
-                      onChange={(e) => setTargetDate(e.target.value)}
+                      {...registerBooking("targetDate", { required: true })}
                       className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                     />
                     <button
                       type="button"
                       className={`w-full py-4.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
-                        targetDate !== getTodayDateString() && targetDate !== getTomorrowDateString() && targetDate !== ""
+                        targetDate !== getTodayDateString() &&
+                        targetDate !== getTomorrowDateString() &&
+                        targetDate !== ""
                           ? "bg-secondary text-white shadow-md"
                           : "bg-[#f0f1f1] text-on-surface hover:bg-[#e4e5e5]"
                       }`}
                     >
                       <Calendar className="w-4 h-4" />
-                      {targetDate && targetDate !== getTodayDateString() && targetDate !== getTomorrowDateString()
+                      {targetDate &&
+                      targetDate !== getTodayDateString() &&
+                      targetDate !== getTomorrowDateString()
                         ? targetDate
-                        : (isAr ? "تاريخ مخصص" : "Custom")}
+                        : isAr
+                          ? "تاريخ مخصص"
+                          : "Custom"}
                     </button>
                   </div>
                 </div>
@@ -509,12 +623,16 @@ export default function BookingFlow() {
               {/* TACTILE QUANTITY ADJUSTER */}
               <div className="space-y-4">
                 <label className="block text-sm font-black text-on-surface/80">
-                  {isAr ? `كم عدد تذاكر ${selectedTicket?.nameAr} التي ترغب بحجزها؟` : `How many ${selectedTicket?.name} tickets would you like?`}
+                  {isAr
+                    ? `كم عدد تذاكر ${selectedTicket?.nameAr} التي ترغب بحجزها؟`
+                    : `How many ${selectedTicket?.name} tickets would you like?`}
                 </label>
                 <div className="flex items-center gap-6 bg-[#f0f1f1] rounded-2xl p-2.5 w-fit shadow-inner">
                   <button
                     type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() =>
+                      setBookingValue("quantity", Math.max(1, quantity - 1))
+                    }
                     className="w-12 h-12 rounded-xl bg-white shadow-sm text-secondary font-black text-2xl flex items-center justify-center hover:bg-white/80 active:scale-95 transition-all"
                   >
                     <Minus className="w-5 h-5" />
@@ -524,7 +642,7 @@ export default function BookingFlow() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setBookingValue("quantity", quantity + 1)}
                     className="w-12 h-12 rounded-xl bg-secondary shadow-sm text-white font-black text-2xl flex items-center justify-center hover:bg-secondary/90 active:scale-95 transition-all"
                   >
                     <Plus className="w-5 h-5" />
@@ -536,14 +654,15 @@ export default function BookingFlow() {
               <div className="space-y-3">
                 <label className="block text-sm font-black text-on-surface/80 flex items-center gap-2">
                   <Phone className="w-4 h-4 text-secondary" />
-                  {isAr ? `رقم الموبايل لتأكيد حجز ${selectedTicket?.nameAr} نقداً` : `Mobile number to confirm ${selectedTicket?.name} in cash`}
+                  {isAr
+                    ? `رقم الموبايل لتأكيد حجز ${selectedTicket?.nameAr} نقداً`
+                    : `Mobile number to confirm ${selectedTicket?.name} in cash`}
                 </label>
                 <input
                   type="tel"
                   required
                   placeholder={t("phone_placeholder")}
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  {...registerBooking("phoneNumber", { required: true })}
                   className="w-full bg-[#f0f1f1] border-none rounded-2xl p-5 text-on-surface font-sans text-base focus:ring-4 focus:ring-secondary/20 outline-none transition-all shadow-inner"
                 />
               </div>
@@ -552,13 +671,13 @@ export default function BookingFlow() {
               <div className="flex gap-4 pt-6 mt-6 bg-[#f0f1f1]/30 p-6 rounded-3xl">
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => dispatch(setStep(1))}
                   className="flex-1 py-5 rounded-full font-black text-sm uppercase tracking-wider text-on-surface bg-[#f0f1f1] hover:bg-[#e4e5e5] transition-all flex items-center justify-center gap-2 active:scale-95"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   {t("back")}
                 </button>
-                
+
                 <button
                   type="submit"
                   disabled={isBookingLoading || !targetDate || !phoneNumber}
@@ -585,9 +704,11 @@ export default function BookingFlow() {
               {selectedTicket && (
                 <div className="space-y-4">
                   {/* Selected Ticket Mini Card */}
-                  <div 
+                  <div
                     className="p-6 rounded-[2rem] text-white shadow-lg relative overflow-hidden"
-                    style={{ backgroundColor: selectedTicket.color || "#b5161e" }}
+                    style={{
+                      backgroundColor: selectedTicket.color || "#b5161e",
+                    }}
                   >
                     <span className="text-xs uppercase tracking-widest font-black text-white/70">
                       {t("selected_ticket")}
@@ -604,17 +725,23 @@ export default function BookingFlow() {
                   <div className="space-y-3.5 pt-4">
                     <div className="flex justify-between items-center text-sm text-on-surface/75">
                       <span>{t("base_price")}</span>
-                      <span className="font-extrabold font-sans">{pricing.base} {t("egp")}</span>
+                      <span className="font-extrabold font-sans">
+                        {pricing.base} {t("egp")}
+                      </span>
                     </div>
                     {pricing.discountAmt > 0 && (
                       <div className="flex justify-between items-center text-sm text-[#b5161e] font-extrabold">
                         <span>{t("promo_discount")}</span>
-                        <span className="font-sans">-{pricing.discountAmt} {t("egp")}</span>
+                        <span className="font-sans">
+                          -{pricing.discountAmt} {t("egp")}
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-sm text-on-surface/75">
                       <span>{t("target_date")}</span>
-                      <span className="font-extrabold font-sans">{targetDate || t("not_set")}</span>
+                      <span className="font-extrabold font-sans">
+                        {targetDate || t("not_set")}
+                      </span>
                     </div>
 
                     {/* Total Due Panel (No borderlines, strictly background shade) */}
@@ -660,15 +787,13 @@ export default function BookingFlow() {
           >
             {/* SUCCESS BOARD / MAGIC PASS CARD */}
             <div className="bg-white rounded-[3rem] shadow-2xl overflow-hidden relative">
-              
               {/* Header Colored Ribbon */}
-              <div 
+              <div
                 className="h-6 w-full"
                 style={{ backgroundColor: generatedPass.color }}
               />
 
               <div className="p-8 md:p-12 text-center space-y-8">
-                
                 {/* Success Tick Badge */}
                 <div className="flex justify-center">
                   <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
@@ -687,9 +812,8 @@ export default function BookingFlow() {
 
                 {/* PASS CARD GRAPHIC (No 1px borders, relying on deep ambient card shadows) */}
                 <div className="max-w-sm mx-auto bg-gradient-to-br from-[#ffffff] to-[#f9f9f9] rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden">
-                  
                   {/* Card Ribbon */}
-                  <div 
+                  <div
                     className="absolute top-0 right-0 left-0 h-2.5"
                     style={{ backgroundColor: generatedPass.color }}
                   />
@@ -701,19 +825,25 @@ export default function BookingFlow() {
                   </div>
 
                   <h3 className="text-2xl font-black text-on-surface mb-2 leading-tight">
-                    {isAr ? generatedPass.ticketNameAr : generatedPass.ticketName}
+                    {isAr
+                      ? generatedPass.ticketNameAr
+                      : generatedPass.ticketName}
                   </h3>
-                  
+
                   <div className="flex justify-between items-center text-xs text-on-surface/50 font-black mb-6">
-                    <span>{t("qty")}: {generatedPass.quantity}</span>
-                    <span>{t("visit")}: {generatedPass.targetDate}</span>
+                    <span>
+                      {t("qty")}: {generatedPass.quantity}
+                    </span>
+                    <span>
+                      {t("visit")}: {generatedPass.targetDate}
+                    </span>
                   </div>
 
                   {/* QR Code Container */}
                   <div className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6">
-                    <QRCodeSVG 
-                      value={generatedPass.qrCodeId} 
-                      size={180} 
+                    <QRCodeSVG
+                      value={generatedPass.qrCodeId}
+                      size={180}
                       level="H"
                       includeMargin={false}
                     />
@@ -732,17 +862,24 @@ export default function BookingFlow() {
                   {/* Price info (Separated with background shade) */}
                   <div className="bg-[#f0f1f1]/50 p-4 rounded-2xl flex justify-between items-center text-sm font-black text-on-surface/85">
                     <span>{t("due_cash")}</span>
-                    <span className="text-xl font-black text-secondary">{generatedPass.totalPrice} {t("egp")}</span>
+                    <span className="text-xl font-black text-secondary">
+                      {generatedPass.totalPrice} {t("egp")}
+                    </span>
                   </div>
                 </div>
 
                 {/* User localized Arabic instructions */}
                 {isAr && (
                   <div className="bg-[#f0f1f1] p-6 rounded-3xl text-sm text-on-surface/80 leading-relaxed text-right rtl space-y-2">
-                    <h4 className="font-extrabold text-secondary text-base mb-2">💡 خطوات إتمام زيارتك:</h4>
+                    <h4 className="font-extrabold text-secondary text-base mb-2">
+                      💡 خطوات إتمام زيارتك:
+                    </h4>
                     <p className="flex gap-2">
                       <span className="text-primary font-bold">١.</span>
-                      <span>توجه مباشرة لمكتب التسويق بمدخل الحديقة يوم الزيارة <b>({generatedPass.targetDate})</b>.</span>
+                      <span>
+                        توجه مباشرة لمكتب التسويق بمدخل الحديقة يوم الزيارة{" "}
+                        <b>({generatedPass.targetDate})</b>.
+                      </span>
                     </p>
                     <p className="flex gap-2">
                       <span className="text-primary font-bold">٢.</span>
@@ -750,7 +887,11 @@ export default function BookingFlow() {
                     </p>
                     <p className="flex gap-2">
                       <span className="text-primary font-bold">٣.</span>
-                      <span>ادفع قيمة التذكرة نقداً <b>({generatedPass.totalPrice} جنيه)</b> لتفعيل ممرك ودخول المنتزه فوراً!</span>
+                      <span>
+                        ادفع قيمة التذكرة نقداً{" "}
+                        <b>({generatedPass.totalPrice} جنيه)</b> لتفعيل ممرك
+                        ودخول المنتزه فوراً!
+                      </span>
                     </p>
                   </div>
                 )}
@@ -759,11 +900,11 @@ export default function BookingFlow() {
                   <button
                     type="button"
                     onClick={() => {
-                      setStep(1);
-                      setGeneratedPass(null);
-                      setPhoneNumber("");
-                      setTargetDate("");
-                      setQuantity(1);
+                      dispatch(setStep(1));
+                      dispatch(setGeneratedPass(null));
+                      setBookingValue("phoneNumber", "");
+                      setBookingValue("targetDate", "");
+                      setBookingValue("quantity", 1);
                     }}
                     className="flex-1 py-4.5 rounded-full font-black text-xs uppercase tracking-widest bg-[#f0f1f1] text-on-surface hover:bg-[#e4e5e5] transition-all"
                   >
@@ -788,7 +929,7 @@ export default function BookingFlow() {
         {showLoginModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Overlay */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -822,7 +963,10 @@ export default function BookingFlow() {
                 </div>
               )}
 
-              <form onSubmit={handleInlineLogin} className="space-y-4">
+              <form
+                onSubmit={handleLoginSubmit(onSubmitLogin)}
+                className="space-y-4"
+              >
                 <div className="space-y-1.5">
                   <label className="text-xs font-black text-on-surface/50 uppercase tracking-wider block">
                     {t("email")}
@@ -830,8 +974,7 @@ export default function BookingFlow() {
                   <input
                     type="email"
                     required
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
+                    {...registerLogin("loginEmail", { required: true })}
                     placeholder="e.g. test@example.com"
                     className="w-full bg-[#f0f1f1] border-none rounded-xl p-4 text-on-surface font-sans text-sm focus:ring-4 focus:ring-secondary/15 outline-none transition-all shadow-inner"
                   />
@@ -844,8 +987,7 @@ export default function BookingFlow() {
                   <input
                     type="password"
                     required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
+                    {...registerLogin("loginPassword", { required: true })}
                     placeholder="••••••••"
                     className="w-full bg-[#f0f1f1] border-none rounded-xl p-4 text-on-surface font-sans text-sm focus:ring-4 focus:ring-secondary/15 outline-none transition-all shadow-inner"
                   />

@@ -8,4 +8,5 @@ export type TicketProduct = {
   color?: string;     // اختياري لأنه غير موجود في قائمة الـ required
   discount?: number;   // اختياري لأنه غير موجود في قائمة الـ required
   isActive?: boolean;  // اختياري لأنه غير موجود في قائمة الـ required
+  icon?: string;
 };

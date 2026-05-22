@@ -66,7 +66,7 @@ export function PassCard({ tier, onSelect, isRtl }: PassCardProps) {
         <div className={`flex items-baseline gap-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
           <>
             <span className="text-3xl font-black text-[#b5161e] font-sans">
-              {tier.price * (1 - tier.discount / 100)} {t("egp")}
+              {tier.price * (1 - (tier.discount || 0) / 100)} {t("egp")}
             </span>
             <span className="text-sm line-through text-on-surface/40">
               {tier.price} {t("egp")}

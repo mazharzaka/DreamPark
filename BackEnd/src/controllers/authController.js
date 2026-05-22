@@ -1,11 +1,11 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import catchAsync from '../utils/catchAsync.js';
-import AppError from '../utils/appError.js';
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import catchAsync from "../utils/catchAsync.js";
+import AppError from "../utils/appError.js";
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback-secret-key-for-development', {
-    expiresIn: process.env.JWT_EXPIRES_IN || '90d',
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
@@ -27,6 +27,7 @@ export const signup = catchAsync(async (req, res) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
+    passwordConfirm: req.body.password_confirmation,
     phoneNumber: req.body.phoneNumber,
     profilePicture: req.body.profilePicture,
     gender: req.body.gender,
@@ -34,22 +35,20 @@ export const signup = catchAsync(async (req, res) => {
     address: req.body.address,
     role: req.body.role,
   });
-
   createSendToken(newUser, 201, res);
 });
 
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email, password)
 
   if (!email || !password) {
-    return next(new AppError('Please provide email and password!', 400));
+    return next(new AppError("Please provide email and password!", 400));
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    return next(new AppError("Incorrect email or password", 401));
   }
 
   createSendToken(user, 200, res);

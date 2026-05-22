@@ -3,7 +3,11 @@
     "parkInfo": "Park Info",
     "Games": "Games",
     "tickets": "Tickets",
-    "map": "Map"
+    "map": "Map",
+    "login": "Login",
+    "signup": "Signup",
+    "logout": "Logout",
+    "home": "Home"
   },
   "Actions": {
     "bookNow": "Book Now"
@@ -198,6 +202,13 @@
     }
   },
   "Auth": {
+    "layout": {
+      "dream": "Dream",
+      "park": "Park",
+      "whereDreams": "Where Dreams",
+      "comeTrue": "Come True",
+      "description": "Join millions of visitors who have experienced the magic of DreamPark."
+    },
     "login": {
       "title": "Welcome Back",
       "subtitle": "Sign in to your account to continue your magical journey.",
@@ -218,7 +229,17 @@
       "email": "Email Address",
       "emailPlaceholder": "you@example.com",
       "password": "Password",
-      "passwordPlaceholder": "••••••••"
+      "confirmPassword": "Confirm Password",
+      "passwordPlaceholder": "••••••••",
+      "address": "Address",
+      "addressPlaceholder": "123 Main St",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "123456789",
+      "countryCode": "Country Code",
+      "countryCodePlaceholder": "+1",
+      "dateOfBirth": "Date of Birth",
+      "dateOfBirthPlaceholder": "MM/DD/YYYY",
+      "gender": "Gender"
     },
     "social": {
       "or": "Or continue with",
@@ -231,7 +252,8 @@
       "passwordLength": "Password must be at least 8 characters",
       "passwordUppercase": "Must contain at least one uppercase letter",
       "passwordNumber": "Must contain at least one number",
-      "passwordSpecial": "Must contain at least one special character"
+      "passwordSpecial": "Must contain at least one special character",
+      "passwordMismatch": "Passwords do not match"
     }
   },
   "booking": {

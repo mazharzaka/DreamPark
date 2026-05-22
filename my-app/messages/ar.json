@@ -3,7 +3,11 @@
     "parkInfo": "معلومات الحديقة",
     "Games": "الألعاب",
     "tickets": "التذاكر",
-    "map": "الخريطة"
+    "map": "الخريطة",
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "home": "الرئيسية"
   },
   "Actions": {
     "bookNow": "احجز الآن"
@@ -198,6 +202,13 @@
     }
   },
   "Auth": {
+    "layout": {
+      "dream": "دريم",
+      "park": "بارك",
+      "whereDreams": "حيث تتحقق",
+      "comeTrue": "الأحلام",
+      "description": "انضم إلى ملايين الزوار الذين عاشوا سحر دريم بارك."
+    },
     "login": {
       "title": "مرحباً بعودتك",
       "subtitle": "قم بتسجيل الدخول إلى حسابك لمواصلة رحلتك السحرية.",
@@ -218,7 +229,17 @@
       "email": "البريد الإلكتروني",
       "emailPlaceholder": "you@example.com",
       "password": "كلمة المرور",
-      "passwordPlaceholder": "••••••••"
+      "confirmPassword": "تأكيد كلمة المرور",
+      "passwordPlaceholder": "••••••••",
+      "address": "العنوان",
+      "addressPlaceholder": "123 شارع رئيسي",
+      "phoneNumber": "رقم الهاتف",
+      "phoneNumberPlaceholder": "123456789",
+      "countryCode": "رمز الدولة",
+      "countryCodePlaceholder": "+1",
+      "dateOfBirth": "تاريخ الميلاد",
+      "dateOfBirthPlaceholder": "MM/DD/YYYY",
+      "gender": "الجنس"
     },
     "social": {
       "or": "أو المتابعة باستخدام",
@@ -231,7 +252,8 @@
       "passwordLength": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
       "passwordUppercase": "يجب أن تحتوي على حرف كبير واحد على الأقل",
       "passwordNumber": "يجب أن تحتوي على رقم واحد على الأقل",
-      "passwordSpecial": "يجب أن تحتوي على رمز خاص واحد على الأقل"
+      "passwordSpecial": "يجب أن تحتوي على رمز خاص واحد على الأقل",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين"
     }
   },
   "booking": {
