@@ -1,8 +1,8 @@
 {
   "Navigation": {
     "parkInfo": "Park Info",
-    "attractions": "Attractions",
-    "dining": "Dining",
+    "Games": "Games",
+    "tickets": "Tickets",
     "map": "Map"
   },
   "Actions": {
@@ -69,6 +69,9 @@
     "cta": "Select Pass",
     "egp": "EGP",
     "heading": "Ticket <span>Sets</span>",
+    "title": "Book Your <span>Ticket</span>",
+    "validity": "Valid for X days from purchase date",
+    "viewAll": "View All",
     "description": "Discover our unique experiences and enjoy your time at Dream Park.",
     "subtitle": "Discover our unique experiences and enjoy your time at Dream Park",
     "tiers": {
@@ -230,5 +233,55 @@
       "passwordNumber": "Must contain at least one number",
       "passwordSpecial": "Must contain at least one special character"
     }
+  },
+  "booking": {
+    "title": "Curated Ticket Booking",
+    "individual_tabs": "Individual Tickets",
+    "group_tabs": "Group Packages",
+    "selected_ticket": "Currently Selected Ticket",
+    "choose_date": "Choose your magical day of visit",
+    "personal_info": "Personal Info & Verification",
+    "phone_placeholder": "Mobile number to confirm cash booking",
+    "cta_next": "Confirm & Proceed",
+    "cta_book": "Confirm & Book Your Magical Ticket",
+    "step_select": "Select Pass",
+    "step_customize": "Customize",
+    "currently_configuring": "Currently Configuring Pass",
+    "category": "Category",
+    "individual": "Individual",
+    "group": "Group",
+    "quantity_prompt": "How many tickets would you like?",
+    "phone_prompt": "Contact Phone Number (SMS confirmation)",
+    "price": "Price",
+    "egp": "EGP",
+    "back": "Back",
+    "confirm_booking": "Confirm Booking",
+    "booking_summary": "Booking Summary",
+    "base_price": "Base Price:",
+    "promo_discount": "Promo Discount:",
+    "target_date": "Target Date:",
+    "not_set": "Not set",
+    "total_due": "Total Due",
+    "cash_note": "⚠️ Please note that payment is processed in cash upon arrival at the marketing desks using your generated Magic Pass QR code.",
+    "pass_issued": "Magic Pass Issued!",
+    "pass_instructions": "Show this code at the gate to complete cash payment & enter.",
+    "active_pass": "Active Magic Pass",
+    "qty": "Qty",
+    "visit": "Visit",
+    "manual_id": "Manual Pass Verification ID",
+    "due_cash": "Due in Cash",
+    "book_another": "Book Another Pass",
+    "print_save": "Print / Save Pass",
+    "login_required": "Authentication Required",
+    "login_subtitle": "Log in with your email to link and issue your Magic Pass",
+    "email": "Email Address",
+    "password": "Password",
+    "sign_in": "Sign In & Continue",
+    "cancel_close": "Cancel & Close"
+  },
+  "pass": {
+    "instant_ticketing": "Instant Ticketing & Pass Issuance",
+    "reserve_title": "Reserve Your Dream Magic Pass",
+    "reserve_subtitle": "Select your preferred pass tier, customize the visit date, and instantly generate your scannable Magic Pass for quick park access."
   }
 }

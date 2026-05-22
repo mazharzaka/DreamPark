@@ -7,8 +7,15 @@ import { ZooHero } from '@/src/features/portal/data/mockHeroSlides'
 import React from 'react'
 import { useGetAttractionsQuery } from '@/src/lib/features/api/apiSlice';
 
+import { useLocale } from 'next-intl';
+
 function ZooPage() {
-    const { data: animals } = useGetAttractionsQuery({ category: 'animals' });
+    const locale = useLocale();
+    const { data: animals } = useGetAttractionsQuery({
+        lang: locale,
+        pageKey: 'zoo',
+        category: 'animals'
+    });
 
     return (
         <main className='mt-[106px]'>

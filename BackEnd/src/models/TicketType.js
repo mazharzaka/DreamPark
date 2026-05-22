@@ -9,13 +9,22 @@ const ticketTypeSchema = new mongoose.Schema(
     },
     nameAr: {
       type: String,
-      required: [true, 'Please provide a ticket name'],
+      required: [true, 'Please provide a ticket name in Arabic'],
       trim: true,
     },
-    descriptionAr: {
+    category: {
       type: String,
-      required: [true, 'Please provide a ticket description'],
-      trim: true,
+      enum: ['INDIVIDUAL', 'GROUP'],
+      required: [true, 'Please provide a ticket category'],
+      default: 'INDIVIDUAL',
+    },
+    icon: {
+      type: String,
+      default: 'Ticket',
+    },
+    color: {
+      type: String,
+      default: '#b5161e',
     },
     price: {
       type: Number,
@@ -23,10 +32,13 @@ const ticketTypeSchema = new mongoose.Schema(
       min: [0, 'Price cannot be negative'],
     },
     description: {
-      type: String,
-      trim: true,
+      type: [String],
+      default: [],
     },
-
+    descriptionAr: {
+      type: [String],
+      default: [],
+    },
     discount: {
       type: Number,
       default: 0,
@@ -37,7 +49,6 @@ const ticketTypeSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-
   },
   {
     timestamps: true,

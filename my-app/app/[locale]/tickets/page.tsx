@@ -11,8 +11,14 @@ export default function AllTicketsPage() {
   const { data: typesRes, isLoading } = useGetTicketTypesQuery();
   const ticketTypes = typesRes?.data ?? [];
   const t = useTranslations("Tickets");
+  const tBooking = useTranslations("booking");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  
+  const [selectedCategory, setSelectedCategory] = useState<"INDIVIDUAL" | "GROUP">("INDIVIDUAL");
+
+  const filteredTickets = ticketTypes.filter(ticket => ticket.category === selectedCategory);
+
   useEffect(() => {
     if (ticketTypes.length > 0) {
     }
@@ -38,15 +44,46 @@ export default function AllTicketsPage() {
             <Loader2 className="w-12 h-12 text-[#005caa] animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ticketTypes.map((ticket, i) => (
-              <PassCard
-                tier={ticket}
-                onSelect={handleSelect}
-                isRtl={isRtl}
-              />
-            ))}
-          </div>
+          <>
+            {/* CATEGORY SWITCHER BUTTONS */}
+            <div className="flex justify-center mb-10">
+              <div className="bg-[#f0f1f1] p-1.5 rounded-full flex gap-1 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("INDIVIDUAL")}
+                  className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${
+                    selectedCategory === "INDIVIDUAL" 
+                      ? "bg-white text-secondary shadow-md" 
+                      : "text-on-surface/70 hover:text-on-surface"
+                  }`}
+                >
+                  {tBooking("individual_tabs")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("GROUP")}
+                  className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${
+                    selectedCategory === "GROUP" 
+                      ? "bg-white text-secondary shadow-md" 
+                      : "text-on-surface/70 hover:text-on-surface"
+                  }`}
+                >
+                  {tBooking("group_tabs")}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2  gap-6">
+              {filteredTickets.map((ticket, i) => (
+                <PassCard
+                  key={ticket.id || ticket._id}
+                  tier={ticket}
+                  onSelect={handleSelect}
+                  isRtl={isRtl}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

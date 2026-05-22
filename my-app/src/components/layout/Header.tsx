@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/src/i18n/routing';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/src/i18n/routing';
 import { EditorialButton } from '../ui/EditorialButton';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -10,12 +10,14 @@ import LanguageSwitcher from '../ui/LanguageSwitcher';
 export function Header() {
   const t = useTranslations('Navigation');
   const tActions = useTranslations('Actions');
+  const locale = useLocale();
+  const pathname = usePathname();
 
   const navLinks = [
-    { label: t('parkInfo'), href: '/park-info', active: true },
-    { label: t('attractions'), href: '/attractions' },
-    { label: t('dining'), href: '/dining' },
-    { label: t('map'), href: '/map' },
+    { label: t('parkInfo'), href: '/park-info', active: pathname === '/park-info' },
+    { label: t('Games'), href: '/games', active: pathname === '/games' },
+    { label: t('tickets'), href: '/tickets', active: pathname === '/tickets' },
+    { label: t('map'), href: '/map', active: pathname === '/map' },
   ];
 
   return (
@@ -52,7 +54,7 @@ export function Header() {
 
         {/* CTA Button */}
         <div className="flex items-center flex-col  md:flex-row md:gap-3 gap-1">
-          <EditorialButton variant="primary" className="!px-3 !py-1 md:!px-6 md:!py-3 !min-h-0 !min-w-0  md:!text-xs !text-xxs">
+          <EditorialButton variant="primary" link={`/${locale}/pass`} className="!px-3 !py-1 md:!px-6 md:!py-3 !min-h-0 !min-w-0  md:!text-xs !text-xxs">
             {tActions('bookNow')}
           </EditorialButton>
           <LanguageSwitcher />

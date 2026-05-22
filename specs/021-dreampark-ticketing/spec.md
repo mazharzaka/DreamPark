@@ -4,6 +4,13 @@
 **Created**: 2026-05-22  
 **Status**: Draft  
 
+## Clarifications
+
+### Session 2026-05-22
+- Q: Does a single booking represent one ticket, or can users specify a quantity? → A: Add a quantity field to the Booking. Users can buy multiple tickets of the same type in one transaction.
+- Q: What is the fallback if the QR code is unreadable or camera fails? → A: Provide a manual fallback where agents can type the qrCodeValue or user's phone number to find and verify the booking.
+- Q: Can visitors book tickets for today, or do they need to book in advance? → A: Yes, visitors can book for today and future dates. Past dates are disabled in the UI.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Visitor Booking Flow (Priority: P1)
@@ -67,9 +74,9 @@ Visitors can access their personalized dashboard to view active bookings and ret
 
 ### Edge Cases
 
-- What happens when a visitor tries to book for a past date?
+- What happens when a visitor tries to book for a past date? → Past dates are disabled in the UI. Visitors can book for today and future dates.
 - How does system handle concurrent bookings if capacity is limited? (Assuming unlimited capacity for now based on description)
-- What happens if the agent's scanner loses camera permissions or connectivity?
+- What happens if the agent's scanner loses camera permissions or the QR code is unreadable? → System provides a manual fallback allowing agents to type the qrCodeValue or visitor's phone number to verify the booking.
 
 ## Requirements *(mandatory)*
 
@@ -91,7 +98,7 @@ Visitors can access their personalized dashboard to view active bookings and ret
 
 - **User**: Represents individuals interacting with the system, defined by their role and authentication status.
 - **Ticket Type**: Represents the available admission products, including category and price.
-- **Booking**: Represents a visitor's reservation, linking their account to a specific ticket type, visit date, pricing, and a unique QR identifier.
+- **Booking**: Represents a visitor's reservation, linking their account to a specific ticket type, quantity, visit date, pricing, and a unique QR identifier.
 
 ## Success Criteria *(mandatory)*
 

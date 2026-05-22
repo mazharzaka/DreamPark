@@ -1,17 +1,13 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Autoplay } from 'swiper/modules';
-import { StepIndicator } from './StepIndicator';
+
 import { PassCard } from './PassCard';
-import { TICKET_TIERS, TicketProduct } from '../lib/ticket-data';
+import { TicketProduct } from '../lib/ticket-data';
 
-import 'swiper/css';
-import 'swiper/css/pagination';
-
+import { Link } from '@/src/i18n/routing';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Loader2 } from 'lucide-react';
 
 export function TicketsSection({ typesRes, typesLoading, typesError }: { typesRes: any, typesLoading: boolean, typesError: any }) {
   const t = useTranslations('Tickets');
@@ -44,7 +40,29 @@ export function TicketsSection({ typesRes, typesLoading, typesError }: { typesRe
     <section className="w-full py-24 px-4 bg-surface">
       <div className="max-w-7xl mx-auto">
         {/* Progress Header */}
-        <StepIndicator />
+        <div className=" flex  justify-between w-full items-center mb-12">
+          <h2 className={`text-5xl md:text-6xl text-start font-black text-primary tracking-tight mb-4 antialiased ${locale === 'ar' ? 'font-cairo' : 'font-sans'}`}>
+            {t.rich('title', {
+              span: (chunks) => <span className="text-secondary italic font-bold">{chunks}</span>
+            })
+            }
+          </h2>
+
+          <div className="flex flex-col items-end gap-4 p-2" >
+            <button className="flex items-center gap-2 bg-[#e9f0f6] text-[#2d5f8b] px-4 py-2.5 rounded-full text-xs font-bold hover:bg-[#d4e1ee] transition-colors uppercase tracking-wide">
+              <Calendar className="w-3.5 h-3.5" />
+              {t('validity')}
+            </button>
+            <Link
+              href={`/tickets`}
+              className="flex items-center gap-2  text-primary hover:text-primary/80 text-xs font-bold  transition-colors uppercase tracking-wide"
+            >
+              {t('viewAll')}
+              {locale === 'ar' ? <ArrowLeft className="w-3.5 h-3.5 text-primary" /> : <ArrowRight className="w-3.5 h-3.5 text-primary" />
+              }
+            </Link>
+          </div>
+        </div>
 
         {/* Desktop Grid */}
         <motion.div

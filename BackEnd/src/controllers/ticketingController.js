@@ -23,7 +23,12 @@ export const addTicketType = async (req, res, next) => {
 
 export const createBooking = async (req, res, next) => {
   try {
-    const { ticketTypeId, targetDate, quantity, email } = req.body;
+    const { ticketTypeId, targetDate, quantity, phoneNumber } = req.body;
+
+    // Validate phone number
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, error: "Phone number is required." });
+    }
 
     // Validate date
     const dateObj = new Date(targetDate);
@@ -42,7 +47,9 @@ export const createBooking = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Ticket type not found." });
     }
 
-    const totalPrice = ticketType.price * quantity;
+    // Securely calculate total price with discount
+    const pricePerTicket = ticketType.price * (1 - (ticketType.discount || 0) / 100);
+    const totalPrice = pricePerTicket * quantity;
 
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -55,6 +62,7 @@ export const createBooking = async (req, res, next) => {
       targetDate: dateObj,
       totalPrice,
       quantity,
+      phoneNumber,
     });
 
     res.status(201).json({
@@ -71,15 +79,22 @@ export const createBooking = async (req, res, next) => {
 
 export const verifyAndConfirmPayment = async (req, res, next) => {
   try {
-    const { qrCodeId } = req.body;
+    const { qrCodeId, phoneNumber, bookingId } = req.body;
 
-    // Simulate Agent Role Check via middleware in production
-
-    // 1. Find Booking
-    const booking = await Booking.findOne({ qrCodeId }).populate('ticketType user');
+    let booking;
+    // 1. Find Booking using QR Code, Phone, or Booking ID
+    if (qrCodeId) {
+      booking = await Booking.findOne({ qrCodeId }).populate('ticketTypeId userId');
+    } else if (phoneNumber) {
+      booking = await Booking.findOne({ phoneNumber, status: 'PENDING_PAYMENT' })
+        .populate('ticketTypeId userId')
+        .sort({ createdAt: -1 });
+    } else if (bookingId) {
+      booking = await Booking.findById(bookingId).populate('ticketTypeId userId');
+    }
 
     if (!booking) {
-      return res.status(404).json({ success: false, error: "رمز غير صالح أو الحجز غير موجود" });
+      return res.status(404).json({ success: false, error: "الحجز غير موجود أو رمز التحقق غير صالح" });
     }
 
     // 2. Check if already paid
@@ -106,8 +121,8 @@ export const verifyAndConfirmPayment = async (req, res, next) => {
       data: {
         bookingId: booking._id,
         status: booking.status,
-        customerName: booking.user.email,
-        ticketName: booking.ticketType.name,
+        customerName: booking.userId ? booking.userId.name : "Guest",
+        ticketName: booking.ticketTypeId ? booking.ticketTypeId.name : "Ticket",
         quantity: booking.quantity,
         totalPrice: booking.totalPrice,
       },
@@ -119,7 +134,7 @@ export const verifyAndConfirmPayment = async (req, res, next) => {
 
 export const updateTicketPrice = async (req, res, next) => {
   try {
-    const { ticketTypeId, newPrice, name, description, nameAr, discount, descriptionAr } = req.body;
+    const { ticketTypeId, newPrice, name, description, nameAr, discount, descriptionAr, icon, color } = req.body;
 
     if (newPrice <= 0) {
       return res.status(400).json({ success: false, error: "Price must be a positive number." });
@@ -127,7 +142,7 @@ export const updateTicketPrice = async (req, res, next) => {
 
     const updatedTicket = await TicketType.findByIdAndUpdate(
       ticketTypeId,
-      { price: newPrice, name, description, nameAr, descriptionAr, discount },
+      { price: newPrice, name, description, color, icon, nameAr, descriptionAr, discount },
       { new: true, runValidators: true }
     );
 
@@ -143,18 +158,32 @@ export const updateTicketPrice = async (req, res, next) => {
 
 export const getUserBookings = async (req, res, next) => {
   try {
-    const { email } = req.query; // Mock auth via query param for now
-    const userEmail = email || "test@example.com";
-    const user = await User.findOne({ email: userEmail });
-    if (!user) {
+    const { email } = req.query; // Mock auth via query param if needed, otherwise fallback to req.user.id
+    let userId = req.user ? req.user.id : null;
+
+    if (!userId && email) {
+      const user = await User.findOne({ email });
+      if (user) {
+        userId = user._id;
+      }
+    }
+
+    if (!userId) {
       return res.status(404).json({ success: false, error: "User not found." });
     }
 
-    const bookings = await Booking.find({ userId: user._id })
-      .populate('ticketType')
+    const bookings = await Booking.find({ userId })
+      .populate('ticketTypeId')
       .sort({ targetDate: -1 });
 
-    res.status(200).json({ success: true, data: bookings });
+    // Map ticketTypeId to ticketType to match frontend expectations
+    const formattedBookings = bookings.map(b => {
+      const obj = b.toJSON();
+      obj.ticketType = obj.ticketTypeId;
+      return obj;
+    });
+
+    res.status(200).json({ success: true, data: formattedBookings });
   } catch (error) {
     next(error);
   }

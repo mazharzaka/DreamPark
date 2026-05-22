@@ -28,7 +28,20 @@ export const protect = catchAsync(async (req, res, next) => {
 
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    const userRole = req.user.role;
+    // Normalize user role
+    const normalizedUserRole = userRole === 'customer' ? 'USER' :
+                               userRole === 'staff' ? 'MARKETING_AGENT' :
+                               userRole === 'admin' ? 'ADMIN' : userRole;
+
+    // Normalize roles allowed by the endpoint
+    const normalizedAllowedRoles = roles.map(r => 
+      r === 'customer' ? 'USER' :
+      r === 'staff' ? 'MARKETING_AGENT' :
+      r === 'admin' ? 'ADMIN' : r
+    );
+
+    if (!normalizedAllowedRoles.includes(normalizedUserRole)) {
       return next(new AppError('You do not have permission to perform this action', 403));
     }
     next();

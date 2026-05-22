@@ -37,6 +37,11 @@ const bookingSchema = new mongoose.Schema(
       default: 1,
       min: [1, 'Quantity must be at least 1'],
     },
+    phoneNumber: {
+      type: String,
+      required: [true, 'Booking must have a contact phone number'],
+      trim: true,
+    },
   },
   {
     timestamps: true,

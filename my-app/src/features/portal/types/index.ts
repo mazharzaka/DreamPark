@@ -6,12 +6,17 @@ export interface HeroAction {
 
 export interface HeroSlide {
   title: string;
-  subtitle: string;
+  subtitle?: string;
+  titleAccent?: string;
+  tagline?: string;
   description: string;
-  ctaText: string;
-  ctaLink: string;
-  _id: string;
-  imageUrl: string;
+  ctaText?: string;
+  ctaLink?: string;
+  _id?: string;
+  id?: string;
+  imageUrl?: string;
+  image?: string;
+  buttons?: any[];
 }
 export interface AttractionTag {
   label: string;

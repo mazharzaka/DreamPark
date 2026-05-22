@@ -134,7 +134,7 @@ router.get('/bookings/user', protect, getUserBookings);
  *       404:
  *         description: Invalid token or booking not found
  */
-router.post('/verify', protect, restrictTo('staff', 'admin'), verifyAndConfirmPayment);
+router.post('/verify', protect, restrictTo('MARKETING_AGENT', 'ADMIN'), verifyAndConfirmPayment);
 
 // ── Admin only ─────────────────────────────────────────────────────────────────
 // Only admins may update ticket prices
@@ -180,7 +180,7 @@ router.post('/verify', protect, restrictTo('staff', 'admin'), verifyAndConfirmPa
  *       404:
  *         description: Ticket not found
  */
-router.patch('/types/price', protect, restrictTo('admin'), updateTicketPrice);
+router.patch('/types/price', protect, restrictTo('ADMIN'), updateTicketPrice);
 
 // Admin only
 /**
@@ -227,6 +227,6 @@ router.patch('/types/price', protect, restrictTo('admin'), updateTicketPrice);
  *       404:
  *         description: Ticket type not found
  */
-router.post('/types', protect, restrictTo('admin'), addTicketType);
+router.post('/types', protect, restrictTo('ADMIN'), addTicketType);
 
 export default router;

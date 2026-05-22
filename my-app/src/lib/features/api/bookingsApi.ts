@@ -5,9 +5,17 @@ import type { RootState } from '../../store'
 
 export interface TicketType {
   id: string
+  _id?: string
   name: string
+  nameAr: string
+  category: 'INDIVIDUAL' | 'GROUP'
+  icon?: string
+  color?: string
   price: number
-  description: string | null
+  description: string[]
+  descriptionAr: string[]
+  discount?: number
+  isActive?: boolean
   updatedAt: string
   createdAt: string
 }
@@ -30,6 +38,7 @@ export interface CreateBookingRequest {
   targetDate: string
   quantity: number
   email?: string
+  phoneNumber?: string
 }
 
 export interface CreateBookingResponse {
@@ -41,7 +50,9 @@ export interface CreateBookingResponse {
 }
 
 export interface VerifyPaymentRequest {
-  qrCodeId: string
+  qrCodeId?: string
+  phoneNumber?: string
+  bookingId?: string
 }
 
 export interface VerifyPaymentResponse {

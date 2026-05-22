@@ -40,7 +40,7 @@ export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideConte
       opacity: 1,
       transition: {
         duration: 1,
-        ease: [0.19, 1, 0.22, 1], // Ease out expo
+        ease: [0.19, 1, 0.22, 1] as const, // Ease out expo
       },
     },
   };
