@@ -1,21 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { InputField } from "./InputField";
 import { PasswordInput } from "./PasswordInput";
 import { SocialLogin } from "./SocialLogin";
-import { useDispatch } from "react-redux";
-import { useSignUpMutation } from "../../../lib/features/auth/authApi";
-import { setToken } from "../../../lib/features/auth/authSlice";
+import { useSignUpWithPasswordMutation } from "../../../lib/features/auth/authApi";
 import { useForm } from "react-hook-form";
+import { OtpVerification } from "./OtpVerification";
 
 export const SignupForm = () => {
   const t = useTranslations("Auth");
   const router = useRouter();
-  const dispatch = useDispatch();
-  const [signUp] = useSignUpMutation();
+  const [signUp] = useSignUpWithPasswordMutation();
+  const [showOtp, setShowOtp] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   const {
     register,
@@ -28,8 +28,8 @@ export const SignupForm = () => {
       name: "",
       email: "",
       password: "",
-      password_confirmation: "",
-      phoneNumber: "",
+      passwordConfirm: "",
+      phone: "",
       gender: "male",
       dateOfBirth: "",
       address: "",
@@ -37,38 +37,47 @@ export const SignupForm = () => {
   });
 
   const onSubmit = (data: any) => {
-    // Exclude password_confirmation from the payload sent to the API
     signUp(data)
       .unwrap()
       .then((result) => {
-        if (result.success && result.token) {
-          dispatch(setToken(result.token));
-          router.push("/");
-        }
+        console.log("Signup successful:", result);
+          setRegisteredEmail(data.email);
+          setShowOtp(true);
       })
       .catch((err) => {
         console.error("Signup failed:", err);
+        const errMsg = typeof err?.data?.message === 'string'
+          ? err.data.message
+          : typeof err?.data?.error === 'string'
+            ? err.data.error
+            : typeof err?.error === 'string'
+              ? err.error
+              : "Registration failed. Please check your inputs.";
+
         setError("root.serverError", {
           type: "manual",
-          message:
-            err?.data?.message ||
-            err?.data?.error ||
-            err?.error ||
-            "Registration failed. Please check your inputs.",
+          message: errMsg,
         });
       });
   };
 
   const getErrorKey = (errorMsg: string | undefined) => {
     if (!errorMsg) return undefined;
-    // If it's one of our predefined Auth keys, we prefix it, otherwise we leave it raw.
-    // However, in InputField, it does t(errorKey) so passing a raw un-translated string
-    // will just render that string if next-intl doesn't find it (which is good fallback).
     if (errorMsg.startsWith("errors.")) {
       return `Auth.${errorMsg}`;
     }
-    return errorMsg; // e.g. "Passwords do not match"
+    return errorMsg;
   };
+
+  if (showOtp) {
+    return (
+      <div className="w-full">
+        <OtpVerification 
+          email={registeredEmail} 
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -126,13 +135,11 @@ export const SignupForm = () => {
         <PasswordInput
           labelKey="Auth.fields.confirmPassword"
           placeholderKey="Auth.fields.passwordPlaceholder"
-          errorKey={getErrorKey(errors.password_confirmation?.message)}
+          errorKey={getErrorKey(errors.passwordConfirm?.message)}
           dir="ltr"
-          {...register("password_confirmation", {
+          {...register("passwordConfirm", {
             required: "errors.required",
             validate: (value) => {
-              console.log(value);
-              console.log(value === watch("password"));
               return value === watch("password") || "errors.passwordMismatch";
             },
           })}
@@ -142,9 +149,9 @@ export const SignupForm = () => {
           type="tel"
           labelKey="Auth.fields.phoneNumber"
           placeholderKey="Auth.fields.phoneNumberPlaceholder"
-          errorKey={getErrorKey(errors.phoneNumber?.message)}
+          errorKey={getErrorKey(errors.phone?.message)}
           dir="ltr"
-          {...register("phoneNumber", { required: "errors.required" })}
+          {...register("phone", { required: "errors.required" })}
         />
 
         <div className="flex flex-col gap-2">

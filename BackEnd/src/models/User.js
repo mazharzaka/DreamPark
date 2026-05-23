@@ -17,13 +17,23 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please provide a password"],
+      required: [
+        function () {
+          return !this.linkedProviders || this.linkedProviders.length === 0;
+        },
+        "Please provide a password",
+      ],
       minlength: 8,
       select: false,
     },
     passwordConfirm: {
       type: String,
-      required: [true, "Please provide a password confirmation"],
+      required: [
+        function () {
+          return !this.linkedProviders || this.linkedProviders.length === 0;
+        },
+        "Please provide a password confirmation",
+      ],
       validate: {
         validator: function (el) {
           return el === this.password;
@@ -55,8 +65,22 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["customer", "admin", "staff", "USER", "MARKETING_AGENT", "ADMIN"],
+      enum: ["customer", "admin", "staff", "MARKETING_AGENT"],
       default: "customer",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    linkedProviders: [
+      {
+        provider: { type: String, required: true },
+        providerId: { type: String, required: true },
+      },
+    ],
+    refreshTokenHash: {
+      type: String,
+      select: false,
     },
   },
   {
@@ -64,11 +88,18 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+//  الشكل الصحيح والآمن 100%
+userSchema.pre('save', async function() {
+  // 1) تشفير الباسورد فقط لو حصل لها تعديل أو لسه بتتكريه
+  if (!this.isModified('password')) return;
 
+  // 2) عمل هاش للباسورد
   this.password = await bcrypt.hash(this.password, 12);
-  // next();
+
+  // 3) مسح الـ passwordConfirm عشان متتحفظش في الداتابيز (FR-002)
+  this.passwordConfirm = undefined; 
+  
+  // مش محتاجين نكتب ()next طالما الدالة async!
 });
 
 userSchema.methods.correctPassword = async function (

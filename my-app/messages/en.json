@@ -7,7 +7,8 @@
     "login": "Login",
     "signup": "Signup",
     "logout": "Logout",
-    "home": "Home"
+    "home": "Home",
+    "profile": "Profile"
   },
   "Actions": {
     "bookNow": "Book Now"
@@ -214,7 +215,8 @@
       "subtitle": "Sign in to your account to continue your magical journey.",
       "submit": "Sign In",
       "noAccount": "Don't have an account?",
-      "createAccount": "Create an account"
+      "createAccount": "Create an account",
+      "forgotPassword": "Forgot your password?"
     },
     "signup": {
       "title": "Create Account",
@@ -222,6 +224,17 @@
       "submit": "Sign Up",
       "hasAccount": "Already have an account?",
       "signIn": "Sign In"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "subtitle": "No worries, we'll send you reset instructions.",
+      "submit": "Send Reset Code",
+      "remembered": "Remember your password?"
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Please enter your new password below.",
+      "submit": "Reset Password"
     },
     "fields": {
       "fullName": "Full Name",
@@ -254,7 +267,17 @@
       "passwordNumber": "Must contain at least one number",
       "passwordSpecial": "Must contain at least one special character",
       "passwordMismatch": "Passwords do not match"
-    }
+    },
+    "verifyEmail": "Verify Your Email",
+    "otpSentTo": "We've sent a 6-digit code to {email}",
+    "invalidOtpLength": "Please enter all 6 digits",
+    "verificationFailed": "Invalid or expired OTP code",
+    "verifying": "Verifying...",
+    "verify": "Verify Code",
+    "didNotReceive": "Didn't receive the code?",
+    "resend": "Resend Code",
+    "resendIn": "Resend in {time}",
+    "resendFailed": "Failed to resend code"
   },
   "booking": {
     "title": "Curated Ticket Booking",

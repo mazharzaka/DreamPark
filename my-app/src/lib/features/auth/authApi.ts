@@ -1,73 +1,138 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { Mutex } from 'async-mutex';
 import { RootState } from '../../store';
-import { logout } from './authSlice';
+import { setCredentials, clearCredentials, UserProfile } from './authSlice';
 
-// Entity Types
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-}
+const mutex = new Mutex();
 
-export interface AuthResponse {
-  success: boolean;
-  token: string;
-  user: UserProfile;
-}
+const baseQuery = fetchBaseQuery({
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as RootState).auth.accessToken;
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  },
+  credentials: 'include',
+});
 
-export interface AuthError {
-  success: boolean;
-  error: string;
-}
+const baseQueryWithReauth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  await mutex.waitForUnlock();
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result.error && result.error.status === 401) {
+    if (!mutex.isLocked()) {
+      const release = await mutex.acquire();
+      try {
+        const refreshResult = await baseQuery(
+          { url: '/auth/refresh', method: 'POST' },
+          api,
+          extraOptions
+        );
+        if (refreshResult.data) {
+          const data = refreshResult.data as { token: string; data: { user: UserProfile } };
+          api.dispatch(setCredentials({ token: data.token, user: data.data.user }));
+          result = await baseQuery(args, api, extraOptions);
+        } else {
+          api.dispatch(clearCredentials());
+          // api.dispatch(authApi.util.resetApiState()); // Cannot dispatch directly here if cyclical dependency, but we can clear credentials.
+        }
+      } finally {
+        release();
+      }
+    } else {
+      await mutex.waitForUnlock();
+      result = await baseQuery(args, api, extraOptions);
+    }
+  }
+  return result;
+};
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
-    prepareHeaders: (headers, { getState }) => {
-      // By default, if we have a token in the store, let's use that for authenticated requests
-      const token = (getState() as RootState).auth.token;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-  tagTypes: ['User'],
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['UserProfile', 'UserBookings'],
   endpoints: (builder) => ({
-    signUp: builder.mutation<AuthResponse, any>({
+    signUpWithPassword: builder.mutation<any, any>({
       query: (credentials) => ({
         url: '/auth/signup',
         method: 'POST',
         body: credentials,
       }),
+      invalidatesTags: ['UserProfile'],
     }),
-    login: builder.mutation<AuthResponse, any>({
+    verifyAccountOTP: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/auth/verify-otp',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['UserProfile'],
+    }),
+    loginWithPassword: builder.mutation<any, any>({
       query: (credentials) => ({
         url: '/auth/login',
         method: 'POST',
         body: credentials,
       }),
+      invalidatesTags: ['UserProfile'],
     }),
-    getProfile: builder.query<UserProfile, void>({
-      query: () => '/auth/profile',
-      providesTags: ['User'],
-      // Passive 401 detection is generally handled at the component level or by a custom baseQuery
-      // Alternatively we can use an onQueryStarted to listen to the query and dispatch logout
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+    sendOtp: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/auth/send-otp',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    resetPasswordWithOTP: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/auth/reset-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    logoutServer: builder.mutation<any, void>({
+      query: () => ({
+        url: '/auth/logout',
+        method: 'POST',
+      }),
+      invalidatesTags: ['UserProfile', 'UserBookings'],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-        } catch (error: any) {
-          if (error.error?.status === 401) {
-            dispatch(logout());
-            dispatch(authApi.util.resetApiState());
-          }
+          dispatch(clearCredentials());
+        } catch (error) {
+          // even if network fails, clear local
+          dispatch(clearCredentials());
         }
       },
+    }),
+    getProfile: builder.query<any, void>({
+      query: () => '/auth/profile',
+      providesTags: ['UserProfile'],
+    }),
+    getUserBookings: builder.query<any, { from: string; sort: string; order: string }>({
+      query: (params) => ({
+        url: `/tickets/bookings/user`,
+        params,
+      }),
+      providesTags: ['UserBookings'],
     }),
   }),
 });
 
-export const { useSignUpMutation, useLoginMutation, useGetProfileQuery } = authApi;
+export const {
+  useSignUpWithPasswordMutation,
+  useVerifyAccountOTPMutation,
+  useLoginWithPasswordMutation,
+  useSendOtpMutation,
+  useResetPasswordWithOTPMutation,
+  useLogoutServerMutation,
+  useGetProfileQuery,
+  useGetUserBookingsQuery,
+} = authApi;

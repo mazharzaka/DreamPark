@@ -1,21 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { InputField } from "./InputField";
-import { PasswordInput } from "./PasswordInput";
-import { SocialLogin } from "./SocialLogin";
-import { useDispatch } from "react-redux";
-import { useLoginWithPasswordMutation } from "../../../lib/features/auth/authApi";
-import { setCredentials } from "../../../lib/features/auth/authSlice";
 import { useForm } from "react-hook-form";
+import { useSendOtpMutation } from "@/src/lib/features/auth/authApi";
+import { OtpVerification } from "./OtpVerification";
 
-export const LoginForm = () => {
+export const ForgotPassword = () => {
   const t = useTranslations("Auth");
   const router = useRouter();
-  const dispatch = useDispatch();
-  const [login] = useLoginWithPasswordMutation();
+  const [sendOtp] = useSendOtpMutation();
+  const [showOtp, setShowOtp] = useState(false);
+  const [requestedEmail, setRequestedEmail] = useState("");
 
   const {
     register,
@@ -25,34 +23,30 @@ export const LoginForm = () => {
   } = useForm({
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  const onSubmit = (data: any) => {
-    login(data)
-      .unwrap()
-      .then((result) => {
-        if (result.success && result.token) {
-          dispatch(setCredentials({ token: result.token, user: result.data.user }));
-          router.push("/");
-        }
-      })
-      .catch((err) => {
-        console.error("Authentication failed:", err);
-        const errMsg = typeof err?.data?.message === 'string'
+  const onSubmit = async (data: any) => {
+    try {
+      await sendOtp({ email: data.email, purpose: "password_reset" }).unwrap();
+      setRequestedEmail(data.email);
+      setShowOtp(true);
+    } catch (err: any) {
+      console.error("Failed to send OTP:", err);
+      const errMsg =
+        typeof err?.data?.message === "string"
           ? err.data.message
-          : typeof err?.data?.error === 'string'
-            ? err.data.error
-            : typeof err?.error === 'string'
-              ? err.error
-              : "Authentication failed";
+          : typeof err?.data?.error === "string"
+          ? err.data.error
+          : typeof err?.error === "string"
+          ? err.error
+          : "Failed to process request";
 
-        setError("root.serverError", {
-          type: "manual",
-          message: errMsg,
-        });
+      setError("root.serverError", {
+        type: "manual",
+        message: errMsg,
       });
+    }
   };
 
   const getErrorKey = (errorMsg: string | undefined) => {
@@ -63,13 +57,36 @@ export const LoginForm = () => {
     return errorMsg;
   };
 
+  if (showOtp) {
+    // For password reset, OtpVerification needs to handle the redirect differently
+    // Actually, we can reuse it if we modify it to accept a custom purpose and onSuccess callback.
+    // I will use it with purpose="password_reset".
+    return (
+      <div className="w-full">
+        <OtpVerification
+          email={requestedEmail}
+          purpose="password_reset"
+          onSuccess={(data) => {
+            if (data?.resetToken) {
+              router.push(`/reset-password?token=${data.resetToken}`);
+            } else {
+              router.push("/login");
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-primary font-cairo mb-3">
-          {t("login.title")}
+          {t("forgotPassword.title") || "Forgot Password"}
         </h1>
-        <p className="text-secondary/70">{t("login.subtitle")}</p>
+        <p className="text-secondary/70">
+          {t("forgotPassword.subtitle") || "Enter your email to receive a reset code."}
+        </p>
       </div>
 
       {errors.root?.serverError?.message && (
@@ -98,35 +115,19 @@ export const LoginForm = () => {
           })}
         />
 
-        <PasswordInput
-          labelKey="Auth.fields.password"
-          placeholderKey="Auth.fields.passwordPlaceholder"
-          errorKey={getErrorKey(errors.password?.message)}
-          dir="ltr"
-          {...register("password", { required: "errors.required" })}
-        />
-        
-        <div className="flex justify-end mt-[-10px]">
-          <Link href="/forgot-password" className="text-sm font-semibold text-tertiary hover:underline">
-            {t("login.forgotPassword") || "Forgot Password?"}
-          </Link>
-        </div>
-
         <button
           type="submit"
           disabled={isSubmitting}
           className="w-full bg-primary text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 mt-2 disabled:opacity-70 disabled:hover:translate-y-0"
         >
-          {isSubmitting ? "..." : t("login.submit")}
+          {isSubmitting ? "..." : t("forgotPassword.submit") || "Send Reset Code"}
         </button>
       </form>
 
-      <SocialLogin />
-
       <p className="text-center text-secondary/70 text-sm mt-8">
-        {t("login.noAccount")}{" "}
-        <Link href="/signup" className="text-primary font-bold hover:underline">
-          {t("login.createAccount")}
+        {t("forgotPassword.remembered") || "Remember your password?"}{" "}
+        <Link href="/login" className="text-primary font-bold hover:underline">
+          {t("signup.signIn")}
         </Link>
       </p>
     </div>

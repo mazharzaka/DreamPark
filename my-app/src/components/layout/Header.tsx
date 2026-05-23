@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, usePathname } from "@/src/i18n/routing";
+import { Link, usePathname, useRouter } from "@/src/i18n/routing";
+import { useAppSelector } from "@/src/lib/hooks";
+import { useLogoutServerMutation } from "@/src/lib/features/auth/authApi";
 import { EditorialButton } from "../ui/EditorialButton";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -14,11 +16,15 @@ export function Header() {
   const locale = useLocale();
   const pathname = usePathname();
 
-  const [token, setToken] = useState<string | null>(null);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [logout] = useLogoutServerMutation();
+  const router = useRouter();
 
-  useEffect(() => {
-    setToken(localStorage.getItem("token"));
-  }, []);
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await logout().unwrap();
+    router.push("/login");
+  };
 
   const navLinks = [
     {
@@ -45,18 +51,30 @@ export function Header() {
       active: pathname === "/map",
       visible: true,
     },
-    // { label: t("contact"), href: "/contact", active: pathname === "/contact" },
     {
-      label: token ? t("logout") : t("signup"),
-      href: token ? "/logout" : "/signup",
+      label: t("profile") || "Profile",
+      href: "/profile",
+      active: pathname === "/profile",
+      visible: isAuthenticated,
+    },
+    {
+      label: t("signup"),
+      href: "/signup",
       active: pathname === "/signup",
-      visible: true,
+      visible: !isAuthenticated,
+    },
+    {
+      label: t("logout"),
+      href: "#",
+      active: false,
+      visible: isAuthenticated,
+      onClick: handleLogout,
     },
     {
       label: t("login"),
       href: "/login",
       active: pathname === "/login",
-      visible: !token,
+      visible: !isAuthenticated,
     },
   ];
 
@@ -82,6 +100,7 @@ export function Header() {
               <Link
                 key={link.label}
                 href={link.href as any}
+                onClick={link.onClick}
                 className={`relative text-sm font-bold tracking-wide transition-colors hover:text-primary ${
                   link.active ? "text-primary" : "text-on-surface/70"
                 }`}

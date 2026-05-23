@@ -172,7 +172,13 @@ export const getUserBookings = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "User not found." });
     }
 
-    const bookings = await Booking.find({ userId })
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const bookings = await Booking.find({ 
+      userId,
+      targetDate: { $gte: thirtyDaysAgo }
+    })
       .populate('ticketTypeId')
       .sort({ targetDate: -1 });
 
