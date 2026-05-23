@@ -8,7 +8,7 @@ export default function Merch() {
     const locale = useLocale();
     const isRtl = locale === 'ar';
     return (
-        <main className="min-h-screen bg-background pt-30 pb-16">
+        <section className="bg-background py-16">
             <div className="container mx-auto px-4 md:px-8">
                 <div className="mb-12">
                     <h2 className={`text-5xl md:text-6xl font-black text-primary tracking-tight mb-6 antialiased ${isRtl ? 'font-cairo' : 'font-sans'}`}>
@@ -22,6 +22,6 @@ export default function Merch() {
                 </div>
                 <GamesGrid products={mockMerch} />
             </div>
-        </main>
+        </section>
     );
 }

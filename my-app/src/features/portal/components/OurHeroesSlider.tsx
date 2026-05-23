@@ -64,14 +64,14 @@ export function OurHeroesSlider({ mockHeroes, title = "Portal.OurHeroes" }: { mo
             className="rounded-[2.5rem] overflow-hidden !py-2"
           >
             {mockHeroes?.map((slide) => (
-              <SwiperSlide key={slide.id}>
+              <SwiperSlide key={slide.id || slide._id}>
                 <div className="relative w-full h-[350px] md:h-[450px] lg:h-[550px] rounded-[2.5rem] overflow-hidden bg-surface group shadow-xl shadow-black/5">
                   <Image
-                    src={slide.image}
+                    src={slide.image || slide.imageUrl || ""}
                     alt={slide.title}
                     fill
                     className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                    priority={slide.id === 'hero-1'}
+                    priority={slide.id === 'hero-1' || slide._id === 'hero-1'}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>

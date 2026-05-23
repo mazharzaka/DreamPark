@@ -6,12 +6,17 @@ export interface HeroAction {
 
 export interface HeroSlide {
   title: string;
-  subtitle: string;
+  subtitle?: string;
+  titleAccent?: string;
+  tagline?: string;
   description: string;
-  ctaText: string;
-  ctaLink: string;
-  _id: string;
-  imageUrl: string;
+  ctaText?: string;
+  ctaLink?: string;
+  _id?: string;
+  id?: string;
+  imageUrl?: string;
+  image?: string;
+  buttons?: any[];
 }
 export interface AttractionTag {
   label: string;
@@ -43,6 +48,9 @@ export interface Attraction {
   category?: string;
   bookPass?: boolean;
   icon?: string; // name of icon like 'Rocket', 'Droplet'
+  description?: string;
+  riskLevel?: string;
+  ticketPrice?: string | number;
   layout: {
     colSpan: number;
     rowSpan: number;

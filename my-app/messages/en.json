@@ -1,9 +1,14 @@
 {
   "Navigation": {
     "parkInfo": "Park Info",
-    "attractions": "Attractions",
-    "dining": "Dining",
-    "map": "Map"
+    "Games": "Games",
+    "tickets": "Tickets",
+    "map": "Map",
+    "login": "Login",
+    "signup": "Signup",
+    "logout": "Logout",
+    "home": "Home",
+    "profile": "Profile"
   },
   "Actions": {
     "bookNow": "Book Now"
@@ -66,6 +71,14 @@
     "step03": "Add-ons 03",
     "mostPopular": "Most Popular",
     "person": "person",
+    "cta": "Select Pass",
+    "egp": "EGP",
+    "heading": "Ticket <span>Sets</span>",
+    "title": "Book Your <span>Ticket</span>",
+    "validity": "Valid for X days from purchase date",
+    "viewAll": "View All",
+    "description": "Discover our unique experiences and enjoy your time at Dream Park.",
+    "subtitle": "Discover our unique experiences and enjoy your time at Dream Park",
     "tiers": {
       "diamond": {
         "name": "Diamond",
@@ -117,6 +130,8 @@
     "pageTitle": "All <span>Games</span>",
     "pageSubtitle": "Discover all the amazing games and attractions DreamPark has to offer.",
     "noGamesFound": "No games found for this category.",
+    "loadingGames": "Loading games...",
+    "errorLoadingGames": "Error loading games. Please try again.",
     "Categories": {
       "all": "All Games",
       "thrill": "Thrill Rides",
@@ -188,12 +203,20 @@
     }
   },
   "Auth": {
+    "layout": {
+      "dream": "Dream",
+      "park": "Park",
+      "whereDreams": "Where Dreams",
+      "comeTrue": "Come True",
+      "description": "Join millions of visitors who have experienced the magic of DreamPark."
+    },
     "login": {
       "title": "Welcome Back",
       "subtitle": "Sign in to your account to continue your magical journey.",
       "submit": "Sign In",
       "noAccount": "Don't have an account?",
-      "createAccount": "Create an account"
+      "createAccount": "Create an account",
+      "forgotPassword": "Forgot your password?"
     },
     "signup": {
       "title": "Create Account",
@@ -202,13 +225,34 @@
       "hasAccount": "Already have an account?",
       "signIn": "Sign In"
     },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "subtitle": "No worries, we'll send you reset instructions.",
+      "submit": "Send Reset Code",
+      "remembered": "Remember your password?"
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Please enter your new password below.",
+      "submit": "Reset Password"
+    },
     "fields": {
       "fullName": "Full Name",
       "fullNamePlaceholder": "John Doe",
       "email": "Email Address",
       "emailPlaceholder": "you@example.com",
       "password": "Password",
-      "passwordPlaceholder": "••••••••"
+      "confirmPassword": "Confirm Password",
+      "passwordPlaceholder": "••••••••",
+      "address": "Address",
+      "addressPlaceholder": "123 Main St",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "123456789",
+      "countryCode": "Country Code",
+      "countryCodePlaceholder": "+1",
+      "dateOfBirth": "Date of Birth",
+      "dateOfBirthPlaceholder": "MM/DD/YYYY",
+      "gender": "Gender"
     },
     "social": {
       "or": "Or continue with",
@@ -221,7 +265,68 @@
       "passwordLength": "Password must be at least 8 characters",
       "passwordUppercase": "Must contain at least one uppercase letter",
       "passwordNumber": "Must contain at least one number",
-      "passwordSpecial": "Must contain at least one special character"
-    }
+      "passwordSpecial": "Must contain at least one special character",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "verifyEmail": "Verify Your Email",
+    "otpSentTo": "We've sent a 6-digit code to {email}",
+    "invalidOtpLength": "Please enter all 6 digits",
+    "verificationFailed": "Invalid or expired OTP code",
+    "verifying": "Verifying...",
+    "verify": "Verify Code",
+    "didNotReceive": "Didn't receive the code?",
+    "resend": "Resend Code",
+    "resendIn": "Resend in {time}",
+    "resendFailed": "Failed to resend code"
+  },
+  "booking": {
+    "title": "Curated Ticket Booking",
+    "individual_tabs": "Individual Tickets",
+    "group_tabs": "Group Packages",
+    "selected_ticket": "Currently Selected Ticket",
+    "choose_date": "Choose your magical day of visit",
+    "personal_info": "Personal Info & Verification",
+    "phone_placeholder": "Mobile number to confirm cash booking",
+    "cta_next": "Confirm & Proceed",
+    "cta_book": "Confirm & Book Your Magical Ticket",
+    "step_select": "Select Pass",
+    "step_customize": "Customize",
+    "currently_configuring": "Currently Configuring Pass",
+    "category": "Category",
+    "individual": "Individual",
+    "group": "Group",
+    "quantity_prompt": "How many tickets would you like?",
+    "phone_prompt": "Contact Phone Number (SMS confirmation)",
+    "price": "Price",
+    "egp": "EGP",
+    "back": "Back",
+    "confirm_booking": "Confirm Booking",
+    "booking_summary": "Booking Summary",
+    "base_price": "Base Price:",
+    "promo_discount": "Promo Discount:",
+    "target_date": "Target Date:",
+    "not_set": "Not set",
+    "total_due": "Total Due",
+    "cash_note": "⚠️ Please note that payment is processed in cash upon arrival at the marketing desks using your generated Magic Pass QR code.",
+    "pass_issued": "Magic Pass Issued!",
+    "pass_instructions": "Show this code at the gate to complete cash payment & enter.",
+    "active_pass": "Active Magic Pass",
+    "qty": "Qty",
+    "visit": "Visit",
+    "manual_id": "Manual Pass Verification ID",
+    "due_cash": "Due in Cash",
+    "book_another": "Book Another Pass",
+    "print_save": "Print / Save Pass",
+    "login_required": "Authentication Required",
+    "login_subtitle": "Log in with your email to link and issue your Magic Pass",
+    "email": "Email Address",
+    "password": "Password",
+    "sign_in": "Sign In & Continue",
+    "cancel_close": "Cancel & Close"
+  },
+  "pass": {
+    "instant_ticketing": "Instant Ticketing & Pass Issuance",
+    "reserve_title": "Reserve Your Dream Magic Pass",
+    "reserve_subtitle": "Select your preferred pass tier, customize the visit date, and instantly generate your scannable Magic Pass for quick park access."
   }
 }

@@ -5,6 +5,7 @@ import {
   addAttraction,
   updateAttraction,
   deleteAttraction,
+  getAttractionsByLangAndPage,
 } from '../controllers/attractionController.js';
 
 import { protect, restrictTo } from '../middlewares/authMiddleware.js';
@@ -35,6 +36,60 @@ const router = Router();
  *                     type: object
  */
 router.get('/', getAllAttractions);
+
+/**
+ * @swagger
+ * /api/attractions/{lang}/{pageKey}:
+ *   get:
+ *     summary: Get localized attractions by pageKey
+ *     description: Fetch localized attractions with pagination and sorting.
+ *     tags: [Attractions]
+ *     parameters:
+ *       - in: path
+ *         name: lang
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [ar, en]
+ *         description: Language locale
+ *       - in: path
+ *         name: pageKey
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The key identifying the page (e.g., games)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *         description: Field to sort by
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Sort direction
+ *     responses:
+ *       200:
+ *         description: A list of localized attractions
+ *       400:
+ *         description: Invalid language
+ */
+router.get('/:lang/:pageKey', getAttractionsByLangAndPage);
 
 /**
  * @swagger
@@ -78,12 +133,42 @@ router.use(restrictTo('admin'));
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               pageKey:
  *                 type: string
- *               description:
+ *               name_en:
+ *                 type: string
+ *               name_ar:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               subtitle:
  *                 type: string
  *               category:
  *                 type: string
+ *               description_en:
+ *                 type: string
+ *               description_ar:
+ *                 type: string
+ *               minHeight:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [Operating, Maintenance, Closed]
+ *               waitingTime:
+ *                 type: string
+ *               isFastTrack:
+ *                 type: boolean
+ *               bookPass:
+ *                 type: boolean
+ *               icon:
+ *                 type: string
+ *               layout.colSpan:
+ *                 type: number
+ *               layout.rowSpan:
+ *                 type: number
+ *               layout.customStyle:
+ *                 type: string
+ *                 enum: [crimson, sky, nebula, amazon, phoenix, midas]
  *               image:
  *                 type: string
  *                 format: binary
@@ -120,12 +205,42 @@ router.post('/', upload.single('image'), addAttraction);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               pageKey:
  *                 type: string
- *               description:
+ *               name_en:
+ *                 type: string
+ *               name_ar:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               subtitle:
  *                 type: string
  *               category:
  *                 type: string
+ *               description_en:
+ *                 type: string
+ *               description_ar:
+ *                 type: string
+ *               minHeight:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [Operating, Maintenance, Closed]
+ *               waitingTime:
+ *                 type: string
+ *               isFastTrack:
+ *                 type: boolean
+ *               bookPass:
+ *                 type: boolean
+ *               icon:
+ *                 type: string
+ *               layout.colSpan:
+ *                 type: number
+ *               layout.rowSpan:
+ *                 type: number
+ *               layout.customStyle:
+ *                 type: string
+ *                 enum: [crimson, sky, nebula, amazon, phoenix, midas]
  *               image:
  *                 type: string
  *                 format: binary

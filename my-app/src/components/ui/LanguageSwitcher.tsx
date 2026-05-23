@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from 'next-intl';
-import { useRouter } from '@/src/i18n/routing';
+import { useRouter, usePathname } from '@/src/i18n/routing';
 import { motion } from 'framer-motion';
 import { Globe } from 'lucide-react';
 import Image from 'next/image';
@@ -9,10 +9,11 @@ import Image from 'next/image';
 export default function LanguageSwitcher() {
     const locale = useLocale();
     const router = useRouter();
+    const pathname = usePathname();
 
     const toggleLanguage = () => {
         const newLocale = locale === 'en' ? 'ar' : 'en';
-        router.push('/', { locale: newLocale });
+        router.replace(pathname, { locale: newLocale });
     }
 
     return (

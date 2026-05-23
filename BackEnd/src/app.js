@@ -1,11 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
 import heroRoutes from './routes/heroRoutes.js';
 import attractionRoutes from './routes/attractionRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import ticketingRoutes from './routes/ticketingRoutes.js';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
@@ -20,13 +22,18 @@ const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
 // ── Global Middlewares ─────────────────────────────────────────────────────────
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000' }));
+app.use(cors({ 
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
 app.use('/api/hero', heroRoutes);
 app.use('/api/attractions', attractionRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/tickets', ticketingRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 

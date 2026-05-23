@@ -2,16 +2,50 @@ import mongoose from 'mongoose';
 
 const attractionSchema = new mongoose.Schema(
   {
-    name: {
+    pageKey: {
       type: String,
-      required: [true, 'Attraction name is required'],
+      required: [true, 'Page key is required'],
+      trim: true,
+    },
+    name_en: {
+      type: String,
+      required: [true, 'English attraction name is required'],
+      trim: true,
+    },
+    name_ar: {
+      type: String,
+      required: [true, 'Arabic attraction name is required'],
+      trim: true,
+    },
+    name: { // Deprecated: Use name_en / name_ar
+      type: String,
+      trim: true,
+    },
+    title: { // Support title explicitly if name is different
+      type: String,
+      trim: true,
+    },
+    subtitle: {
+      type: String,
       trim: true,
     },
     category: {
       type: String,
       trim: true,
     },
-    description: {
+    description_en: {
+      type: String,
+      trim: true,
+    },
+    description_ar: {
+      type: String,
+      trim: true,
+    },
+    description: { // Deprecated: Use description_en / description_ar
+      type: String,
+      trim: true,
+    },
+    image: { // Single image for background
       type: String,
       trim: true,
     },
@@ -20,8 +54,7 @@ const attractionSchema = new mongoose.Schema(
       default: [],
     },
     minHeight: {
-      type: Number,
-      min: [0, 'Minimum height cannot be negative'],
+      type: String, // "Min: 140cm"
     },
     status: {
       type: String,
@@ -32,12 +65,47 @@ const attractionSchema = new mongoose.Schema(
       default: 'Operating',
     },
     waitingTime: {
-      type: Number,
-      min: [0, 'Waiting time cannot be negative'],
+      type: String, // "45 MIN"
     },
     isFastTrack: {
       type: Boolean,
       default: false,
+    },
+    bookPass: {
+      type: Boolean,
+      default: false,
+    },
+    icon: {
+      type: String,
+    },
+    tags: {
+      rules: [
+        {
+          id: Number,
+          type: {
+            type: String,
+          },
+          text: String,
+        }
+      ],
+      badges: [
+        {
+          label: String,
+          variant: {
+            type: String,
+            enum: ['white', 'dark', 'outline', 'green'],
+            default: 'white',
+          }
+        }
+      ]
+    },
+    layout: {
+      colSpan: { type: Number, default: 1 },
+      rowSpan: { type: Number, default: 1 },
+      customStyle: {
+        type: String,
+        enum: ['crimson', 'sky', 'nebula', 'amazon', 'phoenix', 'midas'],
+      },
     },
   },
   {

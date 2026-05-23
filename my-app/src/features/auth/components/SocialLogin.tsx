@@ -6,10 +6,13 @@ import { useTranslations } from 'next-intl';
 export const SocialLogin = () => {
   const t = useTranslations('Auth.social');
 
-  const handleMockLogin = (provider: string) => {
-    // Mock functionality for the UI implementation phase
-    console.log(`Mocking login with ${provider}...`);
-    alert(`Mock Login via ${provider}`);
+  const handleSocialLogin = (provider: string) => {
+    if (provider === 'Google') {
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/google`;
+    } else {
+      // Mock for Apple
+      alert(`Mock Login via ${provider}. Apple sign-in coming soon!`);
+    }
   };
 
   return (
@@ -25,7 +28,7 @@ export const SocialLogin = () => {
       <div className="flex flex-col sm:flex-row gap-4">
         <button
           type="button"
-          onClick={() => handleMockLogin('Google')}
+          onClick={() => handleSocialLogin('Google')}
           className="flex-1 flex items-center justify-center gap-3 px-4 py-3 border border-secondary/20 rounded-xl hover:bg-surface/50 transition-colors text-sm font-semibold text-secondary"
         >
           {/* Mock Google Icon using an SVG */}
@@ -52,8 +55,8 @@ export const SocialLogin = () => {
         
         <button
           type="button"
-          onClick={() => handleMockLogin('Apple')}
-          className="flex-1 flex items-center justify-center gap-3 px-4 py-3 border border-secondary/20 rounded-xl hover:bg-surface/50 transition-colors text-sm font-semibold text-secondary"
+          onClick={() => handleSocialLogin('Apple')}
+          className="flex-1 flex items-center justify-center gap-3 px-4 py-3 border border-secondary/20 rounded-xl hover:bg-surface/50 transition-colors text-sm font-semibold text-secondary opacity-50 cursor-not-allowed"
         >
           {/* Mock Apple Icon using an SVG */}
           <svg className="w-5 h-5" viewBox="0 0 24 24">

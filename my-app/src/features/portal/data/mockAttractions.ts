@@ -101,7 +101,7 @@ export const MOCK_TICKETSETS: ticketsetType[] = [
     },
   },
   {
-    id: "TopSpin",
+    id: "TopSpin2",
     title: "TopSpin",
     image: "/ticketsets/TicketSets3.jpg",
     layout: {
