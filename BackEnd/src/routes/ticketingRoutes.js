@@ -6,6 +6,7 @@ import {
   updateTicketPrice,
   getUserBookings,
   addTicketType,
+  changeBookingDate,
 } from '../controllers/ticketingController.js';
 import { protect, restrictTo } from '../middlewares/authMiddleware.js';
 
@@ -228,5 +229,46 @@ router.patch('/types/price', protect, restrictTo('ADMIN'), updateTicketPrice);
  *         description: Ticket type not found
  */
 router.post('/types', protect, restrictTo('ADMIN'), addTicketType);
+
+/**
+ * @swagger
+ * /api/tickets/bookings/{id}/change-date:
+ *   patch:
+ *     summary: Change the visit date for a booking
+ *     description: Authenticated users can modify the visit date of their active upcoming bookings.
+ *     tags: [Ticketing]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The booking MongoDB ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - visitDate
+ *             properties:
+ *               visitDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The new future visit date
+ *     responses:
+ *       200:
+ *         description: Date updated successfully
+ *       400:
+ *         description: Invalid future date or booking is not in modifiable state
+ *       403:
+ *         description: Forbidden - not the booking owner
+ *       404:
+ *         description: Booking not found
+ */
+router.patch('/bookings/:id/change-date', protect, changeBookingDate);
 
 export default router;

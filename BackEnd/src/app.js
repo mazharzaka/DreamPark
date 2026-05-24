@@ -34,6 +34,7 @@ app.use('/api/hero', heroRoutes);
 app.use('/api/attractions', attractionRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketingRoutes);
+app.use('/api/v1', ticketingRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 

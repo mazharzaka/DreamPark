@@ -35,6 +35,7 @@ import {
   setGeneratedPass,
   resetBookingFlow,
 } from "@/src/lib/features/booking/bookingSlice";
+import { setCredentials } from "@/src/lib/features/auth/authSlice";
 
 type BookingFormData = {
   targetDate: string;
@@ -121,7 +122,20 @@ export default function BookingFlow() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedToken = localStorage.getItem("token");
-      setToken(storedToken);
+      if (storedToken === "undefined") {
+        localStorage.removeItem("token");
+        setToken(null);
+      } else if (storedToken) {
+        setToken(storedToken);
+        try {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            dispatch(setCredentials({ token: storedToken, user: JSON.parse(storedUser) }));
+          }
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
     }
   }, []);
 
@@ -263,6 +277,7 @@ export default function BookingFlow() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
         setToken(data.token);
+        dispatch(setCredentials({ token: data.token, user: data.data.user }));
         setShowLoginModal(false);
 
         resetLogin();

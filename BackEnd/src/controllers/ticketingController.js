@@ -172,12 +172,8 @@ export const getUserBookings = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "User not found." });
     }
 
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
     const bookings = await Booking.find({ 
-      userId,
-      targetDate: { $gte: thirtyDaysAgo }
+      userId
     })
       .populate('ticketTypeId')
       .sort({ targetDate: -1 });
@@ -190,6 +186,52 @@ export const getUserBookings = async (req, res, next) => {
     });
 
     res.status(200).json({ success: true, data: formattedBookings });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changeBookingDate = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { visitDate } = req.body;
+
+    if (!visitDate) {
+      return res.status(400).json({ success: false, error: "New visit date is required." });
+    }
+
+    const dateObj = new Date(visitDate);
+    if (isNaN(dateObj.getTime()) || dateObj < new Date(new Date().setHours(0, 0, 0, 0))) {
+      return res.status(400).json({ success: false, error: "New visit date must be a valid future date." });
+    }
+
+    const booking = await Booking.findById(id);
+    if (!booking) {
+      return res.status(404).json({ success: false, error: "Booking not found." });
+    }
+
+    // Verify ownership
+    if (booking.userId.toString() !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, error: "You are not authorized to modify this booking." });
+    }
+
+    // Verify booking is modifyable (only upcoming/active bookings: PENDING_PAYMENT or PAID)
+    if (booking.status !== 'PENDING_PAYMENT' && booking.status !== 'PAID') {
+      return res.status(400).json({ success: false, error: "Only active or pending bookings can have their date changed." });
+    }
+
+    // Update targetDate
+    booking.targetDate = dateObj;
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        bookingId: booking._id,
+        targetDate: booking.targetDate,
+        message: "Visit date updated successfully."
+      }
+    });
   } catch (error) {
     next(error);
   }

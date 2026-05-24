@@ -123,6 +123,14 @@ export const authApi = createApi({
       }),
       providesTags: ['UserBookings'],
     }),
+    changeBookingDate: builder.mutation<any, { bookingId: string; visitDate: string }>({
+      query: ({ bookingId, visitDate }) => ({
+        url: `/v1/bookings/${bookingId}/change-date`,
+        method: 'PATCH',
+        body: { visitDate },
+      }),
+      invalidatesTags: ['UserBookings'],
+    }),
   }),
 });
 
@@ -135,4 +143,5 @@ export const {
   useLogoutServerMutation,
   useGetProfileQuery,
   useGetUserBookingsQuery,
+  useChangeBookingDateMutation,
 } = authApi;

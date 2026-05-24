@@ -9,7 +9,6 @@ export default function MagicPassPage() {
   const locale = useLocale();
   const isAr = locale === "ar";
   const t = useTranslations("pass");
-
   return (
     <div 
       className="min-h-screen bg-[#f6f6f6] p-4 md:p-8 rtl mt-24 mb-12 flex flex-col items-center" 
@@ -21,7 +20,7 @@ export default function MagicPassPage() {
           initial={{ opacity: 0, y: -20 }} 
           animate={{ opacity: 1, y: 0 }} 
           transition={{ duration: 0.5 }}
-          className="mb-10 text-center md:text-right rtl:text-right"
+          className="mb-10 "
         >
           <span className="text-[#755700] text-xs uppercase tracking-widest font-black bg-[#755700]/5 px-5 py-2.5 rounded-full inline-block mb-3">
             {t("instant_ticketing")}

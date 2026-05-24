@@ -27,7 +27,7 @@ export interface Booking {
   targetDate: string
   totalPrice: number
   qrCodeId: string
-  status: 'PENDING_PAYMENT' | 'PAID'
+  status: 'PENDING_PAYMENT' | 'PAID' | 'USED' | 'EXPIRED' | 'CANCELLED'
   quantity: number
   createdAt: string
 }
@@ -94,10 +94,10 @@ export const bookingsApi = createApi({
     // (or fallback to localStorage for SSR-safe hydration)
     prepareHeaders: (headers, { getState }) => {
       // Try Redux store first (set by authSlice after login)
-      const token = (getState() as RootState & { auth?: { token?: string } }).auth?.token
+      const token = (getState() as RootState & { auth?: { accessToken?: string } }).auth?.accessToken
         ?? (typeof window !== 'undefined' ? localStorage.getItem('token') : null)
 
-      if (token) {
+      if (token && token !== "undefined") {
         headers.set('Authorization', `Bearer ${token}`)
       }
 

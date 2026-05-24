@@ -29,7 +29,7 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['PENDING_PAYMENT', 'PAID'],
+      enum: ['PENDING_PAYMENT', 'PAID', 'USED', 'EXPIRED', 'CANCELLED'],
       default: 'PENDING_PAYMENT',
     },
     quantity: {
