@@ -9,7 +9,7 @@ import { QrCode, Download, Calendar, X, Info, Check } from 'lucide-react';
 
 interface BookingQrCardProps {
   booking: {
-    _id: string;
+    id: string;
     qrCodeId: string;
     ticketType?: {
       name: string;
@@ -64,12 +64,12 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const canvas = document.getElementById(`qr-canvas-${booking._id}`) as HTMLCanvasElement;
+    const canvas = document.getElementById(`qr-canvas-${booking.id}`) as HTMLCanvasElement;
     if (canvas) {
       const pngUrl = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
       downloadLink.href = pngUrl;
-      downloadLink.download = `DreamPark-Pass-${booking._id.substring(0, 8).toUpperCase()}.png`;
+      downloadLink.download = `DreamPark-Pass-${booking.id.substring(0, 8).toUpperCase()}.png`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -127,7 +127,7 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
                   {isRtl ? 'الرمز:' : 'ID:'}
                 </span>
                 <span className="font-mono text-xs text-on-surface/60 font-semibold">
-                  {booking._id.substring(0, 8).toUpperCase()}
+                  {booking.id.substring(0, 8).toUpperCase()}
                 </span>
               </div>
             </div>
@@ -146,7 +146,7 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
             {/* Change Date secondary action */}
             {showChangeDateButton && onChangeDate && (
               <button 
-                onClick={(e) => { e.stopPropagation(); onChangeDate(booking._id); }}
+                onClick={(e) => { e.stopPropagation(); onChangeDate(booking.id); }}
                 className="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low hover:bg-outline-variant/20 text-secondary text-xs font-bold uppercase tracking-widest rounded-xl transition-all border border-outline-variant/10 shadow-sm"
               >
                 <Calendar size={14} className="text-secondary" />
@@ -160,7 +160,7 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
         <div className="bg-surface-container-low p-8 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-outline-variant/10 min-w-[200px] relative z-20">
           <div className="bg-white p-3 rounded-2xl shadow-sm border border-outline-variant/10 mb-3 group-hover:scale-105 transition-transform duration-300">
             <QRCodeCanvas 
-              value={booking.qrCodeId || booking._id} 
+              value={booking.qrCodeId || booking.id} 
               size={110}
               level="H"
               includeMargin={false}
@@ -210,8 +210,8 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
               <div className="bg-surface-container-low p-6 rounded-3xl flex flex-col items-center justify-center mb-6">
                 <div className="bg-white p-4 rounded-[20px] shadow-sm border border-outline-variant/10 mb-3">
                   <QRCodeCanvas 
-                    id={`qr-canvas-${booking._id}`}
-                    value={booking.qrCodeId || booking._id} 
+                    id={`qr-canvas-${booking.id}`}
+                    value={booking.qrCodeId || booking.id} 
                     size={200}
                     level="H"
                     includeMargin={false}
@@ -226,10 +226,10 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between items-center text-sm border-b border-surface-container-low pb-2">
                   <span className="text-on-surface/50 font-bold uppercase tracking-wider text-xs">
-                    {t('ticket_id')}
+                    {t('ticketid')}
                   </span>
                   <span className="font-bold font-mono">
-                    {booking._id.toUpperCase()}
+                    {booking.id.toUpperCase()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm border-b border-surface-container-low pb-2">

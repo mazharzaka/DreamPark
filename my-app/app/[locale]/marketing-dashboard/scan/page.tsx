@@ -40,7 +40,8 @@ export default function AgentScanPage() {
       const res = await verifyAndConfirmPayment({ qrCodeId: decodedText }).unwrap();
       setFeedback({ type: "success", message: "تم تأكيد الدفع بنجاح", details: res.data });
     } catch (err: any) {
-      setFeedback({ type: "error", message: err?.data?.error ?? "حدث خطأ" });
+      const errMsg = err?.data?.message || err?.data?.error?.message || (typeof err?.data?.error === 'string' ? err?.data?.error : null) || "حدث خطأ";
+      setFeedback({ type: "error", message: errMsg });
     }
   };
 

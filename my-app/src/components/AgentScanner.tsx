@@ -103,7 +103,7 @@ export default function AgentScanner() {
       }
     } catch (err: any) {
       console.error("Verification error:", err);
-      const errMsg = err?.data?.error || (isAr ? "فشل التحقق من الحجز. يرجى التأكد من البيانات أو تاريخ التذكرة." : "Failed to verify pass. Ensure valid date/inputs.");
+      const errMsg = err?.data?.message || err?.data?.error?.message || (typeof err?.data?.error === 'string' ? err?.data?.error : null) || (isAr ? "فشل التحقق من الحجز. يرجى التأكد من البيانات أو تاريخ التذكرة." : "Failed to verify pass. Ensure valid date/inputs.");
       setScanError(errMsg);
     }
   };
