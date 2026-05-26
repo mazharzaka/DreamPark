@@ -202,18 +202,21 @@ function ProgressBar({ progress }: { progress: number }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 interface SplashScreenProps {
-  /** Duration in ms before the splash auto-dismisses. Default: 3000 */
+  /** Duration in ms before the splash auto-dismisses when not in manual loading mode. Default: 3000 */
   duration?: number;
   /** Called when splash exit animation completes */
   onFinished?: () => void;
   /** Current locale for bilingual tagline */
   locale?: string;
+  /** If true, stays visible and locks scroll until set to false */
+  isLoading?: boolean;
 }
 
 export default function SplashScreen({
   duration = 3000,
   onFinished,
   locale = "en",
+  isLoading,
 }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -223,23 +226,60 @@ export default function SplashScreen({
   const isAr = locale === "ar";
   const tagline = isAr ? TAGLINE_AR : TAGLINE_EN;
 
+  // Lock viewport scroll while active
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalHeight = document.body.style.height;
+    
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+    
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.height = originalHeight;
+    };
+  }, []);
+
   // Drive the progress bar
   useEffect(() => {
-    const start = Date.now();
-    intervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const pct = Math.min((elapsed / duration) * 100, 100);
-      setProgress(pct);
-      if (pct >= 100) {
-        clearInterval(intervalRef.current!);
-        setTimeout(() => setVisible(false), 300);
+    if (isLoading !== undefined) {
+      if (isLoading) {
+        // Increment progress towards 90% smoothly
+        setProgress(0);
+        let currentProgress = 0;
+        intervalRef.current = setInterval(() => {
+          if (currentProgress < 90) {
+            currentProgress += (90 - currentProgress) * 0.05 + 0.5;
+            setProgress(Math.min(currentProgress, 90));
+          }
+        }, 100);
+      } else {
+        // Set to 100% and dismiss
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        setProgress(100);
+        const timer = setTimeout(() => {
+          setVisible(false);
+        }, 400);
+        return () => clearTimeout(timer);
       }
-    }, 30);
+    } else {
+      // Automatic timer fallback
+      const start = Date.now();
+      intervalRef.current = setInterval(() => {
+        const elapsed = Date.now() - start;
+        const pct = Math.min((elapsed / duration) * 100, 100);
+        setProgress(pct);
+        if (pct >= 100) {
+          clearInterval(intervalRef.current!);
+          setTimeout(() => setVisible(false), 300);
+        }
+      }, 30);
+    }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [duration]);
+  }, [duration, isLoading]);
 
   const taglineChars = tagline.split("");
 

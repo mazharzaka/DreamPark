@@ -1,6 +1,7 @@
 import { UserProfile } from "@/src/features/auth/components/UserProfile";
 import { Header } from "@/src/components/layout/Header";
 import { getTranslations } from "next-intl/server";
+import { AuthGuard } from "@/src/features/auth/components/AuthGuard";
 
 export async function generateMetadata({
   params: { locale },
@@ -22,7 +23,9 @@ export default function ProfilePage() {
       <Header />
       
       <div className="pt-24 pb-12">
-        <UserProfile />
+        <AuthGuard>
+          <UserProfile />
+        </AuthGuard>
       </div>
 
     </main>
