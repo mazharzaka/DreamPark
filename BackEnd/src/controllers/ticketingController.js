@@ -1,6 +1,7 @@
 import TicketType from '../models/TicketType.js';
 import Booking from '../models/Booking.js';
 import User from '../models/User.js';
+import ScanAuditLog from '../models/ScanAuditLog.js';
 
 export const getTicketTypes = async (req, res, next) => {
   try {
@@ -80,7 +81,7 @@ export const createBooking = async (req, res, next) => {
 export const verifyAndConfirmPayment = async (req, res, next) => {
   try {
     const { qrCodeId, phoneNumber, bookingId } = req.body;
-
+     console.log('Verification Request Received:', { qrCodeId, phoneNumber, bookingId });
     let booking;
     // 1. Find Booking using QR Code, Phone, or Booking ID
     if (qrCodeId) {
@@ -236,3 +237,217 @@ export const changeBookingDate = async (req, res, next) => {
     next(error);
   }
 };
+
+// ── Security Enhanced Verification (T010, T011, T012) ──────────────────────────
+
+export const verifyScan = async (req, res, next) => {
+  try {
+    const { qrCodeId } = req.body;
+
+    if (!qrCodeId) {
+      return res.status(400).json({ success: false, error: 'يرجى تقديم رمز الاستجابة السريعة (QR Code)' });
+    }
+
+    // 1) Find the booking first to do preliminary check and date validation
+    const booking = await Booking.findOne({ qrCodeId }).populate('ticketTypeId userId');
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'الحجز غير موجود أو رمز التحقق غير صالح' });
+    }
+
+    // 2) Check if already paid
+    if (booking.status === 'PAID') {
+      await ScanAuditLog.create({
+        agentId: req.user.id,
+        bookingId: booking._id,
+        actionType: 'SCAN_REJECTED_DUPLICATE',
+        outcome: 'Rejected: Already paid'
+      });
+      return res.status(409).json({ success: false, error: 'تم تأكيد هذه التذكرة مسبقاً' });
+    }
+
+    // 3) Check if already in scanning state (locked by someone else or same agent previously)
+    if (booking.status === 'SCANNING') {
+      await ScanAuditLog.create({
+        agentId: req.user.id,
+        bookingId: booking._id,
+        actionType: 'SCAN_REJECTED_DUPLICATE',
+        outcome: 'Rejected: Already in SCANNING lock state'
+      });
+      return res.status(409).json({ success: false, error: 'تم مسح هذه التذكرة بالفعل من جهاز آخر' });
+    }
+
+    // 4) Date check: Server-side validation exclusively, normalized to UTC midnight
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const bookingDate = new Date(booking.targetDate);
+    bookingDate.setUTCHours(0, 0, 0, 0);
+
+    if (bookingDate.getTime() !== today.getTime()) {
+      await ScanAuditLog.create({
+        agentId: req.user.id,
+        bookingId: booking._id,
+        actionType: 'SCAN_REJECTED_DATE',
+        outcome: `Rejected: Date mismatch. Server today: ${today.toISOString()}, Ticket date: ${bookingDate.toISOString()}`
+      });
+      return res.status(400).json({ success: false, error: 'هذه التذكرة ليست لتاريخ اليوم' });
+    }
+
+    // 5) Atomic Lock: Transition from PENDING_PAYMENT to SCANNING in one atomic operation
+    const updatedBooking = await Booking.findOneAndUpdate(
+      {
+        _id: booking._id,
+        status: 'PENDING_PAYMENT'
+      },
+      {
+        $set: {
+          status: 'SCANNING',
+          lockedAt: new Date(),
+          lockedBy: req.user.id
+        }
+      },
+      { new: true }
+    ).populate('ticketTypeId userId');
+
+    if (!updatedBooking) {
+      // If no document was updated, it means another agent won the race and updated the status to SCANNING or PAID
+      await ScanAuditLog.create({
+        agentId: req.user.id,
+        bookingId: booking._id,
+        actionType: 'SCAN_REJECTED_DUPLICATE',
+        outcome: 'Rejected: Concurrency conflict during atomic update'
+      });
+      return res.status(409).json({ success: false, error: 'تم مسح هذه التذكرة بالفعل من جهاز آخر' });
+    }
+
+    // 6) Log successful scan lock
+    await ScanAuditLog.create({
+      agentId: req.user.id,
+      bookingId: updatedBooking._id,
+      actionType: 'SCAN_SUCCESS',
+      outcome: 'Successfully locked ticket in SCANNING state'
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        booking: {
+          id: updatedBooking._id,
+          visitorName: updatedBooking.userId ? updatedBooking.userId.name : 'Guest',
+          phoneNumber: updatedBooking.phoneNumber,
+          ticketTypeName: updatedBooking.ticketTypeId ? updatedBooking.ticketTypeId.name : 'Ticket',
+          quantity: updatedBooking.quantity,
+          totalPrice: updatedBooking.totalPrice,
+          status: updatedBooking.status
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyConfirm = async (req, res, next) => {
+  try {
+    const { bookingId } = req.body;
+
+    if (!bookingId) {
+      return res.status(400).json({ success: false, error: 'يرجى تقديم معرف الحجز (bookingId)' });
+    }
+
+    // Atomic update to transition from SCANNING to PAID
+    const booking = await Booking.findOneAndUpdate(
+      {
+        _id: bookingId,
+        status: 'SCANNING',
+        lockedBy: req.user.id // Enforce that the same agent who locked the scan confirms it
+      },
+      {
+        $set: {
+          status: 'PAID',
+          lockedAt: null,
+          lockedBy: null
+        }
+      },
+      { new: true }
+    );
+
+    if (!booking) {
+      return res.status(400).json({
+        success: false,
+        error: 'لا يمكن تأكيد الدفع؛ قد يكون القفل منتهي الصلاحية أو تم الاستحواذ عليه من قبل مستخدم آخر.'
+      });
+    }
+
+    // Log success
+    await ScanAuditLog.create({
+      agentId: req.user.id,
+      bookingId: booking._id,
+      actionType: 'SCAN_SUCCESS',
+      outcome: 'Payment confirmed. Booking marked as PAID.'
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        bookingId: booking._id,
+        status: booking.status
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyCancel = async (req, res, next) => {
+  try {
+    const { bookingId } = req.body;
+
+    if (!bookingId) {
+      return res.status(400).json({ success: false, error: 'يرجى تقديم معرف الحجز (bookingId)' });
+    }
+
+    // Atomic update to release the lock back to PENDING_PAYMENT
+    const booking = await Booking.findOneAndUpdate(
+      {
+        _id: bookingId,
+        status: 'SCANNING',
+        lockedBy: req.user.id // Only the agent who holds the lock can cancel it
+      },
+      {
+        $set: {
+          status: 'PENDING_PAYMENT',
+          lockedAt: null,
+          lockedBy: null
+        }
+      },
+      { new: true }
+    );
+
+    if (!booking) {
+      return res.status(400).json({
+        success: false,
+        error: 'لا يمكن إلغاء الفحص؛ قد يكون القفل قد أطلق بالفعل أو أنك لا تملك الصلاحية.'
+      });
+    }
+
+    // Log cancellation
+    await ScanAuditLog.create({
+      agentId: req.user.id,
+      bookingId: booking._id,
+      actionType: 'SCAN_CANCELLED',
+      outcome: 'Scan lock released. Booking status reverted to PENDING_PAYMENT.'
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        bookingId: booking._id,
+        status: booking.status
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

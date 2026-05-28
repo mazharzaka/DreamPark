@@ -3,10 +3,11 @@ import { SignupForm } from "@/src/features/auth/components/SignupForm";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Auth" });
   return {
     title: `${t("signup.title")} | DreamPark`,

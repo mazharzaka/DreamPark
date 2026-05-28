@@ -28,21 +28,26 @@ export const protect = catchAsync(async (req, res, next) => {
 
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
-    const userRole = req.user.role;
+    if (!req.user || !req.user.role) {
+      return next(new AppError('غير مصرح لك بالوصول إلى هذا المورد', 403));
+    }
+
+    const userRole = req.user.role.toUpperCase().trim();
     // Normalize user role
-    const normalizedUserRole = userRole === 'customer' ? 'USER' :
-                               userRole === 'staff' ? 'MARKETING_AGENT' :
-                               userRole === 'admin' ? 'ADMIN' : userRole;
+    const normalizedUserRole = userRole === 'CUSTOMER' ? 'USER' :
+                               userRole === 'STAFF' ? 'MARKETING_AGENT' :
+                               userRole === 'ADMIN' ? 'ADMIN' : userRole;
 
     // Normalize roles allowed by the endpoint
-    const normalizedAllowedRoles = roles.map(r => 
-      r === 'customer' ? 'USER' :
-      r === 'staff' ? 'MARKETING_AGENT' :
-      r === 'admin' ? 'ADMIN' : r
-    );
+    const normalizedAllowedRoles = roles.map(r => {
+      const upper = r.toUpperCase().trim();
+      return upper === 'CUSTOMER' ? 'USER' :
+             upper === 'STAFF' ? 'MARKETING_AGENT' :
+             upper === 'ADMIN' ? 'ADMIN' : upper;
+    });
 
     if (!normalizedAllowedRoles.includes(normalizedUserRole)) {
-      return next(new AppError('You do not have permission to perform this action', 403));
+      return next(new AppError('ليس لديك صلاحية للقيام بهذا الإجراء', 403));
     }
     next();
   };

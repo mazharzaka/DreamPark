@@ -8,7 +8,9 @@ export const SocialLogin = () => {
 
   const handleSocialLogin = (provider: string) => {
     if (provider === 'Google') {
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/google`;
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://smfxhlj1-5000.euw.devtunnels.ms/';
+      const base = backendUrl.endsWith('/') ? backendUrl.slice(0, -1) : backendUrl;
+      window.location.href = `${base}/api/auth/google`;
     } else {
       // Mock for Apple
       alert(`Mock Login via ${provider}. Apple sign-in coming soon!`);

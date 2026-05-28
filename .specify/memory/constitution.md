@@ -1,36 +1,22 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 1.1.0 → 2.0.0
-Bump Rationale: MAJOR — Complete rewrite expanding all sections to reflect the actual
-  codebase (pages, routes, state, i18n, roles, models, components). The previous v1.1.0
-  described intent; v2.0.0 codifies the as-built reality and extends governance to every
-  layer of the stack. Backward incompatible with v1.x because principles were renumbered
-  and scopes were materially changed.
+Version Change: 2.0.0 → 2.1.0
+Bump Rationale: MINOR — Added a new principle (XIII. Hydration Safety & Client-Side Mounting) under Part 4 (Frontend Principles) establishing strict rules for client-only mounting, localized date formatting using skeletons, and browser-extension warnings bypass.
 Added Sections:
-  - Frontend Route Map (all [locale] routes documented with their feature modules)
-  - Backend API Route Registry (all 5 route files, all methods/paths)
-  - Data Model Contracts (all 5 Mongoose models fully documented)
-  - State Management Architecture (Redux Toolkit, RTK Query slices)
-  - Internationalisation (i18n) Contract
-  - Authentication & Roles Contract
-  - Feature Folder Architecture
-  - Naming & File Conventions
-Modified Principles:
-  - "Modular Controller-Route-Model" → expanded with upload middleware constraints
-  - "Editorial Joy Design System" → expanded with Tailwind token names, RTL rules
-  - "Framer Motion for Interaction" → added layoutId / spring defaults
+  - Part 4, Principle XIII: Hydration Safety & Client-Side Mounting
+Modified Principles: None
 Removed Sections: None
 Templates Requiring Updates:
   - .specify/templates/plan-template.md   ✅ aligned (Constitution Check references remain generic)
   - .specify/templates/spec-template.md   ✅ aligned
   - .specify/templates/tasks-template.md  ✅ aligned
-Deferred TODOs: None — all placeholders resolved.
+Deferred TODOs: None
 -->
 
 # Dream Park Constitution
 
-**Version**: 2.0.0 | **Ratified**: 2026-04-24 | **Last Amended**: 2026-05-23
+**Version**: 2.1.0 | **Ratified**: 2026-04-24 | **Last Amended**: 2026-05-28
 
 ---
 
@@ -388,6 +374,15 @@ Interactive elements and scrollytelling animations MUST use `framer-motion`.
 - `animate-spin` (Tailwind) is permitted for loading spinners only.
 - Heavy 3D scenes MUST use React Three Fiber (`@react-three/fiber`,
   `@react-three/drei`) — not Canvas directly.
+
+### XIII. Hydration Safety & Client-Side Mounting
+
+All dynamic client-side views and component renders MUST prevent hydration mismatch warnings:
+
+- **Client-Side Mount Guarding**: Components using non-deterministic calculations or random generation (such as coordinate generation using `Math.random()`, dynamic initialization IDs, or current time using `Date.now()`) MUST be deferred from rendering until after client-side mount has completed. Implement a local `mounted` state toggle (`const [mounted, setMounted] = useState(false); useEffect(() => setMounted(true), [])`) to guard dynamic renders.
+- **Dynamic Localization Formatting**: Date and time formatting (such as `.toLocaleDateString`) MUST use client-side mounting toggles to bypass Node.js server vs user browser environment discrepancies. While loading/mounting is pending, an elegant Editorial-Joy-compliant loader skeleton (rounded corners, `#f0f1f1` low-tonal background, and pulse animation) MUST be rendered as placeholder, seamlessly swapping to the localized string upon client mount.
+- **Third-Party Browser Extensions**: If browser extensions dynamically inject styles, attributes, or scripts (e.g. `cz-shortcut-listen="true"`) to layout-level wrapper tags before React completes hydration, the `suppressHydrationWarning` attribute MUST be added to that element (such as the main `<body>` or `<html>` tags) to cleanly bypass hydration warnings.
+- **Strict DOM Nesting**: Layouts and pages MUST enforce strictly valid HTML5 semantic tag nesting rules (e.g. no nesting of `div` or other block-level elements inside paragraph `<p>` tags) to prevent browser-native HTML tree corrections from causing React hydration mismatch errors.
 
 ---
 

@@ -4,10 +4,11 @@ import { getTranslations } from "next-intl/server";
 import { AuthGuard } from "@/src/features/auth/components/AuthGuard";
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Navigation" });
   return {
     title: `Profile | DreamPark`,

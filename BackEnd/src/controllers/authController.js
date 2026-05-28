@@ -39,8 +39,8 @@ const createSendToken = async (user, statusCode, res) => {
   const cookieOptions = {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: true, // Enabled for cross-origin and dev tunnel security compliance
+    sameSite: 'none', // Required for decoupled cross-origin frontend-backend fetches
     path: '/api/auth'
   };
 
@@ -275,8 +275,8 @@ export const logout = catchAsync(async (req, res, next) => {
   res.cookie('refreshToken', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: true,
+    sameSite: 'none',
     path: '/api/auth'
   });
   res.status(200).json({ success: true, data: { message: 'Logged out successfully' } });
@@ -342,7 +342,7 @@ export const googleCallback = catchAsync(async (req, res, next) => {
     const { hashOtp } = await import('../utils/otpUtils.js');
     user.refreshTokenHash = await hashOtp(refreshToken);
     await user.save({ validateBeforeSave: false });
-    res.cookie('refreshToken', refreshToken, { expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/api/auth' });
+    res.cookie('refreshToken', refreshToken, { expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), httpOnly: true, secure: true, sameSite: 'none', path: '/api/auth' });
     return res.redirect(process.env.CLIENT_ORIGIN || 'http://localhost:3000/');
   }
 
@@ -373,7 +373,7 @@ export const googleCallback = catchAsync(async (req, res, next) => {
     user.refreshTokenHash = await hashOtp(refreshToken);
     await user.save({ validateBeforeSave: false });
 
-    res.cookie('refreshToken', refreshToken, { expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/api/auth' });
+    res.cookie('refreshToken', refreshToken, { expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), httpOnly: true, secure: true, sameSite: 'none', path: '/api/auth' });
     res.redirect(process.env.CLIENT_ORIGIN || 'http://localhost:3000/');
   } catch (err) {
     console.error('Google Auth Error:', err);

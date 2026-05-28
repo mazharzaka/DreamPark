@@ -29,8 +29,18 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['PENDING_PAYMENT', 'PAID', 'USED', 'EXPIRED', 'CANCELLED'],
+      enum: ['PENDING_PAYMENT', 'SCANNING', 'PAID', 'USED', 'EXPIRED', 'CANCELLED'],
       default: 'PENDING_PAYMENT',
+      uppercase: true,
+    },
+    lockedAt: {
+      type: Date,
+      default: null,
+    },
+    lockedBy: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      default: null,
     },
     quantity: {
       type: Number,

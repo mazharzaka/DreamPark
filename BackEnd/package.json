@@ -22,6 +22,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "seed": "node src/seed.js"
+    "seed": "node src/seed.js",
+    "seed:rbac": "node src/utils/seedRbacData.js"
   }
 }

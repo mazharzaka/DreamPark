@@ -12,7 +12,9 @@ export const useSessionRestore = () => {
 
     const restoreSession = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/refresh`, {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://smfxhlj1-5000.euw.devtunnels.ms/';
+        const base = backendUrl.endsWith('/') ? backendUrl.slice(0, -1) : backendUrl;
+        const response = await fetch(`${base}/api/auth/refresh`, {
           method: 'POST',
           // Important: Next.js + Fetch requires credentials: 'include' to send the httpOnly cookie
           credentials: 'include',

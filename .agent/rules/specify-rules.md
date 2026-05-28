@@ -38,9 +38,9 @@ tests/
 Node.js / ES Modules: Follow standard conventions
 
 ## Recent Changes
+- 027-secure-rbac-system: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 - 026-fix-hydration-errors: Added TypeScript 5, React 19.2.4, Node.js LTS + Next.js 16.2.3 (App Router), Framer Motion 12.38.0, next-intl 4.9.1, Redux Toolkit 2.5.0
 - 026-fix-hydration-errors: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
-- 025-profile-ticket: Added Node.js v18+, TypeScript v5+, ES Modules (Backend) + `next-intl`, `qrcode.react`, `@reduxjs/toolkit`, `framer-motion`, `date-fns`, `lucide-react`, `express`, `mongoose`
 
 
 <!-- MANUAL ADDITIONS START -->

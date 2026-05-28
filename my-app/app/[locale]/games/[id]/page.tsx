@@ -5,7 +5,7 @@ import { BookingPanel } from "@/src/features/games/components/BookingPanel";
 import { TermsAndConditions } from "@/src/features/games/components/TermsAndConditions";
 
 async function getAttraction(id: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api` : "https://smfxhlj1-5000.euw.devtunnels.ms/api";
   try {
     const res = await fetch(`${baseUrl}/attractions/${id}`, {
       cache: "no-store", // Ensure we get fresh data
@@ -27,9 +27,9 @@ async function getAttraction(id: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; id: string };
+  params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
-  const { locale, id } = params;
+  const { locale, id } = await params;
 
   const attraction = await getAttraction(id);
   if (!attraction) return { title: "Game Not Found" };

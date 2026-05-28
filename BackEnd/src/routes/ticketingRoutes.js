@@ -7,6 +7,9 @@ import {
   getUserBookings,
   addTicketType,
   changeBookingDate,
+  verifyScan,
+  verifyConfirm,
+  verifyCancel,
 } from '../controllers/ticketingController.js';
 import { protect, restrictTo } from '../middlewares/authMiddleware.js';
 
@@ -136,6 +139,86 @@ router.get('/bookings/user', protect, getUserBookings);
  *         description: Invalid token or booking not found
  */
 router.post('/verify', protect, restrictTo('MARKETING_AGENT', 'ADMIN'), verifyAndConfirmPayment);
+
+/**
+ * @swagger
+ * /api/tickets/verify/scan:
+ *   post:
+ *     summary: Atomic gate scan lock
+ *     description: Lock a pending payment ticket in SCANNING state atomically.
+ *     tags: [Ticketing]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - qrCodeId
+ *             properties:
+ *               qrCodeId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Ticket successfully locked
+ *       409:
+ *         description: Concurrency error
+ */
+router.post('/verify/scan', protect, restrictTo('MARKETING_AGENT', 'ADMIN'), verifyScan);
+
+/**
+ * @swagger
+ * /api/tickets/verify/confirm:
+ *   post:
+ *     summary: Confirm scanned ticket payment
+ *     description: Finalize the ticket scan and mark it as PAID.
+ *     tags: [Ticketing]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - bookingId
+ *             properties:
+ *               bookingId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successfully confirmed paid
+ */
+router.post('/verify/confirm', protect, restrictTo('MARKETING_AGENT', 'ADMIN'), verifyConfirm);
+
+/**
+ * @swagger
+ * /api/tickets/verify/cancel:
+ *   post:
+ *     summary: Release locked ticket scan
+ *     description: Cancel the scan and revert to PENDING_PAYMENT.
+ *     tags: [Ticketing]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - bookingId
+ *             properties:
+ *               bookingId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Lock released successfully
+ */
+router.post('/verify/cancel', protect, restrictTo('MARKETING_AGENT', 'ADMIN'), verifyCancel);
 
 // ── Admin only ─────────────────────────────────────────────────────────────────
 // Only admins may update ticket prices

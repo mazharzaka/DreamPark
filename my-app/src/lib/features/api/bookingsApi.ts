@@ -88,7 +88,7 @@ export const bookingsApi = createApi({
   reducerPath: 'bookingsApi',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}/api/tickets`,
+    baseUrl: `https://smfxhlj1-5000.euw.devtunnels.ms/api/tickets`,
 
     // Automatically attach the Bearer token stored in Redux auth state
     // (or fallback to localStorage for SSR-safe hydration)
@@ -145,6 +145,36 @@ export const bookingsApi = createApi({
       invalidatesTags: ['Booking'],
     }),
 
+    // ── Mutation: POST /api/tickets/verify/scan (T014) ────────────────────
+    verifyScan: builder.mutation<any, { qrCodeId: string }>({
+      query: (body) => ({
+        url: '/verify/scan',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Booking'],
+    }),
+
+    // ── Mutation: POST /api/tickets/verify/confirm (T014) ─────────────────
+    verifyConfirm: builder.mutation<any, { bookingId: string }>({
+      query: (body) => ({
+        url: '/verify/confirm',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Booking'],
+    }),
+
+    // ── Mutation: POST /api/tickets/verify/cancel (T014) ──────────────────
+    verifyCancel: builder.mutation<any, { bookingId: string }>({
+      query: (body) => ({
+        url: '/verify/cancel',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Booking'],
+    }),
+
     // ── Mutation: PATCH /api/tickets/types/price (Admin protected) ─────────
     updateTicketPrice: builder.mutation<ApiItemResponse<TicketType>, UpdateTicketPriceRequest>({
       query: (body) => ({
@@ -162,5 +192,8 @@ export const {
   useCreateBookingMutation,
   useGetUserBookingsQuery,
   useVerifyAndConfirmPaymentMutation,
+  useVerifyScanMutation,
+  useVerifyConfirmMutation,
+  useVerifyCancelMutation,
   useUpdateTicketPriceMutation,
 } = bookingsApi

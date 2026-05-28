@@ -16,7 +16,7 @@ export function Header() {
   const locale = useLocale();
   const pathname = usePathname();
 
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const [logout] = useLogoutServerMutation();
   const router = useRouter();
 
@@ -25,6 +25,11 @@ export function Header() {
     await logout().unwrap();
     router.push("/login");
   };
+
+  const userRole = user?.role?.toUpperCase()?.trim();
+  const normalizedUserRole = userRole === 'CUSTOMER' ? 'USER' :
+                             userRole === 'STAFF' ? 'MARKETING_AGENT' :
+                             userRole === 'ADMIN' ? 'ADMIN' : userRole;
 
   const navLinks = [
     {
@@ -46,10 +51,22 @@ export function Header() {
       visible: true,
     },
     {
-      label: t("map"),
-      href: "/map",
-      active: pathname === "/map",
-      visible: true,
+      label: locale === 'ar' ? 'الميدان' : 'Scanner',
+      href: "/marketing-dashboard/scan",
+      active: pathname === "/marketing-dashboard/scan",
+      visible: isAuthenticated && (normalizedUserRole === 'MARKETING_AGENT' || normalizedUserRole === 'ADMIN'),
+    },
+    {
+      label: locale === 'ar' ? 'المالية' : 'Finance',
+      href: "/financial",
+      active: pathname === "/financial",
+      visible: isAuthenticated && (normalizedUserRole === 'FINANCIAL_MANAGER' || normalizedUserRole === 'ADMIN'),
+    },
+    {
+      label: locale === 'ar' ? 'الأسعار' : 'Pricing',
+      href: "/admin/pricing",
+      active: pathname === "/admin/pricing",
+      visible: isAuthenticated && normalizedUserRole === 'ADMIN',
     },
     {
       label: t("profile") || "Profile",
