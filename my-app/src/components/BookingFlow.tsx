@@ -36,6 +36,7 @@ import {
   resetBookingFlow,
 } from "@/src/lib/features/booking/bookingSlice";
 import { setCredentials } from "@/src/lib/features/auth/authSlice";
+import { useLoginWithPasswordMutation } from "../lib/features/auth/authApi";
 
 type BookingFormData = {
   targetDate: string;
@@ -44,8 +45,8 @@ type BookingFormData = {
 };
 
 type LoginFormData = {
-  loginEmail: string;
-  loginPassword: string;
+  email: string;
+  password: string;
 };
 
 // Lucide icon mapping helper
@@ -98,11 +99,13 @@ export default function BookingFlow() {
     handleSubmit: handleLoginSubmit,
     reset: resetLogin,
   } = useForm<LoginFormData>({
-    defaultValues: { loginEmail: "", loginPassword: "" },
+    defaultValues: {email: "",
+      password: "" },
   });
 
   // Auth state local fallback
-  const [token, setToken] = useState<string | null>(null);
+  const [login] = useLoginWithPasswordMutation();
+
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
@@ -121,7 +124,6 @@ export default function BookingFlow() {
   // Sync token from localStorage
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-
   // Auto-activation logic for URL parameter
   useEffect(() => {
     if (ticketTypes.length > 0) {
@@ -132,7 +134,7 @@ export default function BookingFlow() {
             t.id === ticketIdFromUrl ||
             t._id === ticketIdFromUrl ||
             t.name?.toLowerCase().replace(/\s+/g, "-") ===
-            ticketIdFromUrl?.toLowerCase(),
+              ticketIdFromUrl?.toLowerCase(),
         );
         if (matchedTicket) {
           dispatch(
@@ -239,45 +241,30 @@ export default function BookingFlow() {
 
   // Inline login submit
   const onSubmitLogin: SubmitHandler<LoginFormData> = async (data) => {
-    const { loginEmail, loginPassword } = data;
+    
     if (!isLoggingIn) setIsLoggingIn(true);
     setLoginError(null);
 
-    try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      const res = await fetch(`${backendUrl}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+    login(data)
+      .unwrap()
+      .then((result) => {
+        if (result.success && result.token) {
+            dispatch(setCredentials({ token: result.token, user: result.data.user }));
+          setShowLoginModal(false)};
+      })
+      .catch((err) => {
+        console.error("Authentication failed:", err);
+        const errMsg =
+          typeof err?.data?.message === "string"
+            ? err.data.message
+            : typeof err?.data?.error === "string"
+              ? err.data.error
+              : typeof err?.error === "string"
+                ? err.error
+                : "Authentication failed";
+
+        
       });
-
-      const data = await res.json();
-      if (data.success && data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
-        setToken(data.token);
-        dispatch(setCredentials({ token: data.token, user: data.data.user }));
-        setShowLoginModal(false);
-
-        resetLogin();
-      } else {
-        setLoginError(
-          data.message ||
-          (isAr
-            ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
-            : "Invalid email or password"),
-        );
-      }
-    } catch (err) {
-      setLoginError(
-        isAr ? "حدث خطأ أثناء الاتصال بالخادم" : "Error connecting to server",
-      );
-    } finally {
-      setIsLoggingIn(false);
-    }
   };
 
   const getBookingErrorMessage = () => {
@@ -301,10 +288,11 @@ export default function BookingFlow() {
           <button
             type="button"
             onClick={() => dispatch(setStep(1))}
-            className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${step === 1
+            className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
+              step === 1
                 ? "bg-white text-secondary shadow-md"
                 : "text-on-surface/60 hover:text-on-surface"
-              }`}
+            }`}
           >
             <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">
               1
@@ -315,10 +303,11 @@ export default function BookingFlow() {
             type="button"
             onClick={() => selectedTicketId && dispatch(setStep(2))}
             disabled={!selectedTicketId}
-            className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed ${step === 2
+            className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+              step === 2
                 ? "bg-white text-secondary shadow-md"
                 : "text-on-surface/60 hover:text-on-surface"
-              }`}
+            }`}
           >
             <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">
               2
@@ -345,20 +334,22 @@ export default function BookingFlow() {
                 <button
                   type="button"
                   onClick={() => handleCategoryChange("INDIVIDUAL")}
-                  className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${selectedCategory === "INDIVIDUAL"
+                  className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${
+                    selectedCategory === "INDIVIDUAL"
                       ? "bg-white text-secondary shadow-md"
                       : "text-on-surface/70 hover:text-on-surface"
-                    }`}
+                  }`}
                 >
                   {t("individual_tabs")}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleCategoryChange("GROUP")}
-                  className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${selectedCategory === "GROUP"
+                  className={`px-8 py-3.5 rounded-full font-black text-sm transition-all duration-300 ${
+                    selectedCategory === "GROUP"
                       ? "bg-white text-secondary shadow-md"
                       : "text-on-surface/70 hover:text-on-surface"
-                    }`}
+                  }`}
                 >
                   {t("group_tabs")}
                 </button>
@@ -393,10 +384,11 @@ export default function BookingFlow() {
                       }
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md ${isSelected
+                      className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md ${
+                        isSelected
                           ? "ring-4 ring-secondary shadow-xl"
                           : "hover:shadow-lg"
-                        }`}
+                      }`}
                       style={{
                         background: isSelected
                           ? `linear-gradient(135deg, #ffffff 0%, #fffcfc 100%)`
@@ -480,10 +472,11 @@ export default function BookingFlow() {
 
                         {/* Tactile checkbox indicator */}
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isSelected
+                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                            isSelected
                               ? "bg-secondary text-white scale-110"
                               : "bg-[#f0f1f1] text-transparent"
-                            }`}
+                          }`}
                         >
                           <CheckCircle2 className="w-6 h-6" />
                         </div>
@@ -559,10 +552,11 @@ export default function BookingFlow() {
                     onClick={() =>
                       setBookingValue("targetDate", getTodayDateString())
                     }
-                    className={`py-4.5 rounded-2xl font-black text-sm transition-all ${targetDate === getTodayDateString()
+                    className={`py-4.5 rounded-2xl font-black text-sm transition-all ${
+                      targetDate === getTodayDateString()
                         ? "bg-secondary text-white shadow-md"
                         : "bg-[#f0f1f1] text-on-surface hover:bg-[#e4e5e5]"
-                      }`}
+                    }`}
                   >
                     {isAr ? "اليوم" : "Today"}
                   </button>
@@ -571,10 +565,11 @@ export default function BookingFlow() {
                     onClick={() =>
                       setBookingValue("targetDate", getTomorrowDateString())
                     }
-                    className={`py-4.5 rounded-2xl font-black text-sm transition-all ${targetDate === getTomorrowDateString()
+                    className={`py-4.5 rounded-2xl font-black text-sm transition-all ${
+                      targetDate === getTomorrowDateString()
                         ? "bg-secondary text-white shadow-md"
                         : "bg-[#f0f1f1] text-on-surface hover:bg-[#e4e5e5]"
-                      }`}
+                    }`}
                   >
                     {isAr ? "غداً" : "Tomorrow"}
                   </button>
@@ -588,17 +583,18 @@ export default function BookingFlow() {
                     />
                     <button
                       type="button"
-                      className={`w-full py-4.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${targetDate !== getTodayDateString() &&
-                          targetDate !== getTomorrowDateString() &&
-                          targetDate !== ""
+                      className={`w-full py-4.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
+                        targetDate !== getTodayDateString() &&
+                        targetDate !== getTomorrowDateString() &&
+                        targetDate !== ""
                           ? "bg-secondary text-white shadow-md"
                           : "bg-[#f0f1f1] text-on-surface hover:bg-[#e4e5e5]"
-                        }`}
+                      }`}
                     >
                       <Calendar className="w-4 h-4" />
                       {targetDate &&
-                        targetDate !== getTodayDateString() &&
-                        targetDate !== getTomorrowDateString()
+                      targetDate !== getTodayDateString() &&
+                      targetDate !== getTomorrowDateString()
                         ? targetDate
                         : isAr
                           ? "تاريخ مخصص"
@@ -962,7 +958,7 @@ export default function BookingFlow() {
                   <input
                     type="email"
                     required
-                    {...registerLogin("loginEmail", { required: true })}
+                    {...registerLogin("email", { required: true })}
                     placeholder="e.g. test@example.com"
                     className="w-full bg-[#f0f1f1] border-none rounded-xl p-4 text-on-surface font-sans text-sm focus:ring-4 focus:ring-secondary/15 outline-none transition-all shadow-inner"
                   />
@@ -975,7 +971,7 @@ export default function BookingFlow() {
                   <input
                     type="password"
                     required
-                    {...registerLogin("loginPassword", { required: true })}
+                    {...registerLogin("password", { required: true })}
                     placeholder="••••••••"
                     className="w-full bg-[#f0f1f1] border-none rounded-xl p-4 text-on-surface font-sans text-sm focus:ring-4 focus:ring-secondary/15 outline-none transition-all shadow-inner"
                   />
