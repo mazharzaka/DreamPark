@@ -46,7 +46,7 @@ function generateParticles(count: number): Particle[] {
 function ParticleField({ particles }: { particles: Particle[] }) {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
+      {particles?.map((p) => (
         <motion.div
           key={p.id}
           className="absolute rounded-full"
@@ -221,7 +221,12 @@ export default function SplashScreen({
   const [visible, setVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const [particles] = useState(() => generateParticles(40));
+  const [mounted, setMounted] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isAr = locale === "ar";
   const tagline = isAr ? TAGLINE_AR : TAGLINE_EN;
@@ -304,7 +309,7 @@ export default function SplashScreen({
           }}
         >
           <ScanlineOverlay />
-          <ParticleField particles={particles} />
+          {mounted && <ParticleField particles={particles} />}
 
           {/* Top-right corner accent */}
           <motion.div

@@ -1,14 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Ticket, CheckCircle, Clock } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Booking, useGetUserBookingsQuery } from "@/src/lib/features/api/bookingsApi";
+import { useLocale } from "next-intl";
 
 export default function BookingsHistoryPage() {
   const { data: bookingsRes, isLoading } = useGetUserBookingsQuery();
   const bookings: Booking[] = bookingsRes?.data ?? [];
+  const [mounted, setMounted] = useState(false);
+  const locale = useLocale();
+  const isAr = locale === "ar";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getStatusBadge = (status: string, targetDate: string) => {
     const today = new Date();
@@ -80,12 +88,16 @@ export default function BookingsHistoryPage() {
                           {booking.ticketType.name}
                         </h3>
                         <p className="text-[#005caa] font-semibold text-lg">
-                          {date.toLocaleDateString("ar-EG", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {mounted ? (
+                            date.toLocaleDateString(isAr ? "ar-EG" : "en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          ) : (
+                            <span className="inline-block w-48 h-6 bg-[#f0f1f1] animate-pulse rounded-full" />
+                          )}
                         </p>
                       </div>
                       {getStatusBadge(booking.status, booking.targetDate)}

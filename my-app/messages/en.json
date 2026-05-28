@@ -294,6 +294,7 @@
     "currently_configuring": "Currently Configuring Pass",
     "category": "Category",
     "individual": "Individual",
+    "ticketid": "Ticket ID",
     "group": "Group",
     "quantity_prompt": "How many tickets would you like?",
     "phone_prompt": "Contact Phone Number (SMS confirmation)",
