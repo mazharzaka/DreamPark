@@ -32,7 +32,7 @@ scanAuditLogSchema.pre('save', function (next) {
   if (!this.isNew) {
     return next(new Error('ScanAuditLog entries are read-only and cannot be updated.'));
   }
-  next();
+ 
 });
 
 const ScanAuditLog = mongoose.model('ScanAuditLog', scanAuditLogSchema);

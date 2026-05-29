@@ -9,6 +9,7 @@ import LocalePersistence from "@/src/components/ui/LocalePersistence";
 import StoreProvider from "@/app/StoreProvider";
 import { SplashScreenWrapper } from "@/src/components/ui/SplashScreenWrapper";
 import { AuthProvider } from "@/src/lib/features/auth/AuthContext";
+import ErudaProvider from "@/src/components/ui/ErudaProvider";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -67,6 +68,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <StoreProvider>
             <AuthProvider>
+              <ErudaProvider />
               <SplashScreenWrapper />
               <LocalePersistence />
               <Header />

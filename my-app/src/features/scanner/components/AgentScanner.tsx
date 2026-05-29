@@ -1,8 +1,15 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import { WifiOff, AlertTriangle, CheckCircle, ShieldAlert, Ban, Check, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useCallback } from 'react';
+import { Scanner } from '@yudiel/react-qr-scanner';
+import {
+  WifiOff,
+  CheckCircle,
+  ShieldAlert,
+  Ban,
+  Check,
+  Loader2,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
@@ -17,105 +24,31 @@ export const AgentScanner: React.FC = () => {
   const [cancelMutation, { isLoading: isCancelling }] = useVerifyCancelMutation();
 
   // State management
-  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [isOnline] = useState<boolean>(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
   const [scannedTicket, setScannedTicket] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [error, setError] = useState<any>(null);
+  const [cameraError, setCameraError] = useState<string>('');
 
-  // Scanner reference
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  // Synchronous ref lock — prevents concurrent API calls from rapid QR frames
+  const isScanningRef = useRef<boolean>(false);
 
-  // 1) Handle real-time network connectivity status
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    setIsOnline(navigator.onLine);
-
-    const handleOnline = () => {
-      setIsOnline(true);
-      setErrorMsg(null);
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
-      // Revert any scanned ticket since we are offline and can't proceed securely
-      setScannedTicket(null);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+  // ─────────────────────────────────────────────────────────────
+  // 1) Reset scanner to ready state
+  // ─────────────────────────────────────────────────────────────
+  const resetScanner = useCallback(() => {
+    setScannedTicket(null);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    isScanningRef.current = false;
   }, []);
 
-  // 2) Initialize QR Code scanner reactively based on network connectivity and active ticket/success states
-  useEffect(() => {
-    if (!isOnline) return;
-    if (scannedTicket || successMsg) return;
-
-    // Wait a brief tick for DOM element availability and potential exit transitions
-    const delay = setTimeout(() => {
-      const element = document.getElementById('qr-reader-viewport');
-      if (!element) {
-        console.warn('qr-reader-viewport element not found in DOM, skipping scanner initialization.');
-        return;
-      }
-
-      try {
-        const scanner = new Html5QrcodeScanner(
-          'qr-reader-viewport',
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            rememberLastUsedCamera: true,
-            supportedScanTypes: [0], // 0 is HTML5QrcodeScanType.SCAN_TYPE_CAMERA
-          },
-          /* verbose= */ false
-        );
-
-        scannerRef.current = scanner;
-
-        scanner.render(
-          async (decodedText) => {
-            // Triggered on scan success
-            await handleQrScan(decodedText);
-          },
-          (errorMessage) => {
-            // Quietly ignore frame failures to prevent log spam
-            
-          }
-        );
-      } catch (err) {
-        console.error('QR Init Error:', err);
-  
-  // ✅ الحل: حفظ رسالة نصية صريحة وليس الـ Object كامل لحماية الـ JSX
-  setError({
-    status: "error",
-    statusCode: 500,
-    message: "برجاء التأكد من تفعيل صلاحية الكاميرا للمتصفح"
-  });
-      }
-    }, 200); // 200ms delay to let AnimatePresence and React state batching complete safely
-
-    return () => {
-      clearTimeout(delay);
-      if (scannerRef.current) {
-        const scannerToClear = scannerRef.current;
-        scannerRef.current = null;
-        scannerToClear.clear().catch((err) => {
-          console.warn('Failed to clear scanner on state change or unmount:', err);
-        });
-      }
-    };
-  }, [isOnline, scannedTicket, successMsg]);
-
-  // 3) Process QR Scan event
+  // ─────────────────────────────────────────────────────────────
+  // 2) Process QR Scan event
+  // ─────────────────────────────────────────────────────────────
   const handleQrScan = async (qrCodeId: string) => {
-    if (scannedTicket) return; // Prevent scanning again if we have a locked ticket already
     setErrorMsg(null);
     setSuccessMsg(null);
 
@@ -128,7 +61,7 @@ export const AgentScanner: React.FC = () => {
       const errMsg = err?.data?.error || 'حدث خطأ غير متوقع أثناء الفحص';
       setErrorMsg(errMsg);
       setScannedTicket(null);
-      
+
       // Auto-reset scanner after 3 seconds on error
       setTimeout(() => {
         resetScanner();
@@ -136,14 +69,27 @@ export const AgentScanner: React.FC = () => {
     }
   };
 
-  // 4) Reset scanner to ready state
-  const resetScanner = () => {
-    setScannedTicket(null);
-    setErrorMsg(null);
-    setSuccessMsg(null);
-  };
+  // ─────────────────────────────────────────────────────────────
+  // 3) onScan callback — sole entry point from <Scanner />
+  // ─────────────────────────────────────────────────────────────
+  const handleScan = useCallback(
+    (results: { rawValue: string }[]) => {
+      // Immediate synchronous lock check — no async, no race condition
+      if (!results?.length || isScanningRef.current) return;
 
-  // 5) Confirm paid transition
+      const qrCodeId = results[0].rawValue;
+      if (!qrCodeId) return;
+
+      isScanningRef.current = true; // Lock before any async work
+      handleQrScan(qrCodeId);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // ─────────────────────────────────────────────────────────────
+  // 4) Confirm paid transition
+  // ─────────────────────────────────────────────────────────────
   const handleConfirm = async () => {
     if (!scannedTicket) return;
     setErrorMsg(null);
@@ -154,7 +100,6 @@ export const AgentScanner: React.FC = () => {
         setSuccessMsg(scannedTicket.visitorName);
         setScannedTicket(null);
 
-        // Auto reset scanner after 2 seconds success flash
         setTimeout(() => {
           resetScanner();
         }, 2000);
@@ -164,7 +109,9 @@ export const AgentScanner: React.FC = () => {
     }
   };
 
-  // 6) Cancel/Release scan lock
+  // ─────────────────────────────────────────────────────────────
+  // 5) Cancel / Release scan lock
+  // ─────────────────────────────────────────────────────────────
   const handleCancel = async () => {
     if (!scannedTicket) return;
     setErrorMsg(null);
@@ -176,15 +123,19 @@ export const AgentScanner: React.FC = () => {
       }
     } catch (err: any) {
       setErrorMsg(err?.data?.error || 'فشل إلغاء فحص التذكرة');
-      // Force local reset anyway on fail
       resetScanner();
     }
   };
 
+  // Derive: Scanner mounts only when online and no ticket/success is showing
+  const showScanner = isOnline && !scannedTicket && !successMsg;
+
+  // ─────────────────────────────────────────────────────────────
+  // JSX
+  // ─────────────────────────────────────────────────────────────
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-8 relative">
-      {/* 1) Dynamic Connectivity Lock Layer */}
-      {error && <p className="text-crimson font-medium">{error.message}</p>}
+      {/* 1) Connectivity Lock Layer */}
       <AnimatePresence>
         {!isOnline && (
           <motion.div
@@ -216,7 +167,7 @@ export const AgentScanner: React.FC = () => {
           بوابة فحص التذاكر والدفع النقدي
         </h1>
 
-        {/* 2) Inline Success Indicator */}
+        {/* 2) Success Banner */}
         <AnimatePresence>
           {successMsg && (
             <motion.div
@@ -236,7 +187,14 @@ export const AgentScanner: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Errors display */}
+        {/* Camera Permission Error */}
+        {cameraError && (
+          <p className="text-[#b5161e] bg-[#b5161e]/10 p-4 rounded-xl font-medium text-sm text-center mb-6 font-cairo">
+            {cameraError}
+          </p>
+        )}
+
+        {/* Business Validation Error */}
         {errorMsg && (
           <div className="bg-[#b5161e]/10 text-[#b5161e] p-4 rounded-2xl flex items-center gap-3 mb-6 font-cairo">
             <ShieldAlert className="w-6 h-6 shrink-0" />
@@ -244,15 +202,38 @@ export const AgentScanner: React.FC = () => {
           </div>
         )}
 
-        {/* 3) Scanner Camera Viewport */}
-        {!scannedTicket && !successMsg && (
-          <div className="w-full aspect-square bg-surface-lowest rounded-2xl overflow-hidden relative flex items-center justify-center">
+        {/* 3) Scanner Camera Viewport — unmounts completely when not needed */}
+        {showScanner && (
+          <div className="w-full aspect-square bg-surface-lowest rounded-2xl overflow-hidden relative">
             {isScanning && (
               <div className="absolute inset-0 bg-surface/50 backdrop-blur-sm z-10 flex items-center justify-center">
                 <Loader2 className="w-12 h-12 text-[#b5161e] animate-spin" />
               </div>
             )}
-            <div id="qr-reader-viewport" className="w-full h-full object-cover rounded-2xl" />
+
+            <Scanner
+              onScan={handleScan}
+              onError={(err) => {
+                console.warn('QR Scanner error:', err);
+                setCameraError('برجاء التأكد من تفعيل صلاحية الكاميرا للمتصفح');
+              }}
+              constraints={{ facingMode: 'environment' }}
+              components={{ audio: false }}
+              styles={{
+                container: {
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                },
+                video: {
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '16px',
+                },
+              }}
+            />
           </div>
         )}
 
@@ -283,7 +264,6 @@ export const AgentScanner: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tonal detail listing */}
               <div className="bg-surface-low p-4 rounded-xl space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
                   <span className="text-on-surface/60">نوع التذكرة</span>
@@ -295,7 +275,6 @@ export const AgentScanner: React.FC = () => {
                 </div>
               </div>
 
-              {/* Action buttons with strict rounded-full and linear gradient */}
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={handleCancel}
