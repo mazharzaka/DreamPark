@@ -16,15 +16,16 @@ export default function AgentScanPage() {
 
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  const [verifyAndConfirmPayment, { isLoading }] = useVerifyAndConfirmPaymentMutation();
+  const [verifyAndConfirmPayment, { isLoading }] =
+    useVerifyAndConfirmPaymentMutation();
 
   useEffect(() => {
     scannerRef.current = new Html5QrcodeScanner(
       "qr-reader",
       { fps: 10, qrbox: { width: 250, height: 250 } },
-      false
+      false,
     );
-    scannerRef.current.render(onScanSuccess, () => { });
+    scannerRef.current.render(onScanSuccess, () => {});
 
     return () => {
       scannerRef.current?.clear().catch(console.error);
@@ -37,8 +38,14 @@ export default function AgentScanPage() {
     scannerRef.current?.pause(true);
 
     try {
-      const res = await verifyAndConfirmPayment({ qrCodeId: decodedText }).unwrap();
-      setFeedback({ type: "success", message: "تم تأكيد الدفع بنجاح", details: res.data });
+      const res = await verifyAndConfirmPayment({
+        qrCodeId: decodedText,
+      }).unwrap();
+      setFeedback({
+        type: "success",
+        message: "تم تأكيد الدفع بنجاح",
+        details: res.data,
+      });
     } catch (err: any) {
       setFeedback({ type: "error", message: err?.data?.error ?? "حدث خطأ" });
     }
@@ -51,7 +58,10 @@ export default function AgentScanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f6f6] flex flex-col mt-22 items-center justify-center p-6 rtl" dir="rtl">
+    <div
+      className="min-h-screen bg-[#f6f6f6] flex flex-col mt-22 items-center justify-center p-6 rtl"
+      dir="rtl"
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,10 +86,11 @@ export default function AgentScanPage() {
               initial={{ opacity: 0, height: 0, y: -20 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -20 }}
-              className={`rounded-2xl p-6 ${feedback.type === "success"
+              className={`rounded-2xl p-6 ${
+                feedback.type === "success"
                   ? "bg-emerald-50 text-emerald-800 shadow-[0_10px_30px_rgba(16,185,129,0.1)]"
                   : "bg-[#fff0f1] text-[#b5161e] shadow-[0_10px_30px_rgba(181,22,30,0.1)]"
-                }`}
+              }`}
             >
               <div className="flex items-center mb-4">
                 {feedback.type === "success" ? (
@@ -94,18 +105,28 @@ export default function AgentScanPage() {
                 <div className="space-y-3 bg-white/60 p-4 rounded-xl mt-4">
                   <div className="flex justify-between">
                     <span className="font-semibold opacity-75">رقم الحجز:</span>
-                    <span className="font-bold">{String(feedback.details.bookingId).slice(-6)}</span>
+                    <span className="font-bold">
+                      {String(feedback.details.bookingId).slice(-6)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-semibold opacity-75">نوع التذكرة:</span>
-                    <span className="font-bold">{feedback.details.ticketName}</span>
+                    <span className="font-semibold opacity-75">
+                      نوع التذكرة:
+                    </span>
+                    <span className="font-bold">
+                      {feedback.details.ticketName}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold opacity-75">الكمية:</span>
-                    <span className="font-bold">{feedback.details.quantity}</span>
+                    <span className="font-bold">
+                      {feedback.details.quantity}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center pt-3 border-t border-emerald-100 mt-2">
-                    <span className="font-semibold opacity-75">المبلغ المطلوب تحصيله:</span>
+                    <span className="font-semibold opacity-75">
+                      المبلغ المطلوب تحصيله:
+                    </span>
                     <span className="text-2xl font-extrabold text-[#755700]">
                       {feedback.details.totalPrice} جنيه
                     </span>
@@ -115,10 +136,11 @@ export default function AgentScanPage() {
 
               <button
                 onClick={resetScanner}
-                className={`mt-6 w-full py-3 rounded-full font-bold transition-all ${feedback.type === "success"
+                className={`mt-6 w-full py-3 rounded-full font-bold transition-all ${
+                  feedback.type === "success"
                     ? "bg-emerald-600 text-white hover:bg-emerald-700"
                     : "bg-[#b5161e] text-white hover:bg-[#9a1219]"
-                  }`}
+                }`}
               >
                 مسح تذكرة أخرى
               </button>

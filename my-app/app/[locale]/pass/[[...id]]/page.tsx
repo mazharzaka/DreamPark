@@ -1,5 +1,5 @@
 "use client";
- 
+
 import React from "react";
 import { motion } from "framer-motion";
 import BookingFlow from "@/src/components/BookingFlow";
@@ -10,15 +10,15 @@ export default function MagicPassPage() {
   const isAr = locale === "ar";
   const t = useTranslations("pass");
   return (
-    <div 
-      className="min-h-screen bg-[#f6f6f6] p-4 md:p-8 rtl mt-24 mb-12 flex flex-col items-center" 
+    <div
+      className="min-h-screen bg-[#f6f6f6] p-4 md:p-8 rtl mt-24 mb-12 flex flex-col items-center"
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="w-full max-w-6xl">
         {/* Editorial Joy Header Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-10 "
         >
