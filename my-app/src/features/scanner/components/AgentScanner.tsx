@@ -218,7 +218,7 @@ export const AgentScanner: React.FC = () => {
                 setCameraError('برجاء التأكد من تفعيل صلاحية الكاميرا للمتصفح');
               }}
               constraints={{ facingMode: 'environment' }}
-              components={{ audio: false }}
+              sound={false}
               styles={{
                 container: {
                   width: '100%',

@@ -259,7 +259,7 @@ export default function AgentScannerClient({ user }: AgentScannerClientProps) {
                 setError("برجاء التأكد من تفعيل صلاحية الكاميرا للمتصفح");
               }}
               constraints={{ facingMode: "environment" }}
-              components={{ audio: false }}
+              sound={false}
               styles={{
                 container: {
                   width: "100%",
