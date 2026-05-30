@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '../../hooks';
-import { setCredentials, clearCredentials, UserProfile } from './authSlice';
-import { authApi } from './authApi';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import { setCredentials, clearCredentials, UserProfile } from "./authSlice";
+import { authApi } from "./authApi";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -17,9 +23,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const dispatch = useAppDispatch();
-  const { user, accessToken, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { user, accessToken, isAuthenticated } = useAppSelector(
+    (state) => state.auth,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [logoutServer] = authApi.useLogoutServerMutation();
 
@@ -31,7 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await logoutServer().unwrap();
     } catch {
-      console.warn('Logout server request failed, clearing local credentials anyway');
+      console.warn(
+        "Logout server request failed, clearing local credentials anyway",
+      );
     } finally {
       dispatch(clearCredentials());
     }
@@ -40,14 +52,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
       const response = await fetch(
-        (process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api` : "https://smfxhlj1-5000.euw.devtunnels.ms/api") + '/auth/refresh',
+        (process.env.NEXT_PUBLIC_BACKEND_URL
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
+          : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api") + "/auth/refresh",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include',
-        }
+          credentials: "include",
+        },
       );
 
       if (response.ok) {
@@ -55,13 +69,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (result.success && result.token) {
           const fetchedUser = result.data?.user;
           if (fetchedUser) {
-            dispatch(setCredentials({ token: result.token, user: fetchedUser }));
+            dispatch(
+              setCredentials({ token: result.token, user: fetchedUser }),
+            );
             return true;
           }
         }
       }
     } catch (err) {
-      console.error('Silent refresh network error:', err);
+      console.error("Silent refresh network error:", err);
     }
     return false;
   }, [dispatch]);
@@ -84,14 +100,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const interval = setInterval(async () => {
-      console.log('[AuthContext] Triggering background silent token refresh...');
-      const success = await refreshSession();
-      if (!success) {
-        console.warn('[AuthContext] Background refresh failed, logging out...');
-        dispatch(clearCredentials());
-      }
-    }, 14 * 60 * 1000); // 14 minutes
+    const interval = setInterval(
+      async () => {
+        console.log(
+          "[AuthContext] Triggering background silent token refresh...",
+        );
+        const success = await refreshSession();
+        if (!success) {
+          console.warn(
+            "[AuthContext] Background refresh failed, logging out...",
+          );
+          dispatch(clearCredentials());
+        }
+      },
+      14 * 60 * 1000,
+    ); // 14 minutes
 
     return () => clearInterval(interval);
   }, [isAuthenticated, dispatch, refreshSession]);
@@ -116,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
