@@ -1,0 +1,180 @@
+[
+  {
+    "_id": "69fc44d057103b2d46cd6c01",
+    "pageKey": "zoo",
+    "name_en": "African Lion (Simba)",
+    "name_ar": "الأسد الأفريقي (سيمبا)",
+    "title": "African Lion (Simba)",
+    "subtitle": "ملك الغابة في ساحة العرض المفتوحة",
+    "category": "animals",
+    "description_en": "The African lion is a large cat of the genus Panthera native to Africa.",
+    "description_ar": "قائد عشيرة المفترسات، يتميز ببنيته القوية ويعيش في بيئة صخرية محاكية للطبيعة.",
+    "image": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&q=80&w=600",
+    "images": [],
+    "minHeight": "Everyone is allowed",
+    "status": "Operating",
+    "waitingTime": "5min",
+    "isFastTrack": false,
+    "bookPass": false,
+    "icon": "lion",
+    "tags": {
+      "rules": [
+        {
+          "id": 1,
+          "type": "behavior",
+          "text": "ممنوع إصدار أصوات عالية أو صراخ بالقرب من حافة السياج.",
+          "_id": "6a0d9c5d1e7a73e28f9c5001"
+        },
+        {
+          "id": 2,
+          "type": "items",
+          "text": "ممنوع إلقاء أي نوع من أنواع الأطعمة بتاتاً؛ نظامه الغذائي محدد وصارم.",
+          "_id": "6a0d9c5d1e7a73e28f9c5002"
+        }
+      ],
+      "badges": ["مفترس", "أفريقيا"]
+    },
+    "layout": {
+      "colSpan": 2,
+      "rowSpan": 1,
+      "customStyle": "amber"
+    },
+    "createdAt": "2026-05-10T09:15:00.000Z",
+    "updatedAt": "2026-05-28T14:22:10.000Z",
+    "__v": 0,
+    "name": "African Lion (Simba)",
+    "description": "ملك الغابة في ساحة العرض المفتوحة."
+  },
+  {
+    "_id": "69fc44d057103b2d46cd6c02",
+    "pageKey": "zoo",
+    "name_en": "Reticulated Giraffe",
+    "name_ar": "الزرافة الشبكية (سهر)",
+    "title": "Reticulated Giraffe",
+    "subtitle": "أطول كائن ثديي على الأرض",
+    "category": "animals",
+    "description_en": "The reticulated giraffe, also known as the Somali giraffe, is a species of giraffe native to the Horn of Africa.",
+    "description_ar": "تتميز بنقوشها الفريدة وطبعها الأليف، ويمكن للزوار التفاعل معها من المنصة العلوية.",
+    "image": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&q=80&w=600",
+    "images": [],
+    "minHeight": "Everyone is allowed",
+    "status": "Operating",
+    "waitingTime": "0min",
+    "isFastTrack": false,
+    "bookPass": true,
+    "icon": "giraffe",
+    "tags": {
+      "rules": [
+        {
+          "id": 1,
+          "type": "items",
+          "text": "مسموح بإطعامها الجزر والخس المستلم من المشرف فقط.",
+          "_id": "6a0d9c5d1e7a73e28f9c5101"
+        },
+        {
+          "id": 2,
+          "type": "behavior",
+          "text": "يرجى عدم لمس وجه أو عين الزرافة أثناء تقديم الطعام.",
+          "_id": "6a0d9c5d1e7a73e28f9c5102"
+        }
+      ],
+      "badges": ["أليف", "تفاعلي"]
+    },
+    "layout": {
+      "colSpan": 1,
+      "rowSpan": 1,
+      "customStyle": "emerald"
+    },
+    "createdAt": "2026-05-11T11:30:22.000Z",
+    "updatedAt": "2026-05-25T08:12:45.000Z",
+    "__v": 0,
+    "name": "Reticulated Giraffe",
+    "description": "تتميز بنقوشها الفريدة وطبعها الأليف."
+  },
+  {
+    "_id": "69fc44d057103b2d46cd6c03",
+    "pageKey": "zoo",
+    "name_en": "Giant Panda",
+    "name_ar": "الباندا العملاقة (بامبو)",
+    "title": "Giant Panda",
+    "subtitle": "الدب الضاحك آكل الخيزران",
+    "category": "animals",
+    "description_en": "The giant panda, also known as the panda bear, is a bear species endemic to China.",
+    "description_ar": "كائن نادر ومحبوب، يقضي معظم يومه في تناول أعواد الخيزران واللعب في بيئته المكيفة.",
+    "image": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&q=80&w=600",
+    "images": [],
+    "minHeight": "Everyone is allowed",
+    "status": "Operating",
+    "waitingTime": "15min",
+    "isFastTrack": true,
+    "bookPass": true,
+    "icon": "panda",
+    "tags": {
+      "rules": [
+        {
+          "id": 1,
+          "type": "behavior",
+          "text": "يرجى خفض الصوت تماماً؛ الباندا كائن حساس جداً للضوضاء وينام فترات طويلة.",
+          "_id": "6a0d9c5d1e7a73e28f9c5201"
+        },
+        {
+          "id": 2,
+          "type": "lighting",
+          "text": "ممنوع استخدام الفلاش منعاً باتاً لحماية عين الباندا.",
+          "_id": "6a0d9c5d1e7a73e28f9c5202"
+        }
+      ],
+      "badges": ["نادر جداً", "محمي"]
+    },
+    "layout": {
+      "colSpan": 1,
+      "rowSpan": 2,
+      "customStyle": "rose"
+    },
+    "createdAt": "2026-05-12T14:05:10.000Z",
+    "updatedAt": "2026-05-29T17:40:00.000Z",
+    "__v": 0,
+    "name": "Giant Panda",
+    "description": "كائن نادر ومحبوب، يقضي معظم يومه في تناول أعواد الخيزران."
+  },
+  {
+    "_id": "69fc44d057103b2d46cd6c04",
+    "pageKey": "zoo",
+    "name_en": "Emperor Penguin",
+    "name_ar": "البطريق الإمبراطوري",
+    "title": "Emperor Penguin",
+    "subtitle": "سيد الأجواء المتجمدة والسباح الماهر",
+    "category": "animals",
+    "description_en": "The emperor penguin is the tallest and heaviest of all living penguin species and is endemic to Antarctica.",
+    "description_ar": "يعيش في مجموعات عائلية داخل الصالة الثلجية، ويمتع الزوار بمهاراته العالية في السباحة السريعة.",
+    "image": "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=600",
+    "images": [],
+    "minHeight": "Everyone is allowed",
+    "status": "Maintenance",
+    "waitingTime": "Closed",
+    "isFastTrack": false,
+    "bookPass": false,
+    "icon": "penguin",
+    "tags": {
+      "rules": [
+        {
+          "id": 1,
+          "type": "items",
+          "text": "عدم إلقاء أي عملات معدنية أو متعلقات شخصية في حوض السباحة.",
+          "_id": "6a0d9c5d1e7a73e28f9c5301"
+        }
+      ],
+      "badges": ["بيئة ثلجية", "سباح ماهر"]
+    },
+    "layout": {
+      "colSpan": 2,
+      "rowSpan": 1,
+      "customStyle": "sky"
+    },
+    "createdAt": "2026-05-15T08:20:00.000Z",
+    "updatedAt": "2026-05-29T11:15:30.000Z",
+    "__v": 0,
+    "name": "Emperor Penguin",
+    "description": "يعيش في مجموعات عائلية داخل الصالة الثلجية ويمتع الزوار بمهاراته."
+  }
+]

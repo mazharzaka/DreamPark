@@ -57,10 +57,10 @@ export const UserProfile: React.FC = () => {
 
   const handleOpenDateChange = (bookingId: string, currentDate: string) => {
     setSelectedBookingForDateChange(bookingId);
-    // Default picker to tomorrow's date
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setNewVisitDate(tomorrow.toISOString().split('T')[0]);
+    // Default picker to today's date
+    const today = new Date();
+    today.setDate(today.getDate());
+    setNewVisitDate(today.toISOString().split('T')[0]);
     setDateChangeError(null);
     setDateChangeSuccess(false);
   };
@@ -136,8 +136,8 @@ export const UserProfile: React.FC = () => {
     activeTab === 'past' ? pastBookings : 
     cancelledBookings;
 
-  // Tomorrow's date string for input min-attribute restriction
-  const tomorrowStr = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0];
+  // today's date string for input min-attribute restriction
+  const todayStr = new Date(new Date().setDate(new Date().getDate() )).toISOString().split('T')[0];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 min-h-screen" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -321,7 +321,7 @@ export const UserProfile: React.FC = () => {
                     </label>
                     <input 
                       type="date" 
-                      min={tomorrowStr}
+                      min={todayStr}
                       value={newVisitDate}
                       onChange={(e) => setNewVisitDate(e.target.value)}
                       required

@@ -33,7 +33,7 @@ function renderAttractionCard(attr: Attraction, locale: string) {
   };
 
   return (
-    <div key={attr.id} className={baseClasses} style={{ minHeight: attr.layout.rowSpan === 2 ? '500px' : '240px' }}>
+    <div key={attr._id} className={baseClasses} style={{ minHeight: attr.layout.rowSpan === 2 ? '500px' : '240px' }}>
       {/* Fallback Gradient */}
       <div className={`absolute inset-0 bg-gradient-to-br z-10 opacity-50 ${getFallbackGradient(attr.layout.customStyle!)}`} />
 

@@ -22,9 +22,10 @@ interface BookingQrCardProps {
   };
   onChangeDate?: (id: string) => void;
   showChangeDateButton?: boolean;
+  key?: string;
 }
 
-export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: BookingQrCardProps) => {
+export const BookingQrCard = ({ booking, onChangeDate,key, showChangeDateButton }: BookingQrCardProps) => {
   const t = useTranslations('booking');
   const locale = useLocale() || 'en';
   const isRtl = locale === 'ar';
@@ -86,6 +87,7 @@ export const BookingQrCard = ({ booking, onChangeDate, showChangeDateButton }: B
         onClick={() => setIsModalOpen(true)}
         className="bg-white rounded-[28px] shadow-ambient hover:-translate-y-1 transition-all duration-300 border border-outline-variant/10 overflow-hidden flex flex-col md:flex-row h-full cursor-pointer relative group"
         dir={isRtl ? 'rtl' : 'ltr'}
+        key={key}
       >
         {/* Decorative Connected pass-cutout circles on boundaries */}
         <div className={`absolute top-1/2 -translate-y-1/2 w-4 h-8 bg-surface rounded-y-full ${isRtl ? 'right-0 rounded-l-full' : 'left-0 rounded-r-full'} z-10`} />

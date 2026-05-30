@@ -99,8 +99,7 @@ export default function BookingFlow() {
     handleSubmit: handleLoginSubmit,
     reset: resetLogin,
   } = useForm<LoginFormData>({
-    defaultValues: {email: "",
-      password: "" },
+    defaultValues: { email: "", password: "" },
   });
 
   // Auth state local fallback
@@ -241,7 +240,6 @@ export default function BookingFlow() {
 
   // Inline login submit
   const onSubmitLogin: SubmitHandler<LoginFormData> = async (data) => {
-    
     if (!isLoggingIn) setIsLoggingIn(true);
     setLoginError(null);
 
@@ -249,8 +247,11 @@ export default function BookingFlow() {
       .unwrap()
       .then((result) => {
         if (result.success && result.token) {
-            dispatch(setCredentials({ token: result.token, user: result.data.user }));
-          setShowLoginModal(false)};
+          dispatch(
+            setCredentials({ token: result.token, user: result.data.user }),
+          );
+          setShowLoginModal(false);
+        }
       })
       .catch((err) => {
         console.error("Authentication failed:", err);
@@ -262,8 +263,6 @@ export default function BookingFlow() {
               : typeof err?.error === "string"
                 ? err.error
                 : "Authentication failed";
-
-        
       });
   };
 
@@ -579,27 +578,8 @@ export default function BookingFlow() {
                       required
                       min={getTodayDateString()}
                       {...registerBooking("targetDate", { required: true })}
-                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                      className="w-full px-4 py-3 bg-surface rounded-xl border border-outline-variant/20 font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-secondary"
                     />
-                    <button
-                      type="button"
-                      className={`w-full py-4.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
-                        targetDate !== getTodayDateString() &&
-                        targetDate !== getTomorrowDateString() &&
-                        targetDate !== ""
-                          ? "bg-secondary text-white shadow-md"
-                          : "bg-[#f0f1f1] text-on-surface hover:bg-[#e4e5e5]"
-                      }`}
-                    >
-                      <Calendar className="w-4 h-4" />
-                      {targetDate &&
-                      targetDate !== getTodayDateString() &&
-                      targetDate !== getTomorrowDateString()
-                        ? targetDate
-                        : isAr
-                          ? "تاريخ مخصص"
-                          : "Custom"}
-                    </button>
                   </div>
                 </div>
               </div>

@@ -14,7 +14,7 @@ function renderAttractionCard(attr: Attraction, locale: string) {
 
   return (
     <div
-      key={attr.id}
+      key={attr._id}
       className={baseClasses}
       style={{ minHeight: attr.layout.rowSpan === 2 ? "700px" : "240px" }}
     >

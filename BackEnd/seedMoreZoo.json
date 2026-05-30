@@ -1,0 +1,68 @@
+[
+  {
+    "pageKey": "zoo",
+    "name_en": "Bengal Tiger",
+    "name_ar": "النمر البنغالي (شيرخان)",
+    "title": "Bengal Tiger",
+    "subtitle": "المفترس الأنيق في الغابات الاستوائية",
+    "category": "animals",
+    "description_en": "The Bengal tiger is a tiger from a specific population of the Panthera tigris tigris subspecies that is native to the Indian subcontinent.",
+    "description_ar": "نمر مخطط يتميز بالرشاقة والقوة، يعيش في بيئة استوائية محاكية للغابات.",
+    "image": "https://images.unsplash.com/photo-1549480017-d76466a4b7e8?auto=format&fit=crop&q=80&w=600",
+    "images": [],
+    "minHeight": "Everyone is allowed",
+    "status": "Operating",
+    "waitingTime": "10min",
+    "isFastTrack": false,
+    "bookPass": false,
+    "icon": "tiger",
+    "tags": {
+      "rules": [
+        {
+          "id": 1,
+          "type": "behavior",
+          "text": "ممنوع إزعاج النمر أثناء نومه."
+        }
+      ],
+      "badges": ["مفترس", "آسيا"]
+    },
+    "layout": {
+      "colSpan": 1,
+      "rowSpan": 1,
+      "customStyle": "crimson"
+    }
+  },
+  {
+    "pageKey": "zoo",
+    "name_en": "African Elephant",
+    "name_ar": "الفيل الأفريقي (ضخم)",
+    "title": "African Elephant",
+    "subtitle": "أضخم كائن بري",
+    "category": "animals",
+    "description_en": "The African elephant is the largest living terrestrial animal with enormous ears and a long trunk.",
+    "description_ar": "يتميز بحجمه الهائل وذكائه الشديد، يمكن للزوار إطعامه والتفاعل معه.",
+    "image": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&q=80&w=600",
+    "images": [],
+    "minHeight": "Everyone is allowed",
+    "status": "Operating",
+    "waitingTime": "5min",
+    "isFastTrack": true,
+    "bookPass": true,
+    "icon": "elephant",
+    "tags": {
+      "rules": [
+        {
+          "id": 1,
+          "type": "items",
+          "text": "مسموح بتقديم الفول السوداني بإشراف المدرب."
+        }
+      ],
+      "badges": ["ضخم", "أفريقيا", "تفاعلي"]
+    },
+    "layout": {
+      "colSpan": 1,
+      "rowSpan": 1,
+      "customStyle": "amazon"
+    }
+  }
+]

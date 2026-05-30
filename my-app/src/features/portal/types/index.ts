@@ -38,7 +38,9 @@ export interface Product {
   price: number;
 }
 export interface Attraction {
-  id: string;
+  _id?: string;
+  id?: string;
+  status?: string;
   title: string;
   subtitle?: string;
   image: string;

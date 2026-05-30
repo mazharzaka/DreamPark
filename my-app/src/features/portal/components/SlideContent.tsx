@@ -83,10 +83,10 @@ export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideConte
 
         <motion.h1
           variants={itemVariants}
-          className={`text-6xl ${isRtl ? 'font-cairo' : 'font-sans'} md:text-8xl lg:text-[7rem] 2xl:text-[10rem] font-bold text-white leading-[0.9] mb-8 select-none drop-shadow-2xl`}
+          className={`text-4xl ${isRtl ? 'font-cairo' : 'font-sans'} md:text-5xl lg:text-6xl 2xl:text-8xl font-bold text-white leading-[1.1] mb-6 select-none drop-shadow-2xl`}
         >
           {slide.title + " "}
-          <span className="ml-4 text-primary drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)]">{slide.subtitle}</span>
+          <span className="ml-3 text-primary drop-shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)]">{slide.subtitle}</span>
         </motion.h1>
 
         <motion.p

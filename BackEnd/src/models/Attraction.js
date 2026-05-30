@@ -104,7 +104,7 @@ const attractionSchema = new mongoose.Schema(
       rowSpan: { type: Number, default: 1 },
       customStyle: {
         type: String,
-        enum: ['crimson', 'sky', 'nebula', 'amazon', 'phoenix', 'midas'],
+        enum: ['crimson', 'sky', 'nebula', 'amazon', 'phoenix', 'midas', 'amber', 'emerald', 'rose'],
       },
     },
   },
