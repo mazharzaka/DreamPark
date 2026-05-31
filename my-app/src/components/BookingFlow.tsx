@@ -123,6 +123,13 @@ export default function BookingFlow() {
   // Sync token from localStorage
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
+  // Reset booking flow on unmount to prevent state caching when navigating away
+  useEffect(() => {
+    return () => {
+      dispatch(resetBookingFlow());
+    };
+  }, [dispatch]);
+
   // Auto-activation logic for URL parameter
   useEffect(() => {
     if (ticketTypes.length > 0) {

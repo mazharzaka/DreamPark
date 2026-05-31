@@ -10,7 +10,7 @@
     "home": "Home",
     "profile": "Profile",
     "Zoo": "Dream Zoo",
-     "Animals": "Animals"
+    "Animals": "Animals"
   },
   "Actions": {
     "bookNow": "Book Now"
@@ -32,6 +32,7 @@
   "DreamZoo": {
     "title": "Dream <span>Zoo</span>",
     "animals": "Our <span>Animals</span>",
+    "subtitle": "Discover the enchanting world of our extraordinary creatures at Dream Zoo.",
     "description": "Embark on a journey through nature's most extraordinary habitats.",
     "cta": "Explore Wildlife",
     "openStatus": "Open Today: 9AM - 11PM",
