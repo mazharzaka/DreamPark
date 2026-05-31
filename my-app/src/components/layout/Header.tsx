@@ -32,6 +32,18 @@ export function Header() {
                              userRole === 'ADMIN' ? 'ADMIN' : userRole;
 
   const navLinks = [
+       {
+      label: t("zoo"),
+      href: "/zoo",
+      active: pathname === "/zoo",
+      visible: true,
+    },
+        {
+      label: t("parkInfo"),
+      href: "/park-info",
+      active: pathname === "/park-info",
+      visible: true,
+    },
     {
       label: t("parkInfo"),
       href: "/park-info",

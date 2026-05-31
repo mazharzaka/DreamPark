@@ -8,7 +8,9 @@
     "signup": "Signup",
     "logout": "Logout",
     "home": "Home",
-    "profile": "Profile"
+    "profile": "Profile",
+    "Zoo": "Dream Zoo",
+     "Animals": "Animals"
   },
   "Actions": {
     "bookNow": "Book Now"
