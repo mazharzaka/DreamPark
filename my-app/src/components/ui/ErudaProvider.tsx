@@ -4,6 +4,9 @@ import { useEffect } from 'react';
 
 export default function ErudaProvider() {
   useEffect(() => {
+    // Only run in development mode
+    if (process.env.NODE_ENV !== 'development') return;
+
     // Only run on the client side
     if (typeof window === 'undefined') return;
 
@@ -68,3 +71,4 @@ export default function ErudaProvider() {
 
   return null;
 }
+
