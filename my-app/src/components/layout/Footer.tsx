@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/routing";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { LegalModal } from "./LegalModal";
 import { MapPin, Phone, Mail } from "lucide-react";
 
 const Facebook = (props: any) => <svg {...props} fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>;
@@ -11,6 +13,7 @@ const Instagram = (props: any) => <svg {...props} fill="none" stroke="currentCol
 const Youtube = (props: any) => <svg {...props} fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>;
 
 export function Footer() {
+  const [modalView, setModalView] = useState<"contact" | "privacy" | "terms" | null>(null);
   const t = useTranslations("Footer");
   const nav = useTranslations("Navigation");
 
@@ -24,9 +27,9 @@ export function Footer() {
 
   const supportLinks = [
     { name: t("faq"), href: "/info" },
-    { name: t("contact"), href: "#" },
-    { name: t("privacy"), href: "#" },
-    { name: t("terms"), href: "#" },
+    { name: t("contact"), action: () => setModalView("contact") },
+    { name: t("privacy"), action: () => setModalView("privacy") },
+    { name: t("terms"), action: () => setModalView("terms") },
   ];
 
   const socials = [
@@ -90,13 +93,23 @@ export function Footer() {
             <ul className="flex flex-col gap-3">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href as any}
-                    className="text-on-surface/70 hover:text-secondary transition-colors duration-300 flex items-center gap-2 group"
-                  >
-                    <span className="w-0 h-0.5 bg-secondary rounded-full transition-all duration-300 group-hover:w-4"></span>
-                    {link.name}
-                  </Link>
+                  {link.href ? (
+                    <Link
+                      href={link.href as any}
+                      className="text-on-surface/70 hover:text-secondary transition-colors duration-300 flex items-center gap-2 group"
+                    >
+                      <span className="w-0 h-0.5 bg-secondary rounded-full transition-all duration-300 group-hover:w-4"></span>
+                      {link.name}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={link.action}
+                      className="text-on-surface/70 hover:text-secondary transition-colors duration-300 flex items-center gap-2 group cursor-pointer"
+                    >
+                      <span className="w-0 h-0.5 bg-secondary rounded-full transition-all duration-300 group-hover:w-4"></span>
+                      {link.name}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -132,11 +145,17 @@ export function Footer() {
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-outline-variant/10 text-sm text-on-surface/50">
           <p>{t("rights")}</p>
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-primary transition-colors">{t("privacy")}</Link>
-            <Link href="#" className="hover:text-primary transition-colors">{t("terms")}</Link>
+            <button onClick={() => setModalView("privacy")} className="hover:text-primary transition-colors cursor-pointer">{t("privacy")}</button>
+            <button onClick={() => setModalView("terms")} className="hover:text-primary transition-colors cursor-pointer">{t("terms")}</button>
           </div>
         </div>
       </div>
+      
+      <LegalModal 
+        isOpen={modalView !== null} 
+        onClose={() => setModalView(null)} 
+        view={modalView} 
+      />
     </footer>
   );
 }
