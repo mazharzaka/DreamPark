@@ -1,11 +1,11 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 2.0.0 → 2.1.0
-Bump Rationale: MINOR — Added a new principle (XIII. Hydration Safety & Client-Side Mounting) under Part 4 (Frontend Principles) establishing strict rules for client-only mounting, localized date formatting using skeletons, and browser-extension warnings bypass.
-Added Sections:
-  - Part 4, Principle XIII: Hydration Safety & Client-Side Mounting
-Modified Principles: None
+Version Change: 2.1.0 → 2.1.1
+Bump Rationale: PATCH — Expanded the list of valid pageKey values for Attractions to include dopy, merch, and srts to reflect recent feature implementation. Corrected date inconsistencies in the document.
+Added Sections: None
+Modified Principles:
+  - Part 1, Principle V: Dynamic Content via pageKey Strategy (added dopy, merch, srts to valid pageKey values for Attractions)
 Removed Sections: None
 Templates Requiring Updates:
   - .specify/templates/plan-template.md   ✅ aligned (Constitution Check references remain generic)
@@ -16,7 +16,7 @@ Deferred TODOs: None
 
 # Dream Park Constitution
 
-**Version**: 2.1.0 | **Ratified**: 2026-04-24 | **Last Amended**: 2026-05-28
+**Version**: 2.1.1 | **Ratified**: 2026-04-24 | **Last Amended**: 2026-05-31
 
 ---
 
@@ -88,10 +88,9 @@ client. Use `AppError` (`src/utils/appError.js`) for all thrown domain errors.
 
 ### V. Dynamic Content via `pageKey` Strategy
 
-Every content collection that is page-specific (Hero, Attraction) MUST carry a
-`pageKey` field to distinguish instances rather than using separate collections.
+Every content collection that is page-specific (Hero, Attraction) MUST carry a `pageKey` field to distinguish instances rather than using separate collections.
 - Valid `pageKey` values for Hero: `home`, `zoo`, `games`, `tickets`, `pass`.
-- Valid `pageKey` values for Attraction: `home`, `games`, `zoo`.
+- Valid `pageKey` values for Attraction: `home`, `games`, `zoo`, `dopy`, `merch`, `srts`.
 Image assets MUST be stored as Cloudinary URLs — no binary blobs in MongoDB, no
 local asset serving.
 Relational data (e.g. `Booking.ticketTypeId → TicketType`) MUST use Mongoose
@@ -447,4 +446,4 @@ All dynamic client-side views and component renders MUST prevent hydration misma
 - Any intentional deviation from a principle MUST be recorded in the plan's
   **Complexity Tracking** table with a justification.
 - **Compliance** is reviewed at PR merge time; non-compliant PRs MUST NOT be merged.
-- **Ratification Date**: 2026-04-24 (original) | **Last Amended**: 2026-05-23
+- **Ratification Date**: 2026-04-24 (original) | **Last Amended**: 2026-05-31

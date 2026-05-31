@@ -5,6 +5,7 @@ import { routing } from "@/src/i18n/routing";
 import { Geist, Geist_Mono, IBM_Plex_Sans_Arabic, Cairo, Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
 import { Header } from "@/src/components/layout/Header";
+import { Footer } from "@/src/components/layout/Footer";
 import LocalePersistence from "@/src/components/ui/LocalePersistence";
 import StoreProvider from "@/app/StoreProvider";
 import { SplashScreenWrapper } from "@/src/components/ui/SplashScreenWrapper";
@@ -74,6 +75,7 @@ export default async function LocaleLayout({
               <Header />
 
               {children}
+              <Footer />
             </AuthProvider>
           </StoreProvider>
         </NextIntlClientProvider>

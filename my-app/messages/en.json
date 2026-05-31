@@ -358,5 +358,91 @@
     "instant_ticketing": "Instant Ticketing & Pass Issuance",
     "reserve_title": "Reserve Your Dream Magic Pass",
     "reserve_subtitle": "Select your preferred pass tier, customize the visit date, and instantly generate your scannable Magic Pass for quick park access."
+  },
+  "ParkInfo": {
+    "heroTitle": "Legacy of Joy & Wonder",
+    "heroSubtitle": "Dream Park has been the heartbeat of laughter, adrenaline, and family magic for over two decades.",
+    "heroCta": "Explore Our Legacy",
+    "factsTitle": "Dream Park at a Glance",
+    "factsSubtitle": "Explore the key statistics that define our world-class amusement park.",
+    "fact1Label": "Founded",
+    "fact1Value": "1999",
+    "fact2Label": "Park Size",
+    "fact2Value": "150 Acres",
+    "fact3Label": "Daily Capacity",
+    "fact3Value": "30K Visitors",
+    "fact4Label": "Attractions",
+    "fact4Value": "25+ Rides",
+    "historyTitle": "Our Journey Through Time",
+    "historySubtitle": "Relive the milestones that shaped Dream Park into the magical oasis it is today.",
+    "milestones": {
+      "m1": {
+        "year": "1999",
+        "title": "Grand Opening",
+        "desc": "Dream Park opened its gates for the first time, welcoming thousands of families with a handful of pioneering rides and high spirits."
+      },
+      "m2": {
+        "year": "2005",
+        "title": "The Golden Expansion",
+        "desc": "A major upgrade introduced our signature roller coasters and dedicated water zones, doubling the park's footprint and daily capacity."
+      },
+      "m3": {
+        "year": "2015",
+        "title": "Eco-Friendly Initiative",
+        "desc": "Transitioned to sustainable energy grids, introduced solar-powered stations, and initiated green preservation protocols across all 150 acres."
+      },
+      "m4": {
+        "year": "2026",
+        "title": "Digital Transformation",
+        "desc": "Launched the Magic Pass QR ticketing system and integrated dynamic, contactless park exploration to elevate the modern guest experience."
+      }
+    },
+    "zonesTitle": "Magical Zones to Explore",
+    "zonesSubtitle": "Discover the uniquely themed areas that make up the rich tapestry of Dream Park.",
+    "zones": {
+      "z1": {
+        "name": "Main Gate",
+        "desc": "The starting point of the adventure, featuring elegant architecture, shopping stalls, and classic street performances."
+      },
+      "z2": {
+        "name": "Kids Area",
+        "desc": "A safe, magical playground of gentle carousels, soft plays, and colorful interactive adventures for toddlers."
+      },
+      "z3": {
+        "name": "Adventure Area",
+        "desc": "Jungle-themed trails, high-rope obstacle courses, and thrilling wild encounters for courageous explorers."
+      },
+      "z4": {
+        "name": "Fantasy Land",
+        "desc": "Step into a fairy tale with spectacular castle tours, magic stage shows, and magical light projections."
+      },
+      "z5": {
+        "name": "Thrill Rides",
+        "desc": "The home of gravity-defying drops, high-speed launch coasters, and adrenaline-pumping speed loops."
+      }
+    },
+    "faqTitle": "Visitor Information & FAQs",
+    "faqSubtitle": "Everything you need to plan a seamless, magical day at the park.",
+    "faqs": {
+      "q1": "What are the Ticket Categories?",
+      "a1": "We offer Silver (Standard access, standard parking), Gold (Fast-Track for 5 rides, premium parking), and Diamond (Unlimited Magic Pass, VIP lounge, 25% merchandise and dining discount) tiers. Tickets are paid in cash or verification at gate counters.",
+      "q2": "What are the Opening Hours?",
+      "a2": "Dream Park is open daily from 9:00 AM to 11:00 PM. Special holiday hours may apply and will be announced on the portal homepage.",
+      "q3": "Where is Dream Park Located?",
+      "a3": "We are located along the Main Oasis Boulevard, easily accessible via public transit or car. Standard and premium parking facilities are available at the entrance.",
+      "q4": "Are outside food and beverages allowed?",
+      "a4": "To ensure health and safety, outside food and beverages are not permitted. We host a wide variety of themed restaurants and snack bars to satisfy all dietary needs."
+    }
+  },
+  "Footer": {
+    "description": "Dream Park is the ultimate destination for family fun, adrenaline-pumping rides, and magical experiences that last a lifetime.",
+    "quickLinks": "Quick Links",
+    "support": "Support & Info",
+    "social": "Follow Us",
+    "rights": "© 2026 Dream Park. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact Us",
+    "faq": "FAQs"
   }
 }

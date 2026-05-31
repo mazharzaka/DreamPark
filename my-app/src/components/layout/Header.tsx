@@ -76,6 +76,12 @@ export function Header() {
       active: pathname === "/tickets",
       visible: true,
     },
+        {
+      label: t("parkInfo"),
+      href: "/info",
+      active: pathname === "/info",
+      visible: true,
+    },
     {
       label: locale === 'ar' ? 'الميدان' : 'Scanner',
       href: "/marketing-dashboard/scan",
@@ -180,7 +186,7 @@ export function Header() {
           </div>
 
           {/* Navigation Links (Desktop) */}
-          <div className="hidden lg:flex items-center gap-8 lg:gap-10">
+          <div className="hidden lg:flex items-center gap-8 lg:gap-5">
             {navLinks
               .filter((link) => link.visible)
               .map((link) => (

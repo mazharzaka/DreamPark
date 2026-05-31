@@ -11,6 +11,7 @@ import Merch from "./Merch";
 import { useGetAttractionsQuery } from "@/src/lib/features/api/apiSlice";
 import { useLocale } from "next-intl";
 import { useGetTicketTypesQuery } from "@/src/lib/features/api/bookingsApi";
+import Accordion from "@/src/components/ui/Accordion";
 
 export function HeroPortal({ data }: { data: any }) {
   const locale = useLocale();
@@ -18,36 +19,45 @@ export function HeroPortal({ data }: { data: any }) {
     data: gamesData,
     isLoading: gamesLoading,
     error: gamesError,
-
   } = useGetAttractionsQuery({
     lang: locale,
-    pageKey: 'home',
-    category: undefined
+    pageKey: "home",
+    category: undefined,
+  });
+  const { data: setsData } = useGetAttractionsQuery({
+    lang: locale,
+    pageKey: "srts",
+    category: undefined,
   });
   const {
-    data: setsData,
-
-
-  } = useGetAttractionsQuery({
-    lang: locale,
-    pageKey: 'srts',
-    category: undefined
-  });
-  const { data: typesRes, isLoading: typesLoading, error: typesError } = useGetTicketTypesQuery();
-
+    data: typesRes,
+    isLoading: typesLoading,
+    error: typesError,
+  } = useGetTicketTypesQuery();
 
   return (
     <div className="w-full bg-white min-h-screen">
       <div className="relative w-full h-screen overflow-hidden">
-        <HeroSlider slides={data?.data?.slides || []} isLoading={data?.isLoading || false} />
+        <HeroSlider
+          slides={data?.data?.slides || []}
+          isLoading={data?.isLoading || false}
+        />
       </div>
-      <AdrenalineWorlds title="Attractions" attractions={gamesData?.data?.items} />
+      <AdrenalineWorlds
+        title="Attractions"
+        attractions={gamesData?.data?.items}
+      />
       <DreamZoo />
       <OurHeroesSlider mockHeroes={MOCK_DOBY} title="Dopy" />
       <Merch />
       <MapContainer />
       <Ticketsets title="Ticketsets" attractions={setsData?.data?.items} />
-      <TicketsSection typesRes={typesRes?.data.slice(0, 3)} typesLoading={typesLoading} typesError={typesError} />
+      <TicketsSection
+        typesRes={typesRes?.data.slice(0, 3)}
+        typesLoading={typesLoading}
+        typesError={typesError}
+      />
+      <Accordion />
     </div>
   );
 }
