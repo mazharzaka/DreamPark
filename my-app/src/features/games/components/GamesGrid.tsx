@@ -19,7 +19,7 @@ function AttractionCard({ attr, locale }: { attr: Attraction; locale: string }) 
   const isOperating = attr.status === 'Operating';
 
   return (
-    <div key={attr._id} className="relative rounded-[2rem] overflow-hidden bg-slate-900 border border-white/10 dark:border-zinc-800 shadow-xl group flex flex-col justify-end aspect-[4/5] w-full transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(14,165,233,0.15)] hover:border-sky-500/30">
+    <Link key={attr._id} href={`/${locale}/zoo/animals/${attr._id}`} className="relative rounded-[2rem] overflow-hidden bg-slate-900 border border-white/10 dark:border-zinc-800 shadow-xl group flex flex-col justify-end aspect-[4/5] w-full transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(14,165,233,0.15)] hover:border-sky-500/30">
       {/* Background Image */}
       <Image
         src={attr.image}
@@ -88,7 +88,7 @@ function AttractionCard({ attr, locale }: { attr: Attraction; locale: string }) 
           <ArrowUpRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1 group-hover:-translate-y-0.5' : 'group-hover:translate-x-1 group-hover:-translate-y-0.5'}`} />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

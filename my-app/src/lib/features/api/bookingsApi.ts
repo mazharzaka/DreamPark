@@ -88,7 +88,9 @@ export const bookingsApi = createApi({
   reducerPath: "bookingsApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: `https://ms5k0c9j-5000.uks1.devtunnels.ms/api/tickets`,
+    baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api/tickets`
+      : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api/tickets",
 
     // Automatically attach the Bearer token stored in Redux auth state
     // (or fallback to localStorage for SSR-safe hydration)

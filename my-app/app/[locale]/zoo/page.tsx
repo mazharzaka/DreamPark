@@ -20,7 +20,7 @@ function ZooPage() {
     pageKey: 'zoo'
   });
   return (
-    <main className="mt-[106px]">
+    <main >
       <div className="relative w-full h-screen overflow-hidden">
         <HeroSlider
           slides={heroData?.data?.slides || []}

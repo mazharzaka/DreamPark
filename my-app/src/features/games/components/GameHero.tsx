@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Attraction } from "@/src/types/attraction";
 import Image from "next/image";
+import { Clock, Compass, HelpCircle } from "lucide-react";
+import { getTheme } from "../lib/theme";
 
 interface GameHeroProps {
   attraction: Attraction;
@@ -10,59 +12,125 @@ interface GameHeroProps {
 }
 
 export function GameHero({ attraction, locale }: GameHeroProps) {
-  const name = locale === 'ar' ? (attraction as any).name_ar : (attraction as any).name_en;
-  const description = locale === 'ar' ? (attraction as any).description_ar : (attraction as any).description_en;
-  
+  const isRtl = locale === "ar";
+  const name = isRtl ? (attraction as any).name_ar : (attraction as any).name_en;
+  const description = isRtl
+    ? (attraction as any).description_ar
+    : (attraction as any).description_en;
+
+  const theme = getTheme(attraction.layout?.customStyle);
+
+  const waitTimeLabel = isRtl ? "وقت الانتظار" : "Wait Time";
+  const minHeightLabel = isRtl ? "الحد الأدنى للطول" : "Min Height";
+
   return (
-    <section className="relative w-full h-[80vh] min-h-[600px] flex items-end overflow-hidden">
+    <section className="relative w-full h-[85vh] min-h-[650px] flex items-end overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={attraction.image || '/placeholder.jpg'}
-          alt={name || 'Game Image'}
+          src={attraction.image || "/placeholder.jpg"}
+          alt={name || "Game Image"}
           fill
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#f6f6f6] via-black/50 to-transparent" />
+        {/* Dynamic Theme Color Overlay */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-t ${theme.gradientBg} z-10`}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent z-10" />
       </div>
 
-      <div className="container relative z-10 px-4 pb-12 mx-auto">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          {/* Title and Category */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex-1"
-          >
-            {attraction.category && (
-              <span className="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-white uppercase rounded-full bg-white/10 backdrop-blur-md border border-white/20">
-                {attraction.category}
-              </span>
-            )}
-            <h1 className="text-5xl font-black text-white uppercase md:text-7xl drop-shadow-lg">
+      {/* Floating Dynamic Accent Background Glow */}
+      <div
+        className={`absolute -top-40 -left-40 w-96 h-96 ${theme.glowColor} rounded-full blur-[160px] pointer-events-none z-10`}
+      />
+
+      <div className="container relative z-20 px-6 pb-16 mx-auto">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
+          {/* Main Title Block */}
+          <div className="flex-1 text-start">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="flex flex-wrap items-center gap-3 mb-6"
+            >
+              {attraction.category && (
+                <span
+                  className={`inline-block px-5 py-2 text-xs font-black tracking-widest uppercase rounded-full ${theme.badgeStyle} backdrop-blur-md border border-white/10`}
+                >
+                  {attraction.category}
+                </span>
+              )}
+              {attraction.isFastTrack && (
+                <span className="inline-block px-5 py-2 text-xs font-black tracking-widest text-[#b5161e] bg-red-500/10 rounded-full border border-red-500/10 uppercase">
+                  {isRtl ? "المسار السريع" : "FastPass"}
+                </span>
+              )}
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+              className={`text-5xl font-black text-white uppercase md:text-7xl lg:text-8xl drop-shadow-xl leading-none tracking-tight ${
+                isRtl ? "font-cairo" : "font-sans"
+              }`}
+            >
               {name}
-            </h1>
-            <p className="max-w-2xl mt-4 text-lg text-white/90 drop-shadow-md">
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="max-w-3xl mt-6 text-lg md:text-xl text-white/80 leading-relaxed font-medium drop-shadow-md"
+            >
               {description}
-            </p>
-          </motion.div>
+            </motion.p>
+          </div>
 
           {/* Stats Bar */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="flex gap-4 p-5 rounded-3xl bg-white/80 backdrop-blur-md border border-white/40 shadow-xl shadow-[#2d2f2f]/5"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 180,
+              damping: 20,
+              delay: 0.3,
+            }}
+            className="flex gap-4 p-6 rounded-[2.5rem] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg border border-white/20 shadow-ambient self-start lg:self-end w-full sm:w-auto"
           >
-            <div className="flex flex-col items-center px-6 border-e border-neutral-200/50">
-              <span className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 font-bold">Wait Time</span>
-              <span className="text-2xl font-bold text-[#2d2f2f] whitespace-nowrap">{attraction.waitingTime || '--'}</span>
+            {/* Wait Time */}
+            <div className="flex-1 sm:flex-initial flex items-center gap-4 px-6 border-e border-neutral-200/50">
+              <div className={`p-3 rounded-2xl ${theme.bgAccent} ${theme.textAccent}`}>
+                <Clock size={22} className="animate-pulse" />
+              </div>
+              <div className="flex flex-col text-start">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">
+                  {waitTimeLabel}
+                </span>
+                <span className="text-xl font-black text-[#2d2f2f] whitespace-nowrap">
+                  {attraction.waitingTime || (isRtl ? "-- دقيقة" : "-- MIN")}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col items-center px-6">
-              <span className="text-[10px] uppercase tracking-widest text-neutral-500 mb-1 font-bold">Min Height</span>
-              <span className="text-2xl font-bold text-[#b5161e] whitespace-nowrap">{attraction.minHeight || '--'}</span>
+
+            {/* Min Height */}
+            <div className="flex-1 sm:flex-initial flex items-center gap-4 px-6">
+              <div className="p-3 rounded-2xl bg-red-500/10 text-[#b5161e]">
+                <Compass size={22} />
+              </div>
+              <div className="flex flex-col text-start">
+                <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">
+                  {minHeightLabel}
+                </span>
+                <span className="text-xl font-black text-[#b5161e] whitespace-nowrap">
+                  {attraction.minHeight || "--"}
+                </span>
+              </div>
             </div>
           </motion.div>
         </div>

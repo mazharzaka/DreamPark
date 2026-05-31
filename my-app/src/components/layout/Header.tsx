@@ -52,23 +52,18 @@ export function Header() {
 
   const navLinks = [
        {
-      label: t("zoo"),
+      label: t("Zoo"),
       href: "/zoo",
       active: pathname === "/zoo",
       visible: true,
     },
         {
-      label: t("parkInfo"),
-      href: "/park-info",
-      active: pathname === "/park-info",
+      label: t("Animals"),
+      href: "/zoo/animals",
+      active: pathname === "/zoo/animals",
       visible: true,
     },
-    {
-      label: t("parkInfo"),
-      href: "/park-info",
-      active: pathname === "/park-info",
-      visible: true,
-    },
+
     {
       label: t("Games"),
       href: "/games",
@@ -166,6 +161,10 @@ export function Header() {
         <nav className="glassmorphism bg-white/95 px-4 py-2.5 md:px-6 md:py-3 flex items-center justify-between shadow-ambient border border-white/20 max-w-7xl mx-auto rounded-2xl mt-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="text-secondary text-lg md:text-xl pt-1 font-black italic tracking-tighter hover:opacity-80 transition-opacity flex items-center"
+            >
             <Image 
               src="/logoDream.png" 
               alt="Logo" 
@@ -173,17 +172,15 @@ export function Header() {
               height={50} 
               className="md:w-16 md:h-16 object-contain"
             />
-            <Link
-              href="/"
-              className="text-secondary text-lg md:text-xl pt-1 font-black italic tracking-tighter hover:opacity-80 transition-opacity flex items-center"
-            >
-              <span className="text-primary">Dream</span>
+            <div className="flex  leading-[0.9]" dir="ltr">
+              <span className="text-primary md:inline hidden">Dream</span>
               <span className="md:inline hidden ml-1">Park</span>
-            </Link>
+            </div>
+            </Link> 
           </div>
 
           {/* Navigation Links (Desktop) */}
-          <div className="hidden md:flex items-center gap-8 lg:gap-10">
+          <div className="hidden lg:flex items-center gap-8 lg:gap-10">
             {navLinks
               .filter((link) => link.visible)
               .map((link) => (
@@ -212,7 +209,7 @@ export function Header() {
             <EditorialButton
               variant="primary"
               link={`/${locale}/pass`}
-              className="!px-3 !py-1.5 md:!px-6 md:!py-3 !min-h-0 !min-w-0 text-xs md:text-sm font-black"
+              className="!px-3 !py-1.5 md:!px-4 md:!py-2 !min-h-0 !min-w-0 text-[.5rem] md:text-sm font-black"
             >
               {tActions("bookNow")}
             </EditorialButton>
@@ -225,7 +222,7 @@ export function Header() {
             {/* Hamburger Button (Mobile) */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 text-secondary hover:text-primary transition-colors focus:outline-none cursor-pointer rounded-full hover:bg-black/5"
+              className="lg:hidden p-2 text-secondary hover:text-primary transition-colors focus:outline-none cursor-pointer rounded-full hover:bg-black/5"
               aria-label="Toggle Menu"
             >
               <Menu size={24} />
