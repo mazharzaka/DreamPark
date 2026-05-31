@@ -1,20 +1,28 @@
-import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import { Mutex } from 'async-mutex';
-import { RootState } from '../../store';
-import { setCredentials, clearCredentials, UserProfile } from './authSlice';
+import {
+  createApi,
+  fetchBaseQuery,
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query/react";
+import { Mutex } from "async-mutex";
+import { RootState } from "../../store";
+import { setCredentials, clearCredentials, UserProfile } from "./authSlice";
 
 const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: (process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api` : "https://smfxhlj1-5000.euw.devtunnels.ms/api"),
+  baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
+    : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
     return headers;
   },
-  credentials: 'include',
+  credentials: "include",
 });
 
 const baseQueryWithReauth: BaseQueryFn<
@@ -30,13 +38,18 @@ const baseQueryWithReauth: BaseQueryFn<
       const release = await mutex.acquire();
       try {
         const refreshResult = await baseQuery(
-          { url: '/auth/refresh', method: 'POST' },
+          { url: "/auth/refresh", method: "POST" },
           api,
-          extraOptions
+          extraOptions,
         );
         if (refreshResult.data) {
-          const data = refreshResult.data as { token: string; data: { user: UserProfile } };
-          api.dispatch(setCredentials({ token: data.token, user: data.data.user }));
+          const data = refreshResult.data as {
+            token: string;
+            data: { user: UserProfile };
+          };
+          api.dispatch(
+            setCredentials({ token: data.token, user: data.data.user }),
+          );
           result = await baseQuery(args, api, extraOptions);
         } else {
           api.dispatch(clearCredentials());
@@ -54,54 +67,54 @@ const baseQueryWithReauth: BaseQueryFn<
 };
 
 export const authApi = createApi({
-  reducerPath: 'authApi',
+  reducerPath: "authApi",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['UserProfile', 'UserBookings'],
+  tagTypes: ["UserProfile", "UserBookings"],
   endpoints: (builder) => ({
     signUpWithPassword: builder.mutation<any, any>({
       query: (credentials) => ({
-        url: '/auth/signup',
-        method: 'POST',
+        url: "/auth/signup",
+        method: "POST",
         body: credentials,
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     verifyAccountOTP: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/auth/verify-otp',
-        method: 'POST',
+        url: "/auth/verify-otp",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     loginWithPassword: builder.mutation<any, any>({
       query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
+        url: "/auth/login",
+        method: "POST",
         body: credentials,
       }),
-      invalidatesTags: ['UserProfile'],
+      invalidatesTags: ["UserProfile"],
     }),
     sendOtp: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/auth/send-otp',
-        method: 'POST',
+        url: "/auth/send-otp",
+        method: "POST",
         body: data,
       }),
     }),
     resetPasswordWithOTP: builder.mutation<any, any>({
       query: (data) => ({
-        url: '/auth/reset-password',
-        method: 'POST',
+        url: "/auth/reset-password",
+        method: "POST",
         body: data,
       }),
     }),
     logoutServer: builder.mutation<any, void>({
       query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
+        url: "/auth/logout",
+        method: "POST",
       }),
-      invalidatesTags: ['UserProfile', 'UserBookings'],
+      invalidatesTags: ["UserProfile", "UserBookings"],
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -113,23 +126,29 @@ export const authApi = createApi({
       },
     }),
     getProfile: builder.query<any, void>({
-      query: () => '/auth/profile',
-      providesTags: ['UserProfile'],
+      query: () => "/auth/profile",
+      providesTags: ["UserProfile"],
     }),
-    getUserBookings: builder.query<any, { from: string; sort: string; order: string }>({
+    getUserBookings: builder.query<
+      any,
+      { from: string; sort: string; order: string }
+    >({
       query: (params) => ({
         url: `/tickets/bookings/user`,
         params,
       }),
-      providesTags: ['UserBookings'],
+      providesTags: ["UserBookings"],
     }),
-    changeBookingDate: builder.mutation<any, { bookingId: string; visitDate: string }>({
+    changeBookingDate: builder.mutation<
+      any,
+      { bookingId: string; visitDate: string }
+    >({
       query: ({ bookingId, visitDate }) => ({
         url: `/v1/bookings/${bookingId}/change-date`,
-        method: 'PATCH',
+        method: "PATCH",
         body: { visitDate },
       }),
-      invalidatesTags: ['UserBookings'],
+      invalidatesTags: ["UserBookings"],
     }),
   }),
 });

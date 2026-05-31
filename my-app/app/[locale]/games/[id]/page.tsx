@@ -5,7 +5,9 @@ import { BookingPanel } from "@/src/features/games/components/BookingPanel";
 import { TermsAndConditions } from "@/src/features/games/components/TermsAndConditions";
 
 async function getAttraction(id: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api` : "https://smfxhlj1-5000.euw.devtunnels.ms/api";
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
+    : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api";
   try {
     const res = await fetch(`${baseUrl}/attractions/${id}`, {
       cache: "no-store", // Ensure we get fresh data
@@ -34,8 +36,9 @@ export async function generateMetadata({
   const attraction = await getAttraction(id);
   if (!attraction) return { title: "Game Not Found" };
 
-  const name = locale === 'ar' ? attraction.name_ar : attraction.name_en;
-  const description = locale === 'ar' ? attraction.description_ar : attraction.description_en;
+  const name = locale === "ar" ? attraction.name_ar : attraction.name_en;
+  const description =
+    locale === "ar" ? attraction.description_ar : attraction.description_en;
 
   return {
     title: `${name} | Dream Park`,

@@ -28,6 +28,7 @@ app.use(
       process.env.CLIENT_ORIGIN || "http://localhost:3000",
       "https://smfxhlj1-3000.euw.devtunnels.ms",
       "http://localhost:3000",
+      "https://ms5k0c9j-3000.uks1.devtunnels.ms",
     ],
     credentials: true,
   }),
