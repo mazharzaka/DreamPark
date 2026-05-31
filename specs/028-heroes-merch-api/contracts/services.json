@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ServicesAPIContract",
+  "description": "GET request contract for /api/services",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "heroes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "image": { "type": "string" },
+              "ctaText": { "type": "string" },
+              "ctaLink": { "type": "string" }
+            },
+            "required": ["id", "title", "image"]
+          }
+        },
+        "merch": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "image": { "type": "string" },
+              "price": { "type": "number" }
+            },
+            "required": ["id", "title", "image"]
+          }
+        }
+      },
+      "required": ["heroes", "merch"]
+    }
+  },
+  "required": ["success", "data"]
+}

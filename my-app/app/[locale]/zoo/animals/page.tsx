@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { CategoryFilter } from '@/src/features/games/components/CategoryFilter';
 import { CATEGORIES } from '@/src/features/games/data/mockGames';
 import { GamesGrid } from '@/src/features/games/components/GamesGrid';
+import { OurHeroesSlider } from '@/src/features/portal/components/OurHeroesSlider';
 import { useGetAttractionsQuery } from '@/src/lib/features/api/apiSlice';
 
 export default function AnimalsPage() {
@@ -34,6 +35,12 @@ export default function AnimalsPage() {
             {t('pageSubtitle')}
           </p>
         </div>
+
+        {zooData?.data?.items && zooData.data.items.length > 0 && (
+          <div className="mb-16">
+            <OurHeroesSlider mockHeroes={zooData.data.items} title="DreamZoo" />
+          </div>
+        )}
 
         <CategoryFilter
           categories={CATEGORIES}
