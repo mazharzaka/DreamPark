@@ -14,6 +14,7 @@ export interface TicketType {
   price: number;
   description: string[];
   descriptionAr: string[];
+  features?: Record<string, boolean>;
   discount?: number;
   isActive?: boolean;
   updatedAt: string;

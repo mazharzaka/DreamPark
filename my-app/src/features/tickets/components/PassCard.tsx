@@ -10,6 +10,17 @@ import { TicketProduct } from '../lib/ticket-data';
 import Link from 'next/link';
 
 
+const MASTER_FEATURES = [
+  { id: "rides_standard", textAr: "دخول الألعاب والمعالم العادية", textEn: "Access to standard rides & attractions" },
+  { id: "digital_exhibits", textAr: "دخول المعارض الرقمية التفاعلية", textEn: "Full entry to digital exhibits" },
+  { id: "animal_conservatory", textAr: "دخول محمية ومناطق الحيوانات", textEn: "Access to the animal conservatory" },
+  { id: "park_wifi", textAr: "خدمة إنترنت لاسلكي مجاني", textEn: "Free park-wide Wi-Fi access" },
+  { id: "fast_track", textAr: "دخول سريع وتخطي الطوابير", textEn: "Priority Fast-Track skip-the-line queue" },
+  { id: "vip_lounges", textAr: "دخول استراحات كبار الشخصيات الراقية", textEn: "Access to exclusive VIP rest lounges" },
+  { id: "locker_rental", textAr: "تأجير خزائن مجانية طوال اليوم", textEn: "Free locker rentals for the entire day" },
+  { id: "meal_voucher", textAr: "قسيمة وجبات مجانية عالمية", textEn: "Complimentary premium meal voucher" }
+];
+
 interface PassCardProps {
   tier: TicketProduct;
   onSelect: (id: string) => void;
@@ -22,7 +33,7 @@ export function PassCard({ tier, onSelect, isRtl }: PassCardProps) {
   const isPopular = tier.name.toLowerCase().includes('gold') || (tier.nameAr && tier.nameAr.includes('ذهب'));
   const color = isPopular ? '#d4af37' : '#005caa';
   const name = isRtl ? (tier.nameAr || tier.name) : tier.name;
-  const description = isRtl ? (tier.descriptionAr || tier.description) : tier.description;
+
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
       case "Sparkles": return Sparkles;
@@ -75,26 +86,37 @@ export function PassCard({ tier, onSelect, isRtl }: PassCardProps) {
         </div>
       </div>
 
-      {/* Features */}
-      <div className="w-full space-y-5 mb-12">
-        {description?.map((feature, index) => (
-          <div key={index} className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse text-right' : ''}`}>
+      {/* Features Comparison Grid */}
+      <div className="w-full space-y-4 mb-12 flex-grow flex flex-col justify-start">
+        {MASTER_FEATURES.map((feature) => {
+          const isAvailable = !!tier.features?.[feature.id];
+          return (
             <div
-              className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-              style={{ backgroundColor: tier.color || color, color: 'white' }}
+              key={feature.id}
+              className={`flex items-center gap-3 min-h-[32px] transition-all duration-300 ${
+                isRtl ? 'flex-row-reverse text-right' : 'text-left'
+              } ${isAvailable ? 'text-primary font-semibold opacity-100' : 'text-primary/40 font-medium'}`}
             >
-              <Check size={12} strokeWidth={3} />
+              {isAvailable ? (
+                <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-black">
+                  ✓
+                </span>
+              ) : (
+                <span className="w-5 h-5 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0 text-xs font-black">
+                  ✗
+                </span>
+              )}
+              <span className="text-sm">
+                {isRtl ? feature.textAr : feature.textEn}
+              </span>
             </div>
-            <span className="text-primary/70 text-sm font-medium">
-              {feature.trim()}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Select Button */}
       <Link
-        className="w-full py-5 rounded-[24px] w-fit  flex justify-center items-center text-white font-bold uppercase tracking-widest text-sm shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-primary/10"
+        className="w-full py-5 rounded-[24px] w-fit mt-auto flex justify-center items-center text-white font-bold uppercase tracking-widest text-sm shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-primary/10"
         style={{ backgroundColor: tier.color || color }}
         href={`/${isRtl ? 'ar' : 'en'}/pass/${tier.id}`}
       >

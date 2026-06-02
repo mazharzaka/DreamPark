@@ -49,6 +49,17 @@ type LoginFormData = {
   password: string;
 };
 
+const MASTER_FEATURES = [
+  { id: "rides_standard", textAr: "دخول الألعاب والمعالم العادية", textEn: "Access to standard rides & attractions" },
+  { id: "digital_exhibits", textAr: "دخول المعارض الرقمية التفاعلية", textEn: "Full entry to digital exhibits" },
+  { id: "animal_conservatory", textAr: "دخول محمية ومناطق الحيوانات", textEn: "Access to the animal conservatory" },
+  { id: "park_wifi", textAr: "خدمة إنترنت لاسلكي مجاني", textEn: "Free park-wide Wi-Fi access" },
+  { id: "fast_track", textAr: "دخول سريع وتخطي الطوابير", textEn: "Priority Fast-Track skip-the-line queue" },
+  { id: "vip_lounges", textAr: "دخول استراحات كبار الشخصيات الراقية", textEn: "Access to exclusive VIP rest lounges" },
+  { id: "locker_rental", textAr: "تأجير خزائن مجانية طوال اليوم", textEn: "Free locker rentals for the entire day" },
+  { id: "meal_voucher", textAr: "قسيمة وجبات مجانية عالمية", textEn: "Complimentary premium meal voucher" }
+];
+
 // Lucide icon mapping helper
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
@@ -357,7 +368,7 @@ export default function BookingFlow() {
 
             {/* TICKET TYPE CARDS */}
             {isLoadingTickets ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
                 {[1, 2].map((i) => (
                   <div
                     key={i}
@@ -366,7 +377,7 @@ export default function BookingFlow() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
                 {filteredTickets.map((ticket) => {
                   const IconComp = getIconComponent(ticket.icon || "");
                   const isSelected =
@@ -381,8 +392,8 @@ export default function BookingFlow() {
                           setSelectedTicketId(ticket.id || ticket._id || ""),
                         )
                       }
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.015 }}
+                      whileTap={{ scale: 0.995 }}
                       className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md ${
                         isSelected
                           ? "ring-4 ring-secondary shadow-xl"
@@ -400,7 +411,8 @@ export default function BookingFlow() {
                         style={{ backgroundColor: ticket.color || "#b5161e" }}
                       />
 
-                      <div className="pt-4">
+                      {/* Content Wrapper (Flex-grow ensures this pushes bottom pricing section down) */}
+                      <div className="flex-grow flex flex-col pt-4">
                         <div className="flex justify-between items-center mb-6">
                           <div
                             className="p-4 rounded-2xl text-white flex items-center justify-center shadow-lg"
@@ -422,30 +434,41 @@ export default function BookingFlow() {
                         </div>
 
                         {/* Oversized, Bold Editorial Typography */}
-                        <h3 className="text-3xl md:text-4xl font-black text-on-surface tracking-tight leading-tight mb-4">
+                        <h3 className="text-3xl md:text-4xl font-black text-on-surface tracking-tight leading-tight mb-6">
                           {isAr ? ticket.nameAr : ticket.name}
                         </h3>
 
-                        {/* Description bullet list */}
-                        <ul className="space-y-3 mb-8">
-                          {(
-                            (isAr
-                              ? ticket.descriptionAr
-                              : ticket.description) || []
-                          ).map((bullet: string, index: number) => (
-                            <li
-                              key={index}
-                              className="flex items-start gap-3 text-sm md:text-base text-on-surface/75 leading-relaxed"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-secondary mt-2 flex-shrink-0" />
-                              <span>{bullet}</span>
-                            </li>
-                          ))}
+                        {/* Description bullet list (True / False Grid Comparison) */}
+                        <ul className="space-y-3.5 mb-8">
+                          {MASTER_FEATURES.map((feature) => {
+                            const isAvailable = !!ticket.features?.[feature.id];
+                            return (
+                              <li
+                                key={feature.id}
+                                className={`flex items-center gap-3 text-sm md:text-base leading-relaxed min-h-[32px] transition-all duration-300 ${
+                                  isAvailable ? "text-on-surface font-semibold opacity-100" : "text-on-surface/40 font-medium"
+                                }`}
+                              >
+                                {isAvailable ? (
+                                  <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center flex-shrink-0 text-xs font-black">
+                                    ✓
+                                  </span>
+                                ) : (
+                                  <span className="w-5 h-5 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center flex-shrink-0 text-xs font-black">
+                                    ✗
+                                  </span>
+                                )}
+                                <span>
+                                  {isAr ? feature.textAr : feature.textEn}
+                                </span>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
 
                       {/* Pricing Section (Strictly NO border lines, separating with background shifting) */}
-                      <div className="pt-6 mt-6 bg-[#f0f1f1]/50 p-6 rounded-3xl flex justify-between items-center">
+                      <div className="pt-6 mt-auto bg-[#f0f1f1]/50 p-6 rounded-3xl flex justify-between items-center">
                         <div>
                           <span className="block text-xs uppercase tracking-wider text-on-surface/50 font-black">
                             {t("price")}
@@ -469,15 +492,17 @@ export default function BookingFlow() {
                           </div>
                         </div>
 
-                        {/* Tactile checkbox indicator */}
+                        {/* Sleek, Flexbox aligned Select CTA Button */}
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                          className={`px-6 py-3.5 rounded-full font-black text-xs uppercase tracking-widest transition-all duration-300 ${
                             isSelected
-                              ? "bg-secondary text-white scale-110"
-                              : "bg-[#f0f1f1] text-transparent"
+                              ? "bg-secondary text-white shadow-[0_4px_25px_rgba(0,92,170,0.3)] scale-105"
+                              : "bg-[#f0f1f1] text-on-surface/80 hover:bg-[#e4e5e5]"
                           }`}
                         >
-                          <CheckCircle2 className="w-6 h-6" />
+                          {isSelected 
+                            ? (isAr ? "تم اختيارها" : "Selected") 
+                            : (isAr ? "اختر الباقة" : "Select Pass")}
                         </div>
                       </div>
                     </motion.div>

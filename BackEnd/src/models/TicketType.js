@@ -31,13 +31,10 @@ const ticketTypeSchema = new mongoose.Schema(
       required: [true, 'Please provide a ticket price'],
       min: [0, 'Price cannot be negative'],
     },
-    description: {
-      type: [String],
-      default: [],
-    },
-    descriptionAr: {
-      type: [String],
-      default: [],
+    features: {
+      type: Map,
+      of: Boolean,
+      default: {},
     },
     discount: {
       type: Number,
