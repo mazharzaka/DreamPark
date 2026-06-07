@@ -26,7 +26,7 @@ import {
   useCreateBookingMutation,
 } from "@/src/lib/features/api/bookingsApi";
 import { useLocale, useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/src/lib/hooks";
 import {
   setStep,
@@ -37,6 +37,7 @@ import {
 } from "@/src/lib/features/booking/bookingSlice";
 import { setCredentials } from "@/src/lib/features/auth/authSlice";
 import { useLoginWithPasswordMutation } from "../lib/features/auth/authApi";
+import { navigate } from "next/dist/client/components/segment-cache/navigation";
 
 type BookingFormData = {
   targetDate: string;
@@ -82,6 +83,11 @@ export default function BookingFlow() {
   const t = useTranslations("booking");
   const params = useParams();
 
+  const [mounted, setMounted] = useState<boolean>(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Extract optional ticket ID segment from params: e.g. [[...id]] catch-all segment
   const ticketIdFromUrl = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
@@ -112,7 +118,7 @@ export default function BookingFlow() {
   } = useForm<LoginFormData>({
     defaultValues: { email: "", password: "" },
   });
-
+const navigate = useRouter();
   // Auth state local fallback
   const [login] = useLoginWithPasswordMutation();
 
@@ -134,6 +140,15 @@ export default function BookingFlow() {
   // Sync token from localStorage
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
+  // Set initial step based on URL parameter immediately on mount / route changes
+  useEffect(() => {
+    if (ticketIdFromUrl) {
+      dispatch(setStep(2));
+    } else {
+      dispatch(setStep(1));
+    }
+  }, [ticketIdFromUrl, dispatch]);
+
   // Auto-activation logic for URL parameter
   useEffect(() => {
     if (ticketTypes.length > 0) {
@@ -151,12 +166,14 @@ export default function BookingFlow() {
             setSelectedTicketId(matchedTicket.id || matchedTicket._id || ""),
           );
           dispatch(setSelectedCategory(matchedTicket.category));
+          dispatch(setStep(2)); // Jump directly to customization if valid ticket ID provided   
         } else {
           // Graceful fallback to first available ticket if invalid ID provided
           dispatch(setSelectedCategory(ticketTypes[0].category));
           dispatch(
             setSelectedTicketId(ticketTypes[0].id || ticketTypes[0]._id || ""),
           );
+          dispatch(setStep(1));
         }
       } else {
         // Default when no ID is provided: select first ticket of the first category
@@ -166,9 +183,10 @@ export default function BookingFlow() {
         if (firstOfCat) {
           dispatch(setSelectedTicketId(firstOfCat.id || firstOfCat._id || ""));
         }
+        dispatch(setStep(1));
       }
     }
-  }, [ticketTypes, ticketIdFromUrl]);
+  }, [ticketTypes, ticketIdFromUrl, dispatch]);
 
   // Handle manual category switch
   const handleCategoryChange = (cat: "INDIVIDUAL" | "GROUP") => {
@@ -242,7 +260,7 @@ export default function BookingFlow() {
             color: selectedTicket?.color || "#b5161e",
           }),
         );
-        dispatch(dispatch(setStep(3))); // Success Screen
+        dispatch(setStep(3)); // Success Screen
       }
     } catch (err) {
       console.log("Booking error:", err);
@@ -263,6 +281,7 @@ export default function BookingFlow() {
           );
           setShowLoginModal(false);
         }
+        setIsLoggingIn(false);
       })
       .catch((err) => {
         console.error("Authentication failed:", err);
@@ -273,7 +292,11 @@ export default function BookingFlow() {
               ? err.data.error
               : typeof err?.error === "string"
                 ? err.error
-                : "Authentication failed";
+                : typeof err?.message === "string"
+                  ? err.message
+                  : "Authentication failed";
+        setLoginError(errMsg);
+        setIsLoggingIn(false);
       });
   };
 
@@ -287,43 +310,108 @@ export default function BookingFlow() {
           : "An error occurred during booking")
       );
     }
+    if ("message" in bookingError && typeof bookingError.message === "string") {
+      return bookingError.message;
+    }
     return isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
   };
 
+  if (!mounted) {
+    return (
+      <div className="w-full max-w-6xl mx-auto px-6 py-12 space-y-12 animate-pulse" dir={isAr ? "rtl" : "ltr"}>
+        {/* Stepper Skeleton */}
+        <div className="max-w-xl mx-auto mb-12 relative flex justify-between items-center px-6">
+          <div className="absolute top-6 left-6 right-6 h-1 bg-[#f0f1f1] -translate-y-1/2 rounded-full" />
+          <div className="w-12 h-12 rounded-full bg-[#f0f1f1] relative z-10" />
+          <div className="w-12 h-12 rounded-full bg-[#f0f1f1] relative z-10" />
+        </div>
+
+        {/* Category switcher tabs placeholder */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-[#f0f1f1] w-64 h-14 rounded-full" />
+        </div>
+
+        {/* Main content area skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="h-96 bg-[#f0f1f1] rounded-[2.5rem]" />
+          <div className="h-96 bg-[#f0f1f1] rounded-[2.5rem]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full font-sans" dir={isAr ? "rtl" : "ltr"}>
-      {/* STEPS SEGMENTED CONTROLLER (No lines, strictly relies on background shades) */}
+      {/* EDITORIAL JOY HORIZONTAL STEPPER */}
       {step < 3 && (
-        <div className="max-w-xl mx-auto mb-10 bg-[#f0f1f1] p-1.5 rounded-full flex justify-between items-center relative shadow-inner">
-          <button
-            type="button"
-            onClick={() => dispatch(setStep(1))}
-            className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
-              step === 1
-                ? "bg-white text-secondary shadow-md"
-                : "text-on-surface/60 hover:text-on-surface"
-            }`}
-          >
-            <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">
-              1
-            </span>
-            {t("step_select")}
-          </button>
-          <button
-            type="button"
-            onClick={() => selectedTicketId && dispatch(setStep(2))}
-            disabled={!selectedTicketId}
-            className={`flex-1 py-3 text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed ${
-              step === 2
-                ? "bg-white text-secondary shadow-md"
-                : "text-on-surface/60 hover:text-on-surface"
-            }`}
-          >
-            <span className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center font-bold text-xs">
-              2
-            </span>
-            {t("step_customize")}
-          </button>
+        <div className="max-w-xl mx-auto mb-12 px-6 relative">
+          <div className="flex items-center justify-between relative">
+            {/* Base Connector Bar (Inactive) */}
+            <div className="absolute top-6 left-6 right-6 h-1 bg-surface-container-low -translate-y-1/2 rounded-full z-0" />
+
+            {/* Active Connector Progress Bar */}
+            <div
+              className={`absolute top-6 h-1 bg-secondary -translate-y-1/2 rounded-full transition-all duration-500 ease-out z-0 ${
+                isAr ? "right-6" : "left-6"
+              }`}
+              style={{
+                width: step === 2 ? "calc(100% - 3rem)" : "0%",
+              }}
+            />
+
+            {/* Step 1 */}
+            <button
+              type="button"
+              onClick={() => dispatch(setStep(1))}
+              className="flex flex-col items-center relative z-10 focus:outline-none group"
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-sm transition-all duration-300 ${
+                  step >= 1
+                    ? "bg-secondary text-white shadow-ambient scale-105"
+                    : "bg-surface-container-low text-on-surface/40"
+                }`}
+              >
+                {step > 1 ? (
+                  <CheckCircle2 className="w-5 h-5" />
+                ) : (
+                  "1"
+                )}
+              </div>
+              <span
+                className={`mt-3 text-xs md:text-sm font-black tracking-wide uppercase transition-colors duration-300 ${
+                  step >= 1 ? "text-secondary" : "text-on-surface/50"
+                }`}
+              >
+                {t("step_select")}
+              </span>
+            </button>
+
+            {/* Step 2 */}
+            <button
+              type="button"
+              onClick={() => selectedTicketId && dispatch(setStep(2))}
+              disabled={!selectedTicketId}
+              className="flex flex-col items-center relative z-10 focus:outline-none group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-sm transition-all duration-300 ${
+                  step === 2
+                    ? "bg-secondary text-white shadow-ambient scale-105"
+                    : "bg-surface-container-low text-on-surface/40"
+                }`}
+              >
+                2
+              </div>
+              <span
+                className={`mt-3 text-xs md:text-sm font-black tracking-wide uppercase transition-colors duration-300 ${
+                  step === 2 ? "text-secondary" : "text-on-surface/50"
+                }`}
+              >
+                {t("step_customize")}
+              </span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -387,23 +475,17 @@ export default function BookingFlow() {
                   return (
                     <motion.div
                       key={ticket.id || ticket._id}
-                      onClick={() =>
+                      onClick={() => {
                         dispatch(
                           setSelectedTicketId(ticket.id || ticket._id || ""),
-                        )
-                      }
+                        );
+                        dispatch(setStep(2));
+                        navigate.push(`/${locale}/pass/${ticket.id || ticket._id || ""}`);
+                      }}
                       whileHover={{ scale: 1.015 }}
                       whileTap={{ scale: 0.995 }}
-                      className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md ${
-                        isSelected
-                          ? "ring-4 ring-secondary shadow-xl"
-                          : "hover:shadow-lg"
-                      }`}
-                      style={{
-                        background: isSelected
-                          ? `linear-gradient(135deg, #ffffff 0%, #fffcfc 100%)`
-                          : "#ffffff",
-                      }}
+                      className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md `}
+                  
                     >
                       {/* Brand Pill Accent */}
                       <div
@@ -511,18 +593,8 @@ export default function BookingFlow() {
               </div>
             )}
 
-            {/* ACTION FOOTER */}
-            <div className="flex justify-end pt-6">
-              <button
-                type="button"
-                onClick={() => dispatch(setStep(2))}
-                disabled={!selectedTicketId}
-                className="bg-secondary text-white rounded-full px-12 py-5 font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_15px_30px_rgba(117,87,0,0.25)]"
-              >
-                {t("cta_next")}
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
+   
+           
           </motion.div>
         )}
 

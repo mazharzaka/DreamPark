@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -38,6 +39,21 @@ const cairo = Cairo({
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700", "800", "900"],
 });
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === "ar";
+  return {
+    title: isAr ? "دريم بارك | مدينة الملاهي الأولى" : "Dream Park | The Premier Theme Park",
+    description: isAr
+      ? "مرحباً بكم في دريم بارك، أكبر مدينة ملاهي ترفيهية متكاملة تقدم ألعاباً مثيرة، عروضاً ترفيهية ومغامرات لا تُنسى لجميع أفراد العائلة."
+      : "Welcome to Dream Park, the ultimate theme park offering thrilling rides, interactive family shows, and unforgettable adventures.",
+  };
+}
 
 export default async function LocaleLayout({
   children,

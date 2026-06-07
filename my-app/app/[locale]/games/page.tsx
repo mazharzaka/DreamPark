@@ -2,11 +2,27 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { GamesGrid } from '@/src/features/games/components/GamesGrid';
+import dynamic from 'next/dynamic';
 import { CategoryFilter } from '@/src/features/games/components/CategoryFilter';
 import { CATEGORIES } from '@/src/features/games/data/mockGames';
 import { useGetAttractionsQuery } from '@/src/lib/features/api/apiSlice';
 import { Game } from '@/src/features/games/types';
+
+// GamesGrid — dynamically loaded to keep the filter bar interactive immediately
+// while the heavier card grid (images + hover animations) loads in the background.
+const GamesGrid = dynamic(
+  () => import('@/src/features/games/components/GamesGrid').then((mod) => mod.GamesGrid),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="aspect-[4/5] rounded-[2rem] bg-gray-100 animate-pulse" />
+        ))}
+      </div>
+    ),
+  }
+);
 
 export default function GamesPage() {
   const t = useTranslations('Games');

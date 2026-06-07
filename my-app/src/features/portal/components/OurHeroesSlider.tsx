@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { useGetAttractionsQuery } from '@/src/lib/features/api/apiSlice';
+import { getOptimizedCloudinaryUrl } from '@/src/lib/cloudinary';
 
 // Swiper styles
 import 'swiper/css';
@@ -131,10 +132,16 @@ export function OurHeroesSlider({ mockHeroes, title = "Portal.OurHeroes" }: { mo
           </div>
 
           <div className="flex gap-4">
-            <button className="heroes-prev-btn w-12 h-12 rounded-full border border-secondary/20 flex items-center justify-center hover:bg-[#b91c1c] hover:border-[#b91c1c] hover:text-white transition-all duration-300">
+            <button
+              className="heroes-prev-btn w-12 h-12 rounded-full border border-secondary/20 flex items-center justify-center hover:bg-[#b91c1c] hover:border-[#b91c1c] hover:text-white transition-all duration-300"
+              aria-label={isRtl ? "السلايد السابق" : "Previous slide"}
+            >
               <ChevronLeft size={20} className={isRtl ? 'rotate-180' : ''} />
             </button>
-            <button className="heroes-next-btn w-12 h-12 rounded-full border border-secondary/20 flex items-center justify-center hover:bg-[#b91c1c] hover:border-[#b91c1c] hover:text-white transition-all duration-300">
+            <button
+              className="heroes-next-btn w-12 h-12 rounded-full border border-secondary/20 flex items-center justify-center hover:bg-[#b91c1c] hover:border-[#b91c1c] hover:text-white transition-all duration-300"
+              aria-label={isRtl ? "السلايد التالي" : "Next slide"}
+            >
               <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
             </button>
           </div>
@@ -167,12 +174,12 @@ export function OurHeroesSlider({ mockHeroes, title = "Portal.OurHeroes" }: { mo
               <SwiperSlide key={slide.id || slide._id}>
                 <div className="relative w-full h-[350px] md:h-[450px] lg:h-[550px] rounded-[2.5rem] overflow-hidden bg-surface group shadow-xl shadow-black/5">
                   <Image
-                    src={slide.image || slide.imageUrl || ""}
+                    src={getOptimizedCloudinaryUrl(slide.image || slide.imageUrl || "")}
                     alt={slide.title}
                     fill
+                    loading="lazy"
                     className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    priority={slide.id === 'hero-1' || slide._id === 'hero-1'}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>

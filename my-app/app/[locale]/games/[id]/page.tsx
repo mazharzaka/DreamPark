@@ -12,7 +12,7 @@ async function getAttraction(id: string) {
     : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api";
   try {
     const res = await fetch(`${baseUrl}/attractions/${id}`, {
-      cache: "no-store", // Ensure we get fresh data
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {

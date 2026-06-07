@@ -5,6 +5,7 @@ import { Attraction } from "@/src/types/attraction";
 import Image from "next/image";
 import { Clock, Compass, HelpCircle } from "lucide-react";
 import { getTheme } from "../lib/theme";
+import { getOptimizedCloudinaryHeroUrl } from "@/src/lib/cloudinary";
 
 interface GameHeroProps {
   attraction: Attraction;
@@ -28,10 +29,11 @@ export function GameHero({ attraction, locale }: GameHeroProps) {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={attraction.image || "/placeholder.jpg"}
+          src={getOptimizedCloudinaryHeroUrl(attraction.image || "/placeholder.jpg")}
           alt={name || "Game Image"}
           fill
           className="object-cover"
+          sizes="100vw"
           priority
         />
         {/* Dynamic Theme Color Overlay */}

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { HeroSlide } from '../types';
 import { EditorialButton } from '@/src/components/ui/EditorialButton';
 import Image from 'next/image';
+import { getOptimizedCloudinaryHeroUrl } from '@/src/lib/cloudinary';
 
 interface SlideContentProps {
   slide: HeroSlide;
@@ -50,11 +51,11 @@ export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideConte
       {/* Background Image Optimized */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={slide?.imageUrl || "/hero-slider/1.png"}
+          src={getOptimizedCloudinaryHeroUrl(slide?.imageUrl || "/hero-slider/1.png")}
           alt={slide?.title || ""}
           fill
           priority={isFirst}
-          quality={100}
+          quality={85}
           className={`object-cover transition-transform duration-[15000ms] ease-out ${(isActive && isMounted) ? 'scale-100' : 'scale-110'}`}
           sizes="100vw"
         />

@@ -92,6 +92,14 @@ export const bookingsApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api/tickets`
       : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api/tickets",
+    fetchFn: (input, init) => {
+      const url = typeof input === "string" ? input : input.url;
+      const method = init?.method || "GET";
+      if (url.includes("/types") && method.toUpperCase() === "GET") {
+        return fetch(input, { ...init, next: { revalidate: 3600 } });
+      }
+      return fetch(input, init);
+    },
 
     // Automatically attach the Bearer token stored in Redux auth state
     // (or fallback to localStorage for SSR-safe hydration)

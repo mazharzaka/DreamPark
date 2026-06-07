@@ -4,6 +4,7 @@ import { Game } from '../types';
 import { Product, Attraction } from '@/src/features/portal/types';
 import Link from 'next/link';
 import { Clock, Compass, Sparkles, ArrowUpRight } from 'lucide-react';
+import { getOptimizedCloudinaryUrl } from '@/src/lib/cloudinary';
 
 interface GamesGridProps {
   games?: Game[];
@@ -22,11 +23,12 @@ function AttractionCard({ attr, locale }: { attr: Attraction; locale: string }) 
     <Link key={attr._id} href={`/${locale}/zoo/animals/${attr._id}`} className="relative rounded-[2rem] overflow-hidden bg-slate-900 border border-white/10 dark:border-zinc-800 shadow-xl group flex flex-col justify-end aspect-[4/5] w-full transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(14,165,233,0.15)] hover:border-sky-500/30">
       {/* Background Image */}
       <Image
-        src={attr.image}
+        src={getOptimizedCloudinaryUrl(attr.image)}
         alt={attr.title || ''}
         fill
+        loading="lazy"
         className="object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
-        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
 
       {/* Modern Multi-Layer Gradient Overlays */}
@@ -102,11 +104,12 @@ function GameCard({ game, locale, t }: { game: Game; locale: string; t: any }) {
       <div className="relative rounded-[2rem] overflow-hidden bg-slate-900 border border-white/10 dark:border-zinc-800 shadow-xl group flex flex-col justify-end aspect-[4/5] w-full transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(14,165,233,0.15)] hover:border-sky-500/30">
         {/* Background Image */}
         <Image
-          src={game.image}
+          src={getOptimizedCloudinaryUrl(game.image)}
           alt={title}
           fill
+          loading="lazy"
           className="object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
-          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
 
         {/* Modern Multi-Layer Gradient Overlays */}
@@ -151,11 +154,12 @@ function ProductCard({ product, locale }: { product: Product; locale: string }) 
     <div key={product.id} className="relative rounded-[2rem] overflow-hidden bg-slate-900 border border-white/10 dark:border-zinc-800 shadow-xl group flex flex-col justify-end aspect-[4/5] w-full transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(14,165,233,0.15)] hover:border-sky-500/30">
       {/* Background Image */}
       <Image
-        src={product.image}
+        src={getOptimizedCloudinaryUrl(product.image)}
         alt={product.title}
         fill
+        loading="lazy"
         className="object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
-        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
 
       {/* Modern Multi-Layer Gradient Overlays */}

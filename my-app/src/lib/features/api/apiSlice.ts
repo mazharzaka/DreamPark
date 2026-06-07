@@ -6,7 +6,7 @@ export const apiSlice = createApi({
     baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
       : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api",
-    fetchFn: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    fetchFn: (input, init) => fetch(input, { ...init, next: { revalidate: 3600 } }),
   }),
   endpoints: (builder) => ({
     getHeroByPage: builder.query<any, { lang: string; pageKey: string }>({

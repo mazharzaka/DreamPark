@@ -2,6 +2,8 @@
 
 import { ArrowLeft, ArrowRight, Calendar } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
+import Image from 'next/image';
+import { getOptimizedCloudinaryUrl } from '@/src/lib/cloudinary';
 import { Attraction } from '../types';
 import { Link } from '@/src/i18n/routing';
 
@@ -38,13 +40,13 @@ function renderAttractionCard(attr: Attraction, locale: string) {
       <div className={`absolute inset-0 bg-gradient-to-br z-10 opacity-50 ${getFallbackGradient(attr.layout.customStyle!)}`} />
 
       {/* Background Image */}
-      <div
-        className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-        style={{
-          backgroundImage: `url(${attr.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+      <Image
+        src={getOptimizedCloudinaryUrl(attr.image)}
+        alt={attr.title || ''}
+        fill
+        loading="lazy"
+        className="absolute inset-0 object-cover transition-transform duration-700 group-hover:scale-105"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
 
       {/* Dark Overlay for Text Readability */}

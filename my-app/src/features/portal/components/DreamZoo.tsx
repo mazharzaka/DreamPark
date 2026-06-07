@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, FreeMode } from 'swiper/modules';
 import { Camera, Heart, Info, Sun, Trees, BookOpen, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import { ZOO_FEATURES, ZOO_PINS } from '../data/zooData';
 import { Link } from '@/src/i18n/routing';
 
@@ -65,9 +66,9 @@ export function DreamZoo() {
                         <div className="w-10 h-10 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary mb-4">
                           <Icon className="w-5 h-5" />
                         </div>
-                        <h4 className={`text-sm font-bold text-primary mb-1 uppercase tracking-wider ${isRtl ? 'font-cairo' : ''}`}>
+                        <h3 className={`text-sm font-bold text-primary mb-1 uppercase tracking-wider ${isRtl ? 'font-cairo' : ''}`}>
                           {t(feature.titleKey)}
-                        </h4>
+                        </h3>
                         <p className={`text-xs text-primary/60 leading-normal ${isRtl ? 'font-cairo' : ''}`}>
                           {t(feature.descriptionKey)}
                         </p>
@@ -97,11 +98,14 @@ export function DreamZoo() {
               className="relative aspect-square lg:aspect-auto md:h-[600px] w-full bg-white rounded-[40px] shadow-2xl overflow-hidden border-8 border-white group"
             >
               {/* Background Illustration */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-                style={{ backgroundImage: 'url("/dream_zoo_bg1.png")' }}
+              <Image
+                src="/dream_zoo_bg1.png"
+                alt="Dream Zoo Background"
+                fill
+                className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-105"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent mix-blend-overlay" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent mix-blend-overlay z-10" />
 
               {/* Pins */}
 

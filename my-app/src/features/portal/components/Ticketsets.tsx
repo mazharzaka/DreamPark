@@ -2,6 +2,8 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { Attraction } from "../types";
+import Image from "next/image";
+import { getOptimizedCloudinaryUrl } from "@/src/lib/cloudinary";
 
 function renderAttractionCard(attr: Attraction, locale: string) {
   const isRtl = locale === "ar";
@@ -21,13 +23,13 @@ function renderAttractionCard(attr: Attraction, locale: string) {
       {/* Fallback Gradient */}
 
       {/* Background Image */}
-      <div
-        className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-        style={{
-          backgroundImage: `url(${attr.image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+      <Image
+        src={getOptimizedCloudinaryUrl(attr.image)}
+        alt={attr.title || ''}
+        fill
+        loading="lazy"
+        className="absolute inset-0 object-cover transition-transform duration-700 group-hover:scale-105"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
     </div>
   );

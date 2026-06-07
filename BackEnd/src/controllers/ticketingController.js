@@ -49,11 +49,15 @@ export const createBooking = async (req, res, next) => {
         .json({ success: false, error: "Phone number is required." });
     }
 
-    // Validate date
+    // Validate date (strictly compared against Server-Side UTC midnight)
     const dateObj = new Date(targetDate);
+    dateObj.setUTCHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     if (
       isNaN(dateObj.getTime()) ||
-      dateObj < new Date(new Date().setHours(0, 0, 0, 0))
+      dateObj < today
     ) {
       return res
         .status(400)
@@ -149,11 +153,11 @@ export const verifyAndConfirmPayment = async (req, res, next) => {
         .json({ success: false, error: "تم تأكيد هذه التذكرة مسبقاً" });
     }
 
-    // 3. Check if target date is today
+    // 3) Check if target date is today (strictly compared against Server-Side UTC midnight)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
     const bookingDate = new Date(booking.targetDate);
-    bookingDate.setHours(0, 0, 0, 0);
+    bookingDate.setUTCHours(0, 0, 0, 0);
 
     if (bookingDate.getTime() !== today.getTime()) {
       return res
@@ -230,18 +234,35 @@ export const updateTicketPrice = async (req, res, next) => {
 
 export const getUserBookings = async (req, res, next) => {
   try {
-    const { email } = req.query; // Mock auth via query param if needed, otherwise fallback to req.user.id
+    const { email } = req.query;
     let userId = req.user ? req.user.id : null;
 
-    if (!userId && email) {
-      const user = await User.findOne({ email });
-      if (user) {
-        userId = user._id;
-      }
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Unauthorized." });
     }
 
-    if (!userId) {
-      return res.status(404).json({ success: false, error: "User not found." });
+    if (email) {
+      // Normalize user role to check permissions
+      const userRole = req.user.role ? req.user.role.toUpperCase().trim() : "";
+      const isStaffOrAdmin =
+        userRole === "ADMIN" ||
+        userRole === "MARKETING_AGENT" ||
+        userRole === "STAFF";
+
+      if (isStaffOrAdmin) {
+        const user = await User.findOne({ email });
+        if (user) {
+          userId = user._id;
+        } else {
+          return res.status(404).json({ success: false, error: "User not found." });
+        }
+      } else if (email !== req.user.email) {
+        // Enforce RBAC - non-admin/staff cannot query others' history by email
+        return res.status(403).json({
+          success: false,
+          error: "You are not authorized to view another user's bookings.",
+        });
+      }
     }
 
     const bookings = await Booking.find({
@@ -275,9 +296,13 @@ export const changeBookingDate = async (req, res, next) => {
     }
 
     const dateObj = new Date(visitDate);
+    dateObj.setUTCHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     if (
       isNaN(dateObj.getTime()) ||
-      dateObj < new Date(new Date().setHours(0, 0, 0, 0))
+      dateObj < today
     ) {
       return res
         .status(400)
@@ -468,7 +493,8 @@ export const verifyScan = async (req, res, next) => {
       },
     });
   } catch (error) {
-   console.error("Error in verifyScan:", error);
+    console.error("Error in verifyScan:", error);
+    next(error);
   }
 };
 

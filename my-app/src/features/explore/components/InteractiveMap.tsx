@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations, useLocale } from 'next-intl';
+import Image from 'next/image';
 import { Rocket, Camera, Waves, Star, X, MapPin } from 'lucide-react';
 import { MAP_LOCATIONS, MapLocation } from '../lib/map-data';
 import { Link } from '@/src/i18n/routing';
@@ -47,11 +48,15 @@ export function InteractiveMap() {
         <div className="relative min-w-[1000px] h-[700px] bg-surface rounded-[40px] overflow-hidden border-8 border-white group">
 
           {/* Background Illustration */}
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-            style={{ backgroundImage: 'url("/explore-map-bg1.png")' }}
+          <Image
+            src="/explore-map-bg1.webp"
+            alt="Explore Map Background"
+            fill
+            priority
+            className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-105"
+            sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent mix-blend-overlay z-10 pointer-events-none" />
 
           {/* Markers */}
           {MAP_LOCATIONS.map((loc) => {

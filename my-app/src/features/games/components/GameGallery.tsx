@@ -6,6 +6,11 @@ import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { Attraction } from "@/src/types/attraction";
 import { getTheme } from "../lib/theme";
+import {
+  getOptimizedCloudinaryUrl,
+  getOptimizedCloudinaryHeroUrl,
+  getOptimizedCloudinaryThumbnailUrl,
+} from "@/src/lib/cloudinary";
 
 interface GameGalleryProps {
   attraction: Attraction;
@@ -72,11 +77,12 @@ export function GameGallery({ attraction, locale }: GameGalleryProps) {
             >
               {/* Image */}
               <Image
-                src={imgUrl}
+                src={getOptimizedCloudinaryUrl(imgUrl)}
                 alt={`${attraction.name} - Gallery ${index + 1}`}
                 fill
+                loading="lazy"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
 
               {/* Tonal Layering Overlay on Hover */}
@@ -103,10 +109,12 @@ export function GameGallery({ attraction, locale }: GameGalleryProps) {
               className="relative rounded-2xl overflow-hidden aspect-video bg-neutral-100 cursor-pointer group shadow-sm"
             >
               <Image
-                src={imgUrl}
+                src={getOptimizedCloudinaryThumbnailUrl(imgUrl)}
                 alt={`${attraction.name} - Gallery ${index + 4}`}
                 fill
+                loading="lazy"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 50vw, 25vw"
               />
               <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
@@ -138,12 +146,14 @@ export function GameGallery({ attraction, locale }: GameGalleryProps) {
                 <button
                   onClick={isRtl ? handleNext : handlePrev}
                   className="absolute left-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-50 backdrop-blur-md"
+                  aria-label={isRtl ? "الصورة السابقة" : "Previous image"}
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button
                   onClick={isRtl ? handlePrev : handleNext}
                   className="absolute right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-50 backdrop-blur-md"
+                  aria-label={isRtl ? "الصورة التالية" : "Next image"}
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -160,10 +170,11 @@ export function GameGallery({ attraction, locale }: GameGalleryProps) {
               className="relative w-full max-w-4xl aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl"
             >
               <Image
-                src={allImages[activeImageIndex]}
+                src={getOptimizedCloudinaryHeroUrl(allImages[activeImageIndex])}
                 alt={`${attraction.name} - Lightbox`}
                 fill
                 className="object-contain"
+                sizes="100vw"
                 priority
               />
             </motion.div>
