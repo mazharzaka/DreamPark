@@ -93,6 +93,7 @@ export function InteractiveMap() {
                     onClick={() => handleMarkerClick(loc.id)}
                     className="relative w-12 h-12 rounded-full flex items-center justify-center text-white shadow-xl transition-all duration-300"
                     style={{ backgroundColor: loc.color }}
+                    aria-label={loc.name}
                   >
                     <Icon className="w-6 h-6" />
                   </motion.button>
@@ -115,6 +116,7 @@ export function InteractiveMap() {
                 <button
                   onClick={() => setSelectedId(null)}
                   className="absolute top-8 right-8 w-10 h-10 rounded-full flex items-center justify-center text-primary transition-colors hover:bg-surface-container-low"
+                  aria-label={isRtl ? "إغلاق التفاصيل" : "Close details"}
                 >
                   <X size={24} />
                 </button>

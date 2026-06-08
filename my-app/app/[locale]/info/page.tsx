@@ -16,8 +16,20 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import { EditorialButton } from "@/src/components/ui/EditorialButton";
-import Accordion from "@/src/components/ui/Accordion";
+
+const Accordion = dynamic(() => import("@/src/components/ui/Accordion"), {
+  ssr: false,
+  loading: () => (
+    <div className="py-24 px-6 max-w-4xl mx-auto space-y-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="h-16 rounded-2xl bg-[#f0f1f1] animate-pulse" />
+      ))}
+    </div>
+  ),
+});
 
 // Client-Side Mount Guarding to prevent hydration issues
 function useMounted() {
@@ -260,9 +272,12 @@ export default function ParkInfoPage() {
                   }}
                   className="absolute inset-2 overflow-hidden rounded-[28px]"
                 >
-                  <img
+                  <Image
                     src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=800&auto=format&fit=crop"
                     alt="Dream Park Magic"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 400px"
                     className="w-full h-full object-cover grayscale-[15%] contrast-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-on-surface via-transparent to-transparent opacity-80" />
@@ -462,9 +477,11 @@ export default function ParkInfoPage() {
                   transition={{ delay: idx * 0.1, duration: 0.6 }}
                   className={`${spanClass} relative overflow-hidden rounded-[32px] group aspect-[4/3] md:aspect-auto md:h-[350px] shadow-ambient hover:scale-[1.02] transition-transform duration-300`}
                 >
-                  <img
+                  <Image
                     src={zone.image}
                     alt={zone.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter brightness-[0.8] contrast-105"
                   />
                   <div

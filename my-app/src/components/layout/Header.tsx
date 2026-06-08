@@ -176,6 +176,7 @@ export function Header() {
               alt="Logo" 
               width={50} 
               height={50} 
+              priority
               className="md:w-16 md:h-16 object-contain"
             />
             <div className="flex  leading-[0.9]" dir="ltr">
@@ -264,7 +265,7 @@ export function Header() {
                 {/* Header inside drawer */}
                 <div className="flex items-center justify-between pb-6 border-b border-black/5">
                   <div className="flex items-center gap-2">
-                    <Image src="/logoDream.png" alt="Logo" width={40} height={40} />
+                    <Image src="/logoDream.png" alt="Logo" width={40} height={40} priority />
                     <span className="text-secondary text-lg font-black italic tracking-tighter">
                       <span className="text-primary">Dream</span> Park
                     </span>
@@ -272,6 +273,7 @@ export function Header() {
                   <button
                     onClick={() => setIsOpen(false)}
                     className="p-2 text-secondary hover:text-primary transition-colors focus:outline-none cursor-pointer rounded-full hover:bg-black/5"
+                    aria-label={isRTL ? "إغلاق القائمة" : "Close menu"}
                   >
                     <X size={20} />
                   </button>

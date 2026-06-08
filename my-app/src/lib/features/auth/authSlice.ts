@@ -33,11 +33,17 @@ export const authSlice = createSlice({
       state.accessToken = action.payload.token;
       state.user = action.payload.user;
       state.isAuthenticated = true;
+      if (typeof window !== 'undefined') {
+        document.cookie = "dream_session_active=true; path=/; max-age=31536000; SameSite=Lax";
+      }
     },
     clearCredentials: (state) => {
       state.accessToken = null;
       state.user = null;
       state.isAuthenticated = false;
+      if (typeof window !== 'undefined') {
+        document.cookie = "dream_session_active=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+      }
     },
   },
 });
