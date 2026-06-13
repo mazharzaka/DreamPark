@@ -115,4 +115,7 @@ const attractionSchema = new mongoose.Schema(
 
 const Attraction = mongoose.model('Attraction', attractionSchema);
 
+// Add index for common queries on the homepage
+attractionSchema.index({ pageKey: 1, category: 1, createdAt: -1 });
+
 export default Attraction;

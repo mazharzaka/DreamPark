@@ -16,11 +16,8 @@ export function useSplashScreen(): {
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
-    const alreadyShown = sessionStorage.getItem(STORAGE_KEY);
-    if (!alreadyShown) {
-      setShowSplash(true);
-      sessionStorage.setItem(STORAGE_KEY, "1");
-    }
+    // Splash screen is temporarily disabled for Lighthouse performance testing
+    setShowSplash(false);
   }, []);
 
   const hideSplash = () => setShowSplash(false);

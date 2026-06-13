@@ -91,7 +91,7 @@ export const bookingsApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api/tickets`
-      : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api/tickets",
+      : "http://localhost:5000/api/tickets",
     fetchFn: (input, init) => {
       const url = typeof input === "string" ? input : input.url;
       const method = init?.method || "GET";
@@ -219,3 +219,4 @@ export const {
   useVerifyCancelMutation,
   useUpdateTicketPriceMutation,
 } = bookingsApi;
+

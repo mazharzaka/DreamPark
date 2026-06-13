@@ -14,7 +14,7 @@ const mutex = new Mutex();
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
     ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
-    : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api",
+    : "http://localhost:5000/api",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
     if (token) {
@@ -164,3 +164,4 @@ export const {
   useGetUserBookingsQuery,
   useChangeBookingDateMutation,
 } = authApi;
+

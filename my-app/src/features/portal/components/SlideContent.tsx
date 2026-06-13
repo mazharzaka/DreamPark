@@ -55,7 +55,7 @@ export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideConte
           alt={slide?.title || ""}
           fill
           priority={isFirst}
-          quality={85}
+          unoptimized={true}
           className={`object-cover transition-transform duration-[15000ms] ease-out ${(isActive && isMounted) ? 'scale-100' : 'scale-110'}`}
           sizes="100vw"
         />
@@ -69,7 +69,7 @@ export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideConte
       {/* Content shifted off-center for "Layout Energy" */}
       <motion.div
         variants={containerVariants}
-        initial="hidden"
+        initial={isFirst ? "visible" : "hidden"}
         animate={isActive ? "visible" : "hidden"}
         className="relative z-10 max-w-4xl xl:max-w-5xl 2xl:max-w-7xl pt-20"
       >

@@ -1,7 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import SplashScreen from "@/src/components/ui/SplashScreen";
+import dynamic from "next/dynamic";
+
+const SplashScreen = dynamic(() => import("@/src/components/ui/SplashScreen"), { ssr: false });
 import { useSplashScreen } from "@/src/hooks/useSplashScreen";
 
 export function SplashScreenWrapper() {

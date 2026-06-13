@@ -10,26 +10,29 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   let heroData = null;
 
   try {
-    // 1. Prefetch hero data
-    const result = await store.dispatch(
+    // 1. Prefetch hero data (promise)
+    const heroPromise = store.dispatch(
       apiSlice.endpoints.getHeroByPage.initiate({ lang: locale, pageKey: "home" })
     );
-    heroData = result.data;
 
     // 2. Prefetch attractions for the home page (AdrenalineWorlds)
-    await store.dispatch(
+    store.dispatch(
       apiSlice.endpoints.getAttractions.initiate({ lang: locale, pageKey: "home" })
     );
 
     // 3. Prefetch attractions for ticketsets
-    await store.dispatch(
+    store.dispatch(
       apiSlice.endpoints.getAttractions.initiate({ lang: locale, pageKey: "srts" })
     );
 
     // 4. Prefetch ticket types
-    await store.dispatch(
+    store.dispatch(
       bookingsApi.endpoints.getTicketTypes.initiate()
     );
+
+    // Get heroData
+    const result = await heroPromise;
+    heroData = result.data;
 
     // 5. Wait for all query queries to resolve on the server
     await Promise.all([

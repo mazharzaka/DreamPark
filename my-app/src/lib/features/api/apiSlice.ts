@@ -5,7 +5,7 @@ export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_BACKEND_URL
       ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
-      : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api",
+      : "http://localhost:5000/api",
     fetchFn: (input, init) => fetch(input, { ...init, next: { revalidate: 3600 } }),
   }),
   endpoints: (builder) => ({
@@ -27,3 +27,4 @@ export const apiSlice = createApi({
 });
 
 export const { useGetHeroByPageQuery, useGetAttractionsQuery } = apiSlice;
+

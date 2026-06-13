@@ -5,14 +5,7 @@ import { useLocale } from "next-intl";
 import { useGetTicketTypesQuery } from "@/src/lib/features/api/bookingsApi";
 import dynamic from "next/dynamic";
 
-const HeroSlider = dynamic(() => import("./HeroSlider").then((mod) => mod.HeroSlider), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-screen bg-surface flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  ),
-});
+import { HeroSlider } from "./HeroSlider";
 
 const AdrenalineWorlds = dynamic(() => import("./AdrenalineWorlds").then((mod) => mod.AdrenalineWorlds), {
   ssr: false,

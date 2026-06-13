@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await fetch(
         (process.env.NEXT_PUBLIC_BACKEND_URL
           ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
-          : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api") + "/auth/refresh",
+          : "http://localhost:5000/api") + "/auth/refresh",
         {
           method: "POST",
           headers: {
@@ -143,3 +143,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

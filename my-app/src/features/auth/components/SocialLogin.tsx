@@ -10,7 +10,7 @@ export const SocialLogin = () => {
     if (provider === "Google") {
       const backendUrl =
         process.env.NEXT_PUBLIC_BACKEND_URL ||
-        "https://ms5k0c9j-5000.uks1.devtunnels.ms/";
+        "http://localhost:5000/";
       const base = backendUrl.endsWith("/")
         ? backendUrl.slice(0, -1)
         : backendUrl;
@@ -77,3 +77,4 @@ export const SocialLogin = () => {
     </div>
   );
 };
+

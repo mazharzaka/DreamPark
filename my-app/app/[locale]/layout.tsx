@@ -81,6 +81,9 @@ export default async function LocaleLayout({
       dir={locale === "ar" ? "rtl" : "ltr"}
       className={`${geistSans.variable} ${geistMono.variable} ${ibmPlexArabic.variable} ${cairo.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+      </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <StoreProvider>
