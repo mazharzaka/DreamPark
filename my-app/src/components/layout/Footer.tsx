@@ -142,7 +142,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-outline-variant/10 text-sm text-on-surface/50">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-outline-variant/10 text-sm text-slate-800">
           <p>{t("rights")}</p>
           <div className="flex gap-6">
             <button onClick={() => setModalView("privacy")} className="hover:text-primary transition-colors cursor-pointer">{t("privacy")}</button>

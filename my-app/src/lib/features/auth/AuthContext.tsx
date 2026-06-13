@@ -86,8 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const initializeAuth = async () => {
       setIsLoading(true);
-      const success = await refreshSession();
-      if (!success) {
+      const sessionActive = typeof window !== 'undefined' && document.cookie.includes('dream_session_active=true');
+      if (sessionActive) {
+        const success = await refreshSession();
+        if (!success) {
+          dispatch(clearCredentials());
+        }
+      } else {
         dispatch(clearCredentials());
       }
       setIsLoading(false);

@@ -170,16 +170,16 @@ export function OurHeroesSlider({ mockHeroes, title = "Portal.OurHeroes" }: { mo
             }}
             className="rounded-[2.5rem] overflow-hidden !py-2"
           >
-            {heroes.map((slide) => (
+            {heroes.map((slide, index) => (
               <SwiperSlide key={slide.id || slide._id}>
                 <div className="relative w-full h-[350px] md:h-[450px] lg:h-[550px] rounded-[2.5rem] overflow-hidden bg-surface group shadow-xl shadow-black/5">
                   <Image
                     src={getOptimizedCloudinaryUrl(slide.image || slide.imageUrl || "")}
                     alt={slide.title}
                     fill
-                    loading="lazy"
+                    priority={index === 0}
                     className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>

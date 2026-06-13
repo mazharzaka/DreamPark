@@ -3,8 +3,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Save, Edit2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useGetTicketTypesQuery, useUpdateTicketPriceMutation } from "@/src/lib/features/api/bookingsApi";
-import { PassCard } from "@/src/features/tickets/components/PassCard";
+
+const PassCard = dynamic(
+  () => import("@/src/features/tickets/components/PassCard").then((mod) => mod.PassCard),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[600px] rounded-[40px] bg-[#f0f1f1] animate-pulse" />
+    ),
+  }
+);
 import { useLocale, useTranslations } from "next-intl";
 
 export default function AllTicketsPage() {

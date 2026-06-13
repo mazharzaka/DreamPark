@@ -11,6 +11,9 @@ export const useSessionRestore = () => {
     hasAttemptedRestore.current = true;
 
     const restoreSession = async () => {
+      const sessionActive = typeof window !== 'undefined' && document.cookie.includes('dream_session_active=true');
+      if (!sessionActive) return;
+
       try {
         const backendUrl =
           process.env.NEXT_PUBLIC_BACKEND_URL ||
