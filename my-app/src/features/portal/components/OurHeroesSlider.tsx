@@ -177,7 +177,6 @@ export function OurHeroesSlider({ mockHeroes, title = "Portal.OurHeroes" }: { mo
                     src={getOptimizedCloudinaryUrl(slide.image || slide.imageUrl || "")}
                     alt={slide.title}
                     fill
-                    priority={index === 0}
                     className="object-cover transition-transform duration-1000 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />

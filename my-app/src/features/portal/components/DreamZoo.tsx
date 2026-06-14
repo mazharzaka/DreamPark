@@ -99,7 +99,7 @@ export function DreamZoo() {
             >
               {/* Background Illustration */}
               <Image
-                src="/dream_zoo_bg1.png"
+                src="/dream_zoo_bg.png"
                 alt="Dream Zoo Background"
                 fill
                 className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-105"

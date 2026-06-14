@@ -55,7 +55,6 @@ export function SlideContent({ slide, isActive, isFirst, isMounted }: SlideConte
           alt={slide?.title || ""}
           fill
           priority={isFirst}
-          unoptimized={true}
           className={`object-cover transition-transform duration-[15000ms] ease-out ${(isActive && isMounted) ? 'scale-100' : 'scale-110'}`}
           sizes="100vw"
         />

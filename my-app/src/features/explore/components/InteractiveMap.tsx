@@ -52,7 +52,6 @@ export function InteractiveMap() {
             src="/explore-map-bg1.webp"
             alt="Explore Map Background"
             fill
-            priority
             className="absolute inset-0 object-cover transition-transform duration-1000 group-hover:scale-105"
             sizes="100vw"
           />

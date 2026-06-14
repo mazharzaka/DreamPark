@@ -16,28 +16,33 @@ import ErudaProvider from "@/src/components/ui/ErudaProvider";
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: 'swap',
 });
 
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-ibm-plex-arabic",
   subsets: ["arabic"],
   weight: ["300", "400", "500", "600", "700"],
+  display: 'swap',
 });
 
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700", "800", "900"],
+  display: 'swap',
 });
 
 export async function generateMetadata({
