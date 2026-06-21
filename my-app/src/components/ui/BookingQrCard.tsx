@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
+import html2canvas from 'html2canvas-pro';
 import { format } from 'date-fns';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +15,7 @@ interface BookingQrCardProps {
     ticketType?: {
       name: string;
       nameAr?: string;
+      color?: string;
     };
     targetDate: string;
     status: string;
@@ -30,8 +32,24 @@ export const BookingQrCard = ({ booking, onChangeDate,key, showChangeDateButton 
   const locale = useLocale() || 'en';
   const isRtl = locale === 'ar';
 
+  const passCardRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+
+  React.useEffect(() => {
+    if (isModalOpen) {
+      const timer = setTimeout(() => {
+        const canvas = document.querySelector(`#qr-modal-container-${booking.id} canvas`) as HTMLCanvasElement;
+        if (canvas) {
+          setQrDataUrl(canvas.toDataURL("image/png"));
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setQrDataUrl("");
+    }
+  }, [isModalOpen, booking.id, booking.qrCodeId]);
 
   const ticketName = locale === 'ar' && booking.ticketType?.nameAr 
     ? booking.ticketType.nameAr 
@@ -63,20 +81,41 @@ export const BookingQrCard = ({ booking, onChangeDate,key, showChangeDateButton 
   const isValidDate = !isNaN(dateObj.getTime());
   const formattedDate = isValidDate ? format(dateObj, 'MMM dd, yyyy') : 'Invalid Date';
 
-  const handleDownload = (e: React.MouseEvent) => {
+  const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const canvas = document.getElementById(`qr-canvas-${booking.id}`) as HTMLCanvasElement;
-    if (canvas) {
-      const pngUrl = canvas.toDataURL("image/png");
+    if (passCardRef.current === null) return;
+    
+    try {
+      setDownloadSuccess(true);
+      
+      const canvas = await html2canvas(passCardRef.current, {
+        useCORS: true,
+        backgroundColor: null,
+        scale: 2,
+        logging: true,
+        onclone: (clonedDoc) => {
+          const container = clonedDoc.getElementById(`capture-container-modal-${booking.id}`);
+          if (container) {
+            container.style.position = 'relative';
+            container.style.left = '0';
+            container.style.top = '0';
+            container.style.zIndex = 'auto';
+          }
+        }
+      });
+
+      const dataUrl = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
-      downloadLink.href = pngUrl;
+      downloadLink.href = dataUrl;
       downloadLink.download = `DreamPark-Pass-${booking.id.substring(0, 8).toUpperCase()}.png`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
       
-      setDownloadSuccess(true);
       setTimeout(() => setDownloadSuccess(false), 2000);
+    } catch (err) {
+      console.error("Error generating pass image:", err);
+      setDownloadSuccess(false);
     }
   };
 
@@ -208,61 +247,81 @@ export const BookingQrCard = ({ booking, onChangeDate,key, showChangeDateButton 
                 {t('modal_title')}
               </h3>
 
-              {/* Dynamic QR canvas rendering */}
-              <div className="bg-surface-container-low p-6 rounded-3xl flex flex-col items-center justify-center mb-6">
-                <div className="bg-white p-4 rounded-[20px] shadow-sm border border-outline-variant/10 mb-3">
-                  <QRCodeCanvas 
-                    id={`qr-canvas-${booking.id}`}
-                    value={booking.qrCodeId || booking.id} 
-                    size={200}
-                    level="H"
-                    includeMargin={false}
-                  />
+              {/* Premium Ticket/Pass Card */}
+              <div 
+                className="w-full rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden text-white mb-6"
+                style={{
+                  background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${booking.ticketType?.color || '#005caa'}`
+                }}
+              >
+                {/* Security Watermark */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+                  <span className="text-white/[0.03] font-black text-3xl whitespace-nowrap tracking-[0.2em] rotate-[-45deg] select-none uppercase">
+                    DREAM PARK · دريم بارك
+                  </span>
                 </div>
-                <span className="font-mono text-xs font-black text-on-surface/50 tracking-widest uppercase">
-                  {booking.qrCodeId || 'SCAN AT GATE'}
-                </span>
-              </div>
 
-              {/* Product Specifications */}
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center text-sm border-b border-surface-container-low pb-2">
-                  <span className="text-on-surface/50 font-bold uppercase tracking-wider text-xs">
-                    {t('ticketid')}
+                {/* Card Header (Logo aligned based on locale) */}
+                <div className={`w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 relative z-10`}>
+                  <div className={`flex items-center gap-3.5 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
+                      <img src="/logoDream.png" alt="Logo" className="w-8 h-8 object-contain" />
+                    </div>
+                    <div className={`flex flex-col leading-[1.1] ${isRtl ? 'text-right' : 'text-left'}`}>
+                      <span className="text-white font-black tracking-wider text-xs uppercase">Dream Park</span>
+                      <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">دريم بارك</span>
+                    </div>
+                  </div>
+                  <div className={`flex ${isRtl ? 'justify-end' : 'justify-start'} sm:justify-end`}>
+                    <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-1.5 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
+                      {statusText}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Ticket Name */}
+                <h3 className="text-xl md:text-2xl font-black text-white mb-2 leading-tight relative z-10">
+                  {ticketName}
+                </h3>
+
+                {/* Metadata */}
+                <div className="flex justify-between items-center text-xs text-white/70 font-black mb-6 relative z-10">
+                  <span>
+                    {isRtl ? 'العدد:' : 'Qty:'} {booking.quantity}
                   </span>
-                  <span className="font-bold font-mono">
-                    {booking.id.toUpperCase()}
+                  <span>
+                    {isRtl ? 'التاريخ:' : 'Date:'} {formattedDate}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-sm border-b border-surface-container-low pb-2">
-                  <span className="text-on-surface/50 font-bold uppercase tracking-wider text-xs">
-                    {isRtl ? 'نوع التذكرة' : 'Ticket Type'}
+
+                {/* QR Code Container */}
+                <div id={`qr-modal-container-${booking.id}`} className="flex justify-center bg-white p-5 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10">
+                  {qrDataUrl ? (
+                    <img src={qrDataUrl} alt="QR Code" width={160} height={160} className="w-[160px] h-[160px] object-contain" />
+                  ) : (
+                    <QRCodeCanvas 
+                      value={booking.qrCodeId || booking.id} 
+                      size={160}
+                      level="H"
+                      includeMargin={false}
+                    />
+                  )}
+                </div>
+
+                {/* Manual ID fallback */}
+                <div className="bg-black/10 backdrop-blur-[5px] p-4 rounded-2xl mb-4 text-center relative z-10">
+                  <span className="block text-[10px] uppercase font-black text-white/40">
+                    {t('manual_id') || (isRtl ? 'الرمز التعريفي' : 'Manual ID')}
                   </span>
-                  <span className="font-bold">
-                    {booking.quantity}x {ticketName}
+                  <span className="font-mono text-xs md:text-sm font-black text-white/95 break-all block">
+                    {booking.qrCodeId || booking.id}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-sm border-b border-surface-container-low pb-2">
-                  <span className="text-on-surface/50 font-bold uppercase tracking-wider text-xs">
-                    {t('visit_date')}
-                  </span>
-                  <span className="font-bold">
-                    {formattedDate}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm border-b border-surface-container-low pb-2">
-                  <span className="text-on-surface/50 font-bold uppercase tracking-wider text-xs">
-                    {t('payment_status')}
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${statusColor}`}>
-                    {statusText}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-base pt-2">
-                  <span className="text-on-surface/50 font-black uppercase tracking-wider text-xs">
-                    {t('amount_payable')}
-                  </span>
-                  <span className="text-xl font-black text-primary">
+
+                {/* Price info (Separated with background shade) */}
+                <div className="bg-white/10 backdrop-blur-[10px] p-4 rounded-2xl flex justify-between items-center text-xs md:text-sm font-black text-white relative z-10">
+                  <span className="text-white/75">{isRtl ? 'المبلغ المستحق:' : 'Amount:'}</span>
+                  <span className="text-base md:text-lg font-black text-white">
                     {booking.totalPrice} {t('egp')}
                   </span>
                 </div>
@@ -308,6 +367,90 @@ export const BookingQrCard = ({ booking, onChangeDate,key, showChangeDateButton 
           </div>
         )}
       </AnimatePresence>
+
+      {/* Hidden static pass card container for html2canvas capture (no parent animations/transforms, standard width) */}
+      <div 
+        id={`capture-container-modal-${booking.id}`}
+        style={{ position: 'fixed', left: '-9999px', top: '0', width: '360px', pointerEvents: 'none', userSelect: 'none', zIndex: -9999 }}
+      >
+        <div 
+          ref={passCardRef}
+          className="w-full rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden text-white"
+          style={{
+            background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${booking.ticketType?.color || '#005caa'}`
+          }}
+        >
+          {/* Security Watermark */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+            <span className="text-white/[0.03] font-black text-3xl whitespace-nowrap tracking-[0.2em] rotate-[-45deg] select-none uppercase">
+              DREAM PARK · دريم بارك
+            </span>
+          </div>
+
+          {/* Card Header (Standard side-by-side logo layout for captured image) */}
+          <div className={`w-full flex items-center justify-between mb-6 relative z-10 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex items-center gap-3.5 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
+              <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
+                <img src="/logoDream.png" alt="Logo" className="w-8 h-8 object-contain" />
+              </div>
+              <div className={`flex flex-col leading-[1.1] ${isRtl ? 'text-right' : 'text-left'}`}>
+                <span className="text-white font-black tracking-wider text-xs uppercase">Dream Park</span>
+                <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">دريم بارك</span>
+              </div>
+            </div>
+            <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-1.5 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
+              {statusText}
+            </span>
+          </div>
+
+          {/* Ticket Name */}
+          <h3 className="text-2xl font-black text-white mb-2 leading-tight relative z-10">
+            {ticketName}
+          </h3>
+
+          {/* Metadata */}
+          <div className="flex justify-between items-center text-xs text-white/70 font-black mb-6 relative z-10">
+            <span>
+              {isRtl ? 'العدد:' : 'Qty:'} {booking.quantity}
+            </span>
+            <span>
+              {isRtl ? 'التاريخ:' : 'Date:'} {formattedDate}
+            </span>
+          </div>
+
+          {/* QR Code Container */}
+          <div className="flex justify-center bg-white p-5 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10">
+            {qrDataUrl ? (
+              <img src={qrDataUrl} alt="QR Code" width={160} height={160} className="w-[160px] h-[160px] object-contain" />
+            ) : (
+              <QRCodeCanvas 
+                value={booking.qrCodeId || booking.id} 
+                size={160}
+                level="H"
+                includeMargin={false}
+              />
+            )}
+          </div>
+
+          {/* Manual ID fallback */}
+          <div className="bg-black/10 backdrop-blur-[5px] p-4 rounded-2xl mb-4 text-center relative z-10">
+            <span className="block text-[10px] uppercase font-black text-white/40">
+              {t('manual_id') || (isRtl ? 'الرمز التعريفي' : 'Manual ID')}
+            </span>
+            <span className="font-mono text-xs md:text-sm font-black text-white/95 break-all block">
+              {booking.qrCodeId || booking.id}
+            </span>
+          </div>
+
+          {/* Price info (Separated with background shade) */}
+          <div className="bg-white/10 backdrop-blur-[10px] p-4 rounded-2xl flex justify-between items-center text-xs md:text-sm font-black text-white relative z-10">
+            <span className="text-white/75">{isRtl ? 'المبلغ المستحق:' : 'Amount:'}</span>
+            <span className="text-base md:text-lg font-black text-white">
+              {booking.totalPrice} {t('egp')}
+            </span>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

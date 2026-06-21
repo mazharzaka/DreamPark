@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
+import html2canvas from "html2canvas-pro";
 import {
   Sparkles,
   Crown,
@@ -82,8 +83,12 @@ export default function BookingFlow() {
   const isAr = locale === "ar";
   const t = useTranslations("booking");
   const params = useParams();
+  const passRef = useRef<HTMLDivElement>(null);
+  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
 
   const [mounted, setMounted] = useState<boolean>(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -96,6 +101,20 @@ export default function BookingFlow() {
   // Redux State
   const { step, selectedCategory, selectedTicketId, generatedPass } =
     useAppSelector((state) => state.booking);
+
+  useEffect(() => {
+    if (step === 3 && generatedPass) {
+      const timer = setTimeout(() => {
+        const canvas = document.querySelector("#booking-flow-qr canvas") as HTMLCanvasElement;
+        if (canvas) {
+          setQrDataUrl(canvas.toDataURL("image/png"));
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setQrDataUrl("");
+    }
+  }, [step, generatedPass]);
 
   // React Hook Form for Booking
   const {
@@ -315,6 +334,44 @@ const navigate = useRouter();
     }
     return isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
   };
+
+const handleDownloadPass = async () => {
+  if (passRef.current === null || !generatedPass) return;
+  
+  try {
+    setDownloadSuccess(true);
+    
+    const canvas = await html2canvas(passRef.current, {
+      useCORS: true,
+      backgroundColor: null,
+      scale: 2,
+      logging: true,
+      onclone: (clonedDoc) => {
+        const container = clonedDoc.getElementById(`capture-container-flow-${generatedPass.bookingId}`);
+        if (container) {
+          container.style.position = 'relative';
+          container.style.left = '0';
+          container.style.top = '0';
+          container.style.zIndex = 'auto';
+        }
+      }
+    });
+
+    const dataUrl = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.download = `DreamPark-Pass-${generatedPass.bookingId.substring(0, 8).toUpperCase()}.png`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => setDownloadSuccess(false), 2000);
+  } catch (err) {
+    console.error("Error generating pass image:", err);
+    setDownloadSuccess(false);
+  }
+};
 
   if (!mounted) {
     return (
@@ -872,26 +929,44 @@ const navigate = useRouter();
                 </div>
 
                 {/* PASS CARD GRAPHIC (No 1px borders, relying on deep ambient card shadows) */}
-                <div className="max-w-sm mx-auto bg-gradient-to-br from-[#ffffff] to-[#f9f9f9] rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden">
-                  {/* Card Ribbon */}
-                  <div
-                    className="absolute top-0 right-0 left-0 h-2.5"
-                    style={{ backgroundColor: generatedPass.color }}
-                  />
-
-                  <div className="text-right rtl mb-4 mt-2">
-                    <span className="bg-[#f0f1f1] px-4.5 py-2 rounded-full font-black text-xs uppercase tracking-wider text-on-surface/75">
-                      {t("active_pass")}
+                <div 
+                  className="w-full max-w-sm mx-auto rounded-[2.5rem] p-6 md:p-8 shadow-xl relative overflow-hidden text-white"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${generatedPass.color}`
+                  }}
+                >
+                  {/* Security Watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+                    <span className="text-white/[0.03] font-black text-3xl whitespace-nowrap tracking-[0.2em] rotate-[-45deg] select-none uppercase">
+                      DREAM PARK · دريم بارك
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-black text-on-surface mb-2 leading-tight">
+                  {/* Card Header (Logo aligned based on locale) */}
+                  <div className={`w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 relative z-10`}>
+                    <div className={`flex items-center gap-3.5 ${isAr ? 'flex-row-reverse' : 'flex-row'}`}>
+                      <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
+                        <img src="/logoDream.png" alt="Logo" className="w-8 h-8 object-contain" />
+                      </div>
+                      <div className={`flex flex-col leading-[1.1] ${isAr ? 'text-right' : 'text-left'}`}>
+                        <span className="text-white font-black tracking-wider text-xs uppercase">Dream Park</span>
+                        <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">دريم بارك</span>
+                      </div>
+                    </div>
+                    <div className={`flex ${isAr ? 'justify-end' : 'justify-start'} sm:justify-end`}>
+                      <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-2 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
+                        {t("active_pass")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 leading-tight relative z-10">
                     {isAr
                       ? generatedPass.ticketNameAr
                       : generatedPass.ticketName}
                   </h3>
 
-                  <div className="flex justify-between items-center text-xs text-on-surface/50 font-black mb-6">
+                  <div className="flex justify-between items-center text-xs text-white/70 font-black mb-6 relative z-10">
                     <span>
                       {t("qty")}: {generatedPass.quantity}
                     </span>
@@ -901,29 +976,33 @@ const navigate = useRouter();
                   </div>
 
                   {/* QR Code Container */}
-                  <div className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6">
-                    <QRCodeSVG
-                      value={generatedPass.qrCodeId}
-                      size={180}
-                      level="H"
-                      includeMargin={false}
-                    />
+                  <div id="booking-flow-qr" className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10">
+                    {qrDataUrl ? (
+                      <img src={qrDataUrl} alt="QR Code" width={180} height={180} className="w-[180px] h-[180px] object-contain" />
+                    ) : (
+                      <QRCodeCanvas
+                        value={generatedPass.qrCodeId}
+                        size={180}
+                        level="H"
+                        includeMargin={false}
+                      />
+                    )}
                   </div>
 
                   {/* Alphanumeric ID fallback */}
-                  <div className="bg-[#f0f1f1] p-4 rounded-2xl mb-4 text-center">
-                    <span className="block text-[10px] uppercase font-black text-on-surface/40">
+                  <div className="bg-black/10 backdrop-blur-[5px] p-4 rounded-2xl mb-4 text-center relative z-10">
+                    <span className="block text-[10px] uppercase font-black text-white/40">
                       {t("manual_id")}
                     </span>
-                    <span className="font-mono text-sm font-black text-on-surface/90">
+                    <span className="font-mono text-xs md:text-sm font-black text-white/95 break-all block">
                       {generatedPass.qrCodeId}
                     </span>
                   </div>
 
                   {/* Price info (Separated with background shade) */}
-                  <div className="bg-[#f0f1f1]/50 p-4 rounded-2xl flex justify-between items-center text-sm font-black text-on-surface/85">
-                    <span>{t("due_cash")}</span>
-                    <span className="text-xl font-black text-secondary">
+                  <div className="bg-white/10 backdrop-blur-[10px] p-4 rounded-2xl flex justify-between items-center text-xs md:text-sm font-black text-white relative z-10">
+                    <span className="text-white/75">{t("due_cash")}</span>
+                    <span className="text-base md:text-xl font-black text-white">
                       {generatedPass.totalPrice} {t("egp")}
                     </span>
                   </div>
@@ -973,11 +1052,99 @@ const navigate = useRouter();
                   </button>
                   <button
                     type="button"
-                    onClick={() => window.print()}
-                    className="flex-1 py-4.5 rounded-full font-black text-xs uppercase tracking-widest bg-secondary text-white hover:bg-secondary/95 transition-all shadow-[0_10px_20px_rgba(117,87,0,0.2)]"
+                    onClick={handleDownloadPass}
+                    className={`flex-1 py-4.5 rounded-full font-black text-xs uppercase tracking-widest transition-all ${
+                      downloadSuccess 
+                        ? "bg-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.2)]"
+                        : "bg-secondary text-white hover:bg-secondary/95 shadow-[0_10px_20px_rgba(117,87,0,0.2)]"
+                    }`}
                   >
-                    {t("print_save")}
+                    {downloadSuccess ? (isAr ? "تم الحفظ!" : "Saved!") : t("print_save")}
                   </button>
+                </div>
+
+                {/* Hidden static pass card container for html2canvas capture (no parent animations/transforms, standard width) */}
+                <div 
+                  id={`capture-container-flow-${generatedPass.bookingId}`}
+                  style={{ position: 'fixed', left: '-9999px', top: '0', width: '360px', pointerEvents: 'none', userSelect: 'none', zIndex: -9999 }}
+                >
+                  <div 
+                    ref={passRef}
+                    className="w-full rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden text-white"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${generatedPass.color}`
+                    }}
+                  >
+                    {/* Security Watermark */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+                      <span className="text-white/[0.03] font-black text-3xl whitespace-nowrap tracking-[0.2em] rotate-[-45deg] select-none uppercase">
+                        DREAM PARK · دريم بارك
+                      </span>
+                    </div>
+
+                    {/* Card Header (Standard side-by-side logo layout for captured image) */}
+                    <div className={`w-full flex items-center justify-between mb-6 relative z-10 ${isAr ? 'flex-row-reverse' : 'flex-row'}`}>
+                      <div className={`flex items-center gap-3.5 ${isAr ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
+                          <img src="/logoDream.png" alt="Logo" className="w-8 h-8 object-contain" />
+                        </div>
+                        <div className={`flex flex-col leading-[1.1] ${isAr ? 'text-right' : 'text-left'}`}>
+                          <span className="text-white font-black tracking-wider text-xs uppercase">Dream Park</span>
+                          <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">دريم بارك</span>
+                        </div>
+                      </div>
+                      <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-1.5 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
+                        {t("active_pass")}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl font-black text-white mb-2 leading-tight relative z-10">
+                      {isAr
+                        ? generatedPass.ticketNameAr
+                        : generatedPass.ticketName}
+                    </h3>
+
+                    <div className="flex justify-between items-center text-xs text-white/70 font-black mb-6 relative z-10">
+                      <span>
+                        {t("qty")}: {generatedPass.quantity}
+                      </span>
+                      <span>
+                        {t("visit")}: {generatedPass.targetDate}
+                      </span>
+                    </div>
+
+                    {/* QR Code Container */}
+                    <div className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10">
+                      {qrDataUrl ? (
+                        <img src={qrDataUrl} alt="QR Code" width={180} height={180} className="w-[180px] h-[180px] object-contain" />
+                      ) : (
+                        <QRCodeCanvas
+                          value={generatedPass.qrCodeId}
+                          size={180}
+                          level="H"
+                          includeMargin={false}
+                        />
+                      )}
+                    </div>
+
+                    {/* Alphanumeric ID fallback */}
+                    <div className="bg-black/10 backdrop-blur-[5px] p-4 rounded-2xl mb-4 text-center relative z-10">
+                      <span className="block text-[10px] uppercase font-black text-white/40">
+                        {t("manual_id")}
+                      </span>
+                      <span className="font-mono text-xs md:text-sm font-black text-white/95 break-all block">
+                        {generatedPass.qrCodeId}
+                      </span>
+                    </div>
+
+                    {/* Price info (Separated with background shade) */}
+                    <div className="bg-white/10 backdrop-blur-[10px] p-4 rounded-2xl flex justify-between items-center text-xs md:text-sm font-black text-white relative z-10">
+                      <span className="text-white/75">{t("due_cash")}</span>
+                      <span className="text-base md:text-xl font-black text-white">
+                        {generatedPass.totalPrice} {t("egp")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

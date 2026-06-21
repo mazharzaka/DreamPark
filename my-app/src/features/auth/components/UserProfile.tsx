@@ -268,7 +268,10 @@ export const UserProfile: React.FC = () => {
           {displayBookings.map((booking: any) => (
             <BookingQrCard 
               key={booking._id} 
-              booking={booking} 
+              booking={{
+                ...booking,
+                id: booking.id || booking._id
+              }} 
               showChangeDateButton={activeTab === 'upcoming'}
               onChangeDate={(id) => handleOpenDateChange(id, booking.targetDate)}
             />
