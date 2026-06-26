@@ -59,8 +59,8 @@ export const UserProfile: React.FC = () => {
     setSelectedBookingForDateChange(bookingId);
     // Default picker to today's date
     const today = new Date();
-    today.setDate(today.getDate());
-    setNewVisitDate(today.toISOString().split('T')[0]);
+    const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+    setNewVisitDate(localToday.toISOString().split('T')[0]);
     setDateChangeError(null);
     setDateChangeSuccess(false);
   };
@@ -137,7 +137,7 @@ export const UserProfile: React.FC = () => {
     cancelledBookings;
 
   // today's date string for input min-attribute restriction
-  const todayStr = new Date(new Date().setDate(new Date().getDate() )).toISOString().split('T')[0];
+  const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 min-h-screen" dir={isRtl ? 'rtl' : 'ltr'}>

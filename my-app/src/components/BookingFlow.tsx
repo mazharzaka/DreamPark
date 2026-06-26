@@ -52,14 +52,46 @@ type LoginFormData = {
 };
 
 const MASTER_FEATURES = [
-  { id: "rides_standard", textAr: "دخول الألعاب والمعالم العادية", textEn: "Access to standard rides & attractions" },
-  { id: "digital_exhibits", textAr: "دخول المعارض الرقمية التفاعلية", textEn: "Full entry to digital exhibits" },
-  { id: "animal_conservatory", textAr: "دخول محمية ومناطق الحيوانات", textEn: "Access to the animal conservatory" },
-  { id: "park_wifi", textAr: "خدمة إنترنت لاسلكي مجاني", textEn: "Free park-wide Wi-Fi access" },
-  { id: "fast_track", textAr: "دخول سريع وتخطي الطوابير", textEn: "Priority Fast-Track skip-the-line queue" },
-  { id: "vip_lounges", textAr: "دخول استراحات كبار الشخصيات الراقية", textEn: "Access to exclusive VIP rest lounges" },
-  { id: "locker_rental", textAr: "تأجير خزائن مجانية طوال اليوم", textEn: "Free locker rentals for the entire day" },
-  { id: "meal_voucher", textAr: "قسيمة وجبات مجانية عالمية", textEn: "Complimentary premium meal voucher" }
+  {
+    id: "rides_standard",
+    textAr: "دخول الألعاب والمعالم العادية",
+    textEn: "Access to standard rides & attractions",
+  },
+  {
+    id: "digital_exhibits",
+    textAr: "دخول المعارض الرقمية التفاعلية",
+    textEn: "Full entry to digital exhibits",
+  },
+  {
+    id: "animal_conservatory",
+    textAr: "دخول محمية ومناطق الحيوانات",
+    textEn: "Access to the animal conservatory",
+  },
+  {
+    id: "park_wifi",
+    textAr: "خدمة إنترنت لاسلكي مجاني",
+    textEn: "Free park-wide Wi-Fi access",
+  },
+  {
+    id: "fast_track",
+    textAr: "دخول سريع وتخطي الطوابير",
+    textEn: "Priority Fast-Track skip-the-line queue",
+  },
+  {
+    id: "vip_lounges",
+    textAr: "دخول استراحات كبار الشخصيات الراقية",
+    textEn: "Access to exclusive VIP rest lounges",
+  },
+  {
+    id: "locker_rental",
+    textAr: "تأجير خزائن مجانية طوال اليوم",
+    textEn: "Free locker rentals for the entire day",
+  },
+  {
+    id: "meal_voucher",
+    textAr: "قسيمة وجبات مجانية عالمية",
+    textEn: "Complimentary premium meal voucher",
+  },
 ];
 
 // Lucide icon mapping helper
@@ -105,7 +137,9 @@ export default function BookingFlow() {
   useEffect(() => {
     if (step === 3 && generatedPass) {
       const timer = setTimeout(() => {
-        const canvas = document.querySelector("#booking-flow-qr canvas") as HTMLCanvasElement;
+        const canvas = document.querySelector(
+          "#booking-flow-qr canvas",
+        ) as HTMLCanvasElement;
         if (canvas) {
           setQrDataUrl(canvas.toDataURL("image/png"));
         }
@@ -137,7 +171,7 @@ export default function BookingFlow() {
   } = useForm<LoginFormData>({
     defaultValues: { email: "", password: "" },
   });
-const navigate = useRouter();
+  const navigate = useRouter();
   // Auth state local fallback
   const [login] = useLoginWithPasswordMutation();
 
@@ -185,7 +219,7 @@ const navigate = useRouter();
             setSelectedTicketId(matchedTicket.id || matchedTicket._id || ""),
           );
           dispatch(setSelectedCategory(matchedTicket.category));
-          dispatch(setStep(2)); // Jump directly to customization if valid ticket ID provided   
+          dispatch(setStep(2)); // Jump directly to customization if valid ticket ID provided
         } else {
           // Graceful fallback to first available ticket if invalid ID provided
           dispatch(setSelectedCategory(ticketTypes[0].category));
@@ -237,13 +271,20 @@ const navigate = useRouter();
 
   // Date handlers
   const getTodayDateString = () => {
-    return new Date().toISOString().split("T")[0];
+    const today = new Date();
+    const localToday = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60000,
+    );
+    return localToday.toISOString().split("T")[0];
   };
 
   const getTomorrowDateString = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
+    const localTomorrow = new Date(
+      tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000,
+    );
+    return localTomorrow.toISOString().split("T")[0];
   };
 
   // Handle checkout / JWT protection
@@ -335,47 +376,52 @@ const navigate = useRouter();
     return isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
   };
 
-const handleDownloadPass = async () => {
-  if (passRef.current === null || !generatedPass) return;
-  
-  try {
-    setDownloadSuccess(true);
-    
-    const canvas = await html2canvas(passRef.current, {
-      useCORS: true,
-      backgroundColor: null,
-      scale: 2,
-      logging: true,
-      onclone: (clonedDoc) => {
-        const container = clonedDoc.getElementById(`capture-container-flow-${generatedPass.bookingId}`);
-        if (container) {
-          container.style.position = 'relative';
-          container.style.left = '0';
-          container.style.top = '0';
-          container.style.zIndex = 'auto';
-        }
-      }
-    });
+  const handleDownloadPass = async () => {
+    if (passRef.current === null || !generatedPass) return;
 
-    const dataUrl = canvas.toDataURL("image/png");
+    try {
+      setDownloadSuccess(true);
 
-    const link = document.createElement("a");
-    link.download = `DreamPark-Pass-${generatedPass.bookingId.substring(0, 8).toUpperCase()}.png`;
-    link.href = dataUrl;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setTimeout(() => setDownloadSuccess(false), 2000);
-  } catch (err) {
-    console.error("Error generating pass image:", err);
-    setDownloadSuccess(false);
-  }
-};
+      const canvas = await html2canvas(passRef.current, {
+        useCORS: true,
+        backgroundColor: null,
+        scale: 2,
+        logging: true,
+        onclone: (clonedDoc) => {
+          const container = clonedDoc.getElementById(
+            `capture-container-flow-${generatedPass.bookingId}`,
+          );
+          if (container) {
+            container.style.position = "relative";
+            container.style.left = "0";
+            container.style.top = "0";
+            container.style.zIndex = "auto";
+          }
+        },
+      });
+
+      const dataUrl = canvas.toDataURL("image/png");
+
+      const link = document.createElement("a");
+      link.download = `DreamPark-Pass-${generatedPass.bookingId.substring(0, 8).toUpperCase()}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => setDownloadSuccess(false), 2000);
+    } catch (err) {
+      console.error("Error generating pass image:", err);
+      setDownloadSuccess(false);
+    }
+  };
 
   if (!mounted) {
     return (
-      <div className="w-full max-w-6xl mx-auto px-6 py-12 space-y-12 animate-pulse" dir={isAr ? "rtl" : "ltr"}>
+      <div
+        className="w-full max-w-6xl mx-auto px-6 py-12 space-y-12 animate-pulse"
+        dir={isAr ? "rtl" : "ltr"}
+      >
         {/* Stepper Skeleton */}
         <div className="max-w-xl mx-auto mb-12 relative flex justify-between items-center px-6">
           <div className="absolute top-6 left-6 right-6 h-1 bg-[#f0f1f1] -translate-y-1/2 rounded-full" />
@@ -429,11 +475,7 @@ const handleDownloadPass = async () => {
                     : "bg-surface-container-low text-on-surface/40"
                 }`}
               >
-                {step > 1 ? (
-                  <CheckCircle2 className="w-5 h-5" />
-                ) : (
-                  "1"
-                )}
+                {step > 1 ? <CheckCircle2 className="w-5 h-5" /> : "1"}
               </div>
               <span
                 className={`mt-3 text-xs md:text-sm font-black tracking-wide uppercase transition-colors duration-300 ${
@@ -537,12 +579,13 @@ const handleDownloadPass = async () => {
                           setSelectedTicketId(ticket.id || ticket._id || ""),
                         );
                         dispatch(setStep(2));
-                        navigate.push(`/${locale}/pass/${ticket.id || ticket._id || ""}`);
+                        navigate.push(
+                          `/${locale}/pass/${ticket.id || ticket._id || ""}`,
+                        );
                       }}
                       whileHover={{ scale: 1.015 }}
                       whileTap={{ scale: 0.995 }}
                       className={`relative overflow-hidden cursor-pointer rounded-[2.5rem] p-8 md:p-10 transition-all duration-300 flex flex-col justify-between h-full bg-white shadow-md `}
-                  
                     >
                       {/* Brand Pill Accent */}
                       <div
@@ -585,7 +628,9 @@ const handleDownloadPass = async () => {
                               <li
                                 key={feature.id}
                                 className={`flex items-center gap-3 text-sm md:text-base leading-relaxed min-h-[32px] transition-all duration-300 ${
-                                  isAvailable ? "text-on-surface font-semibold opacity-100" : "text-on-surface/40 font-medium"
+                                  isAvailable
+                                    ? "text-on-surface font-semibold opacity-100"
+                                    : "text-on-surface/40 font-medium"
                                 }`}
                               >
                                 {isAvailable ? (
@@ -639,9 +684,13 @@ const handleDownloadPass = async () => {
                               : "bg-[#f0f1f1] text-on-surface/80 hover:bg-[#e4e5e5]"
                           }`}
                         >
-                          {isSelected 
-                            ? (isAr ? "تم اختيارها" : "Selected") 
-                            : (isAr ? "اختر الباقة" : "Select Pass")}
+                          {isSelected
+                            ? isAr
+                              ? "تم اختيارها"
+                              : "Selected"
+                            : isAr
+                              ? "اختر الباقة"
+                              : "Select Pass"}
                         </div>
                       </div>
                     </motion.div>
@@ -649,9 +698,6 @@ const handleDownloadPass = async () => {
                 })}
               </div>
             )}
-
-   
-           
           </motion.div>
         )}
 
@@ -929,82 +975,109 @@ const handleDownloadPass = async () => {
                 </div>
 
                 {/* PASS CARD GRAPHIC (No 1px borders, relying on deep ambient card shadows) */}
-                <div 
-                  className="w-full max-w-sm mx-auto rounded-[2.5rem] p-6 md:p-8 shadow-xl relative overflow-hidden text-white"
-                  style={{
-                    background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${generatedPass.color}`
-                  }}
-                >
-                  {/* Security Watermark */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
-                    <span className="text-white/[0.03] font-black text-3xl whitespace-nowrap tracking-[0.2em] rotate-[-45deg] select-none uppercase">
-                      DREAM PARK · دريم بارك
-                    </span>
-                  </div>
-
-                  {/* Card Header (Logo aligned based on locale) */}
-                  <div className={`w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 relative z-10`}>
-                    <div className={`flex items-center gap-3.5 ${isAr ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
-                        <img src="/logoDream.png" alt="Logo" className="w-8 h-8 object-contain" />
-                      </div>
-                      <div className={`flex flex-col leading-[1.1] ${isAr ? 'text-right' : 'text-left'}`}>
-                        <span className="text-white font-black tracking-wider text-xs uppercase">Dream Park</span>
-                        <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">دريم بارك</span>
-                      </div>
-                    </div>
-                    <div className={`flex ${isAr ? 'justify-end' : 'justify-start'} sm:justify-end`}>
-                      <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-2 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
-                        {t("active_pass")}
+                <div className="relative w-full max-w-sm mx-auto">
+                  <div className="flex items-center absolute z-10 rounded-[2.5rem] opacity-10 w-full h-full bg-[url('/dream.png')] bg-cover bg-center bg-no-repeat" />
+                  <div
+                    className=" rounded-[2.5rem] p-6 md:p-8 shadow-xl relative overflow-hidden text-white"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${generatedPass.color}`,
+                    }}
+                  >
+                    {/* Security Watermark */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+                      <span className="text-white/[0.03] font-black text-3xl whitespace-nowrap tracking-[0.2em] rotate-[-45deg] select-none uppercase">
+                        DREAM PARK · دريم بارك
                       </span>
                     </div>
-                  </div>
 
-                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 leading-tight relative z-10">
-                    {isAr
-                      ? generatedPass.ticketNameAr
-                      : generatedPass.ticketName}
-                  </h3>
+                    {/* Card Header (Logo aligned based on locale) */}
+                    <div
+                      className={`w-full flex flex-col relative sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 relative z-10 `}
+                    >
+                      <div
+                        className={`flex items-center gap-3.5 ${isAr ? "flex-row-reverse" : "flex-row"}`}
+                      >
+                        <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
+                          <img
+                            src="/logoDream.png"
+                            alt="Logo"
+                            className="w-8 h-8 object-contain"
+                          />
+                        </div>
+                        <div
+                          className={`flex flex-col leading-[1.1] ${isAr ? "text-right" : "text-left"}`}
+                        >
+                          <span className="text-white font-black tracking-wider text-xs uppercase">
+                            Dream Park
+                          </span>
+                          <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">
+                            دريم بارك
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        className={`flex ${isAr ? "justify-end" : "justify-start"} sm:justify-end`}
+                      >
+                        <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-2 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
+                          {t("active_pass")}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="flex justify-between items-center text-xs text-white/70 font-black mb-6 relative z-10">
-                    <span>
-                      {t("qty")}: {generatedPass.quantity}
-                    </span>
-                    <span>
-                      {t("visit")}: {generatedPass.targetDate}
-                    </span>
-                  </div>
+                    <h3 className="text-2xl md:text-3xl font-black text-white mb-2 leading-tight relative z-10">
+                      {isAr
+                        ? generatedPass.ticketNameAr
+                        : generatedPass.ticketName}
+                    </h3>
 
-                  {/* QR Code Container */}
-                  <div id="booking-flow-qr" className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10">
-                    {qrDataUrl ? (
-                      <img src={qrDataUrl} alt="QR Code" width={180} height={180} className="w-[180px] h-[180px] object-contain" />
-                    ) : (
-                      <QRCodeCanvas
-                        value={generatedPass.qrCodeId}
-                        size={180}
-                        level="H"
-                        includeMargin={false}
-                      />
-                    )}
-                  </div>
+                    <div className="flex justify-between items-center text-xs text-white/70 font-black mb-6 relative z-10">
+                      <span>
+                        {t("qty")}: {generatedPass.quantity}
+                      </span>
+                      <span>
+                        {t("visit")}: {generatedPass.targetDate}
+                      </span>
+                    </div>
 
-                  {/* Alphanumeric ID fallback */}
-                  <div className="bg-black/10 backdrop-blur-[5px] p-4 rounded-2xl mb-4 text-center relative z-10">
-                    <span className="block text-[10px] uppercase font-black text-white/40">
-                      {t("manual_id")}
-                    </span>
-                    <span className="font-mono text-xs md:text-sm font-black text-white/95 break-all block">
-                      {generatedPass.qrCodeId}
-                    </span>
-                  </div>
+                    {/* QR Code Container */}
+                    <div
+                      id="booking-flow-qr"
+                      className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10"
+                    >
+                      {qrDataUrl ? (
+                        <img
+                          src={qrDataUrl}
+                          alt="QR Code"
+                          width={180}
+                          height={180}
+                        />
+                      ) : (
+                        <QRCodeCanvas
+                          value={generatedPass.qrCodeId}
+                          size={180}
+                          level="H"
+                          includeMargin={false}
+                        />
+                      )}
+                    </div>
 
-                  {/* Price info (Separated with background shade) */}
-                  <div className="bg-white/10 backdrop-blur-[10px] p-4 rounded-2xl flex justify-between items-center text-xs md:text-sm font-black text-white relative z-10">
-                    <span className="text-white/75">{t("due_cash")}</span>
-                    <span className="text-base md:text-xl font-black text-white">
-                      {generatedPass.totalPrice} {t("egp")}
-                    </span>
+                    {/* Alphanumeric ID fallback */}
+                    <div className="bg-black/10 backdrop-blur-[5px] p-4 rounded-2xl mb-4 text-center relative z-10">
+                      <span className="block text-[10px] uppercase font-black text-white/40">
+                        {t("manual_id")}
+                      </span>
+                      <span className="font-mono text-xs md:text-sm font-black text-white/95 break-all block">
+                        {generatedPass.qrCodeId}
+                      </span>
+                    </div>
+
+                    {/* Price info (Separated with background shade) */}
+                    <div className="bg-white/10 backdrop-blur-[10px] p-4 rounded-2xl flex justify-between items-center text-xs md:text-sm font-black text-white relative z-10">
+                      <span className="text-white/75">{t("due_cash")}</span>
+                      <span className="text-base md:text-xl font-black text-white">
+                        {generatedPass.totalPrice} {t("egp")}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1054,25 +1127,37 @@ const handleDownloadPass = async () => {
                     type="button"
                     onClick={handleDownloadPass}
                     className={`flex-1 py-4.5 rounded-full font-black text-xs uppercase tracking-widest transition-all ${
-                      downloadSuccess 
+                      downloadSuccess
                         ? "bg-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.2)]"
                         : "bg-secondary text-white hover:bg-secondary/95 shadow-[0_10px_20px_rgba(117,87,0,0.2)]"
                     }`}
                   >
-                    {downloadSuccess ? (isAr ? "تم الحفظ!" : "Saved!") : t("print_save")}
+                    {downloadSuccess
+                      ? isAr
+                        ? "تم الحفظ!"
+                        : "Saved!"
+                      : t("print_save")}
                   </button>
                 </div>
 
                 {/* Hidden static pass card container for html2canvas capture (no parent animations/transforms, standard width) */}
-                <div 
+                <div
                   id={`capture-container-flow-${generatedPass.bookingId}`}
-                  style={{ position: 'fixed', left: '-9999px', top: '0', width: '360px', pointerEvents: 'none', userSelect: 'none', zIndex: -9999 }}
+                  style={{
+                    position: "fixed",
+                    left: "-9999px",
+                    top: "0",
+                    width: "360px",
+                    pointerEvents: "none",
+                    userSelect: "none",
+                    zIndex: -9999,
+                  }}
                 >
-                  <div 
+                  <div
                     ref={passRef}
                     className="w-full rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden text-white"
                     style={{
-                      background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${generatedPass.color}`
+                      background: `linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.4) 100%), ${generatedPass.color}`,
                     }}
                   >
                     {/* Security Watermark */}
@@ -1083,14 +1168,28 @@ const handleDownloadPass = async () => {
                     </div>
 
                     {/* Card Header (Standard side-by-side logo layout for captured image) */}
-                    <div className={`w-full flex items-center justify-between mb-6 relative z-10 ${isAr ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <div className={`flex items-center gap-3.5 ${isAr ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div
+                      className={`w-full flex items-center justify-between mb-6 relative z-10 ${isAr ? "flex-row-reverse" : "flex-row"}`}
+                    >
+                      <div
+                        className={`flex items-center gap-3.5 ${isAr ? "flex-row-reverse" : "flex-row"}`}
+                      >
                         <div className="bg-white/10 backdrop-blur-[10px] rounded-full p-2 flex items-center justify-center flex-shrink-0">
-                          <img src="/logoDream.png" alt="Logo" className="w-8 h-8 object-contain" />
+                          <img
+                            src="/logoDream.png"
+                            alt="Logo"
+                            className="w-8 h-8 object-contain"
+                          />
                         </div>
-                        <div className={`flex flex-col leading-[1.1] ${isAr ? 'text-right' : 'text-left'}`}>
-                          <span className="text-white font-black tracking-wider text-xs uppercase">Dream Park</span>
-                          <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">دريم بارك</span>
+                        <div
+                          className={`flex flex-col leading-[1.1] ${isAr ? "text-right" : "text-left"}`}
+                        >
+                          <span className="text-white font-black tracking-wider text-xs uppercase">
+                            Dream Park
+                          </span>
+                          <span className="text-white/60 text-[9px] uppercase tracking-widest font-bold">
+                            دريم بارك
+                          </span>
                         </div>
                       </div>
                       <span className="bg-white/10 backdrop-blur-[10px] px-4.5 py-1.5 rounded-full font-black text-[10px] uppercase tracking-wider text-white">
@@ -1116,7 +1215,13 @@ const handleDownloadPass = async () => {
                     {/* QR Code Container */}
                     <div className="flex justify-center bg-white p-6 rounded-[2rem] shadow-md w-fit mx-auto mb-6 relative z-10">
                       {qrDataUrl ? (
-                        <img src={qrDataUrl} alt="QR Code" width={180} height={180} className="w-[180px] h-[180px] object-contain" />
+                        <img
+                          src={qrDataUrl}
+                          alt="QR Code"
+                          width={180}
+                          height={180}
+                          className="w-[180px] h-[180px] object-contain"
+                        />
                       ) : (
                         <QRCodeCanvas
                           value={generatedPass.qrCodeId}
