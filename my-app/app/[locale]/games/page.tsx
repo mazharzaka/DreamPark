@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { CategoryFilter } from '@/src/features/games/components/CategoryFilter';
@@ -42,28 +42,26 @@ export default function GamesPage() {
     category: activeCategory === 'all' ? undefined : activeCategory
   });
 
-  // Dynamic category extraction (Q1)
-  const dynamicCategories = useMemo(() => {
-    // We always want "All" as the first option
-    const allCategory = { id: 'all', name: t('allGames') || 'All Games' };
+  // Local state to store categories so they don't disappear when filtered (Q1)
+  const [categories, setCategories] = useState<any[]>([
+    { id: 'all', nameKey: 'Games.Categories.all' }
+  ]);
 
-    // We only extract categories from the "all games" initial load or current data
-    // to avoid categories disappearing when filtered.
-    // However, the spec says "extract from initial 'all games' response".
-    // So we'll store the categories once we have them from an "all" fetch.
-    if (!gamesData?.data?.items) return [allCategory];
-
-    const uniqueCategories = Array.from(new Set(
-      gamesData.data.items
-        .map((item: any) => item.category)
-        .filter(Boolean)
-    )).map(catName => ({
-      id: catName as string,
-      name: catName as string
-    }));
-
-    return [allCategory, ...uniqueCategories];
-  }, [gamesData, t]);
+  // Extract unique categories from the "all games" initial load response
+  useEffect(() => {
+    if (activeCategory === 'all' && gamesData?.data?.items) {
+      const allCategory = { id: 'all', nameKey: 'Games.Categories.all' };
+      const uniqueCategories = Array.from(new Set(
+        gamesData.data.items
+          .map((item: any) => item.category)
+          .filter(Boolean)
+      )).map(catName => ({
+        id: catName as string,
+        nameKey: `Games.Categories.${catName}`
+      }));
+      setCategories([allCategory, ...uniqueCategories]);
+    }
+  }, [gamesData, activeCategory]);
 
   // Map backend items to frontend Game interface
   const games: Game[] = useMemo(() => {
@@ -160,7 +158,7 @@ export default function GamesPage() {
         )}
 
         <CategoryFilter
-          categories={dynamicCategories}
+          categories={categories}
           activeCategory={activeCategory}
           onSelectCategory={setActiveCategory}
         />

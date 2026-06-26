@@ -139,7 +139,10 @@
       "all": "All Games",
       "thrill": "Thrill Rides",
       "family": "Family Fun",
-      "kids": "Kids Zone"
+      "kids": "Kids Zone",
+      "animals": "Animals",
+      "dangerous": "Dangerous Rides",
+      "games": "Games"
     },
     "Items": {
       "game1": {

@@ -83,6 +83,7 @@ export default async function LocaleLayout({
     >
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="icon" href="/logoDream.png" />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>

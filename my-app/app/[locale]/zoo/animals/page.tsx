@@ -22,7 +22,7 @@ export default function AnimalsPage() {
 
 
   return (
-    <main className="min-h-screen bg-background pb-16">
+    <main className="min-h-screen mt-20 bg-background pb-16">
      
 
       <div className="container mx-auto px-4 md:px-8 pt-8">
@@ -36,12 +36,7 @@ export default function AnimalsPage() {
           </p>
         </div>
 
-        {zooData?.data?.items && zooData.data.items.length > 0 && (
-          <div className="mb-16">
-            <OurHeroesSlider mockHeroes={zooData.data.items} title="DreamZoo" />
-          </div>
-        )}
-
+       
         <CategoryFilter
           categories={CATEGORIES}
           activeCategory={activeCategory}
