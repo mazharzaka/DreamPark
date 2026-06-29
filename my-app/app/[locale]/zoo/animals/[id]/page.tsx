@@ -1,15 +1,17 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { GameHero } from "@/src/features/games/components/GameHero";
-import { BookingPanel } from "@/src/features/games/components/BookingPanel";
-import { TermsAndConditions } from "@/src/features/games/components/TermsAndConditions";
-import { GameGallery } from "@/src/features/games/components/GameGallery";
+import { 
+  ZooAnimalHero, 
+  ZooBookingBanner, 
+  ZooGallery, 
+  ZooTermsGrid 
+} from "@/src/features/zoo";
 import { getTheme } from "@/src/features/games/lib/theme";
 
 async function getAttraction(id: string) {
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
     ? `${process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/api`
-    : "https://ms5k0c9j-5000.uks1.devtunnels.ms/api";
+    : "http://localhost:5000/api";
   try {
     const res = await fetch(`${baseUrl}/attractions/${id}`, {
       next: { revalidate: 3600 },
@@ -36,14 +38,14 @@ export async function generateMetadata({
   const { locale, id } = await params;
 
   const attraction = await getAttraction(id);
-  if (!attraction) return { title: "Game Not Found" };
+  if (!attraction) return { title: "Animal Not Found" };
 
   const name = locale === "ar" ? attraction.name_ar : attraction.name_en;
   const description =
     locale === "ar" ? attraction.description_ar : attraction.description_en;
 
   return {
-    title: `${name} | Dream Park`,
+    title: `${name} | Dream Zoo`,
     description: description,
     openGraph: {
       images: [attraction.image],
@@ -51,7 +53,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function GamePage({
+export default async function ZooAnimalPage({
   params,
 }: {
   params: { locale: string; id: string };
@@ -75,17 +77,18 @@ export default async function GamePage({
         className={`absolute bottom-[10vh] -right-60 w-[500px] h-[500px] ${theme.glowColor} rounded-full blur-[150px] pointer-events-none`}
       />
 
-      <GameHero attraction={attraction} locale={locale} />
+      {/* Cinematic Hero */}
+      <ZooAnimalHero attraction={attraction} locale={locale} />
 
       <div className="container px-6 py-20 mx-auto flex flex-col gap-20 relative z-10">
         {/* Booking Card & Details */}
-        <BookingPanel attraction={attraction} locale={locale} />
+        <ZooBookingBanner attraction={attraction} locale={locale} />
 
         {/* Gallery Showcase */}
-        <GameGallery attraction={attraction} locale={locale} />
+        <ZooGallery attraction={attraction} locale={locale} />
 
         {/* Rules and Safety Instructions */}
-        <TermsAndConditions attraction={attraction} locale={locale} />
+        <ZooTermsGrid attraction={attraction} locale={locale} />
       </div>
     </main>
   );

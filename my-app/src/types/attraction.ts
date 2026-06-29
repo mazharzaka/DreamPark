@@ -11,6 +11,10 @@ export interface Attraction {
   pageKey: string;
   name: string; // The controller will resolve en/ar based on language param
   description: string;
+  name_en?: string;
+  name_ar?: string;
+  description_en?: string;
+  description_ar?: string;
   title?: string;
   subtitle?: string;
   category?: string;

@@ -437,6 +437,33 @@
       "a4": "To ensure health and safety, outside food and beverages are not permitted. We host a wide variety of themed restaurants and snack bars to satisfy all dietary needs."
     }
   },
+  "ZooAnimal": {
+    "infoBox": {
+      "label": "Everyone is allowed",
+      "duration": "5 min"
+    },
+    "booking": {
+      "heading": "Ready for the Adventure?",
+      "subtext": "Secure your spot and experience the wonders of {park}.",
+      "cta": "Reserve Your Magic Pass Now",
+      "unavailable": "UNAVAILABLE",
+      "statusAvailable": "Available Today",
+      "statusMaintenance": "Under Maintenance",
+      "statusClosed": "Closed Temporarily"
+    },
+    "gallery": {
+      "title": "Media Gallery",
+      "subtitle": "Live glimpses from the heart of the wild"
+    },
+    "terms": {
+      "title": "Terms & Safety Rules",
+      "subtitle": "Please read the safety guidelines carefully to ensure a safe and enjoyable experience."
+    },
+    "hero": {
+      "waitTime": "Wait Time",
+      "min": "MIN"
+    }
+  },
   "Footer": {
     "description": "Dream Park is the ultimate destination for family fun, adrenaline-pumping rides, and magical experiences that last a lifetime.",
     "quickLinks": "Quick Links",
