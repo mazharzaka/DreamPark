@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please tell us your name!"],
+      required: false,
       trim: true,
     },
     email: {
@@ -17,25 +17,16 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [
-        function () {
-          return !this.linkedProviders || this.linkedProviders.length === 0;
-        },
-        "Please provide a password",
-      ],
+      required: false,
       minlength: 8,
       select: false,
     },
     passwordConfirm: {
       type: String,
-      required: [
-        function () {
-          return !this.linkedProviders || this.linkedProviders.length === 0;
-        },
-        "Please provide a password confirmation",
-      ],
+      required: false,
       validate: {
         validator: function (el) {
+          if (!this.isModified('password') || !el) return true;
           return el === this.password;
         },
         message: "Passwords are not the same!",
@@ -44,7 +35,7 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: [true, "Please provide your phone number"],
+      required: false,
     },
     profilePicture: {
       type: String,
@@ -52,16 +43,16 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      required: [true, "Please specify your gender"],
+      required: false,
       enum: ["male", "female"],
     },
     dateOfBirth: {
       type: Date,
-      required: [true, "Please provide your date of birth"],
+      required: false,
     },
     address: {
       type: String,
-      required: [true, "Please provide your address"],
+      required: false,
     },
     role: {
       type: String,
@@ -92,8 +83,8 @@ const userSchema = new mongoose.Schema(
 
 //  الشكل الصحيح والآمن 100%
 userSchema.pre('save', async function() {
-  // 1) تشفير الباسورد فقط لو حصل لها تعديل أو لسه بتتكريه
-  if (!this.isModified('password')) return;
+  // 1) تشفير الباسورد فقط لو حصل لها تعديل أو لسه بتتكريه، وبشرط وجود كلمة مرور غير فارغة
+  if (!this.isModified('password') || !this.password) return;
 
   // 2) عمل هاش للباسورد
   this.password = await bcrypt.hash(this.password, 12);

@@ -1,6 +1,6 @@
 ﻿# DreamPark Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-31
+Auto-generated from all feature plans. Last updated: 2026-07-08
 
 ## Active Technologies
 - TypeScript / Node.js + Next.js App Router, Prisma, Tailwind CSS, html5-qrcode, Lucia Auth (020-ticketing-system)
@@ -39,9 +39,9 @@ tests/
 Node.js / ES Modules: Follow standard conventions
 
 ## Recent Changes
+- 033-hybrid-checkout-otp: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 - 028-heroes-merch-api: Added Next.js 14 (TypeScript), Node.js (ES Modules) + React (useState, useEffect), Redux Toolkit + RTK Query, Swiper, Lucide React
 - 027-secure-rbac-system: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
-- 026-fix-hydration-errors: Added TypeScript 5, React 19.2.4, Node.js LTS + Next.js 16.2.3 (App Router), Framer Motion 12.38.0, next-intl 4.9.1, Redux Toolkit 2.5.0
 
 
 <!-- MANUAL ADDITIONS START -->

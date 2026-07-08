@@ -53,15 +53,30 @@ const createSendToken = async (user, statusCode, res) => {
   });
 };
 
-const sendOtpHelper = async (user, purpose, res, next) => {
+const sendOtpHelper = async ({ user, email, purpose }, res, next) => {
   try {
-    // 1. Check rate limits
+    const targetEmail = email || (user && user.email);
+    const targetUserId = user ? user._id : undefined;
+
+    if (!targetEmail) {
+      return next(new AppError("Email is required to send OTP", 400));
+    }
+
     const now = new Date();
     const windowTime = 15 * 60 * 1000; // 15 mins
-    let otpRecord = await OtpToken.findOne({ userId: user._id, purpose });
+    
+    // Find rate-limit / OTP record by email and purpose
+    let otpRecord = await OtpToken.findOne({ email: targetEmail, purpose });
 
     if (otpRecord) {
-      if (now - otpRecord.windowStart < windowTime) {
+      const timeDiff = now - otpRecord.windowStart;
+      
+      // Enforce 60 seconds cool-down between consecutive sends
+      if (timeDiff < 60000) {
+        return next(new AppError("Please wait 60 seconds before requesting another code.", 429));
+      }
+
+      if (timeDiff < windowTime) {
         if (otpRecord.resendCount >= 3) {
           return next(new AppError("Too many requests. Please try again later.", 429));
         }
@@ -73,26 +88,36 @@ const sendOtpHelper = async (user, purpose, res, next) => {
       }
     } else {
       otpRecord = new OtpToken({
-        userId: user._id,
+        userId: targetUserId,
+        email: targetEmail,
         purpose,
         windowStart: now,
         resendCount: 1,
       });
     }
 
-    // 2. Generate new OTP
+    // 2. Generate new OTP (6 digits)
     const otp = generateOtp();
     otpRecord.codeHash = await hashOtp(otp);
-    otpRecord.expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins expiry
+    // Expiration TTL of 5 minutes as required
+    otpRecord.expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
     
     await otpRecord.save();
 
     // 3. Send Email
-    const subject = purpose === 'account_activation' ? 'Dream Park - Account Activation Code' : 'Dream Park - Password Reset Code';
-    const message = `Your 6-digit code is: ${otp}. It will expire in 10 minutes.`;
+    let subject = 'Dream Park - Verification Code';
+    if (purpose === 'account_activation') {
+      subject = 'Dream Park - Account Activation Code';
+    } else if (purpose === 'password_reset') {
+      subject = 'Dream Park - Password Reset Code';
+    } else if (purpose === 'login_otp') {
+      subject = 'Dream Park - Login Verification Code';
+    }
+    
+    const message = `Your 6-digit verification code is: ${otp}. It will expire in 5 minutes.`;
     
     await sendEmail({
-      email: user.email,
+      email: targetEmail,
       subject,
       message,
     });
@@ -100,11 +125,11 @@ const sendOtpHelper = async (user, purpose, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        message: "If the account exists, a code was sent.",
+        message: "A verification code has been sent.",
       },
     });
   } catch (error) {
-    
+    console.error("sendOtpHelper error:", error);
     return next(new AppError("There was an error sending the email. Try again later!", 500));
   }
 };
@@ -147,7 +172,7 @@ export const signup = catchAsync(async (req, res, next) => {
   });
 
   // 5) تشغيل الـ OTP والـ Helper هو المسؤول عن إرجاع الـ Response الصافي للفرونت إند
-  await sendOtpHelper(newUser, 'account_activation', res, next);
+  await sendOtpHelper({ user: newUser, purpose: 'account_activation' }, res, next);
 });
 
 export const sendOtp = catchAsync(async (req, res, next) => {
@@ -157,7 +182,7 @@ export const sendOtp = catchAsync(async (req, res, next) => {
   }
 
   const user = await User.findOne({ email });
-  if (!user) {
+  if (!user && purpose !== 'login_otp') {
     // Return same message for anti-enumeration
     return res.status(200).json({
       success: true,
@@ -165,7 +190,7 @@ export const sendOtp = catchAsync(async (req, res, next) => {
     });
   }
 
-  await sendOtpHelper(user, purpose, res, next);
+  await sendOtpHelper({ user, email, purpose }, res, next);
 });
 
 export const verifyOtpController = catchAsync(async (req, res, next) => {
@@ -175,12 +200,7 @@ export const verifyOtpController = catchAsync(async (req, res, next) => {
     return next(new AppError("Please provide email, code, and purpose", 400));
   }
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return next(new AppError("Invalid or expired OTP", 400));
-  }
-
-  const otpRecord = await OtpToken.findOne({ userId: user._id, purpose });
+  const otpRecord = await OtpToken.findOne({ email, purpose });
   if (!otpRecord) {
     return next(new AppError("Invalid or expired OTP", 400));
   }
@@ -192,6 +212,33 @@ export const verifyOtpController = catchAsync(async (req, res, next) => {
 
   // OTP verified, delete the record
   await OtpToken.findByIdAndDelete(otpRecord._id);
+
+  let user = await User.findOne({ email });
+
+  if (purpose === 'login_otp') {
+    // Perform Upsert Logic
+    if (!user) {
+      user = await User.create({
+        name: "Guest",
+        email: email,
+        password: null,
+        isVerified: true,
+        role: "USER"
+      });
+    } else {
+      if (!user.isVerified) {
+        user.isVerified = true;
+        await user.save({ validateBeforeSave: false });
+      }
+    }
+
+    // Issue JWT / login session token
+    return await createSendToken(user, 200, res);
+  }
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
 
   if (purpose === 'account_activation') {
     user.isVerified = true;

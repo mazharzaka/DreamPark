@@ -4,11 +4,15 @@ const otpTokenSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
+    required: false
+  },
+  email: {
+    type: String,
     required: true
   },
   purpose: {
     type: String,
-    enum: ['account_activation', 'password_reset'],
+    enum: ['account_activation', 'password_reset', 'login_otp'],
     required: true
   },
   codeHash: {
@@ -32,6 +36,7 @@ const otpTokenSchema = new mongoose.Schema({
 
 // Create compound index for faster queries
 otpTokenSchema.index({ userId: 1, purpose: 1 });
+otpTokenSchema.index({ email: 1, purpose: 1 });
 
 const OtpToken = mongoose.model('OtpToken', otpTokenSchema);
 

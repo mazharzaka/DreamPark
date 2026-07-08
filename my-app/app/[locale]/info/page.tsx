@@ -273,7 +273,7 @@ export default function ParkInfoPage() {
                   className="absolute inset-2 overflow-hidden rounded-[28px]"
                 >
                   <Image
-                    src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=800&auto=format&fit=crop"
+                    src="/dream.png"
                     alt="Dream Park Magic"
                     fill
                     priority

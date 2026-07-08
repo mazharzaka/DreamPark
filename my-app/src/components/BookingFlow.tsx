@@ -37,7 +37,7 @@ import {
   resetBookingFlow,
 } from "@/src/lib/features/booking/bookingSlice";
 import { setCredentials } from "@/src/lib/features/auth/authSlice";
-import { useLoginWithPasswordMutation } from "../lib/features/auth/authApi";
+import { useLoginWithPasswordMutation, useSendOtpMutation, useVerifyOtpMutation } from "../lib/features/auth/authApi";
 import { navigate } from "next/dist/client/components/segment-cache/navigation";
 
 type BookingFormData = {
@@ -168,16 +168,120 @@ export default function BookingFlow() {
     register: registerLogin,
     handleSubmit: handleLoginSubmit,
     reset: resetLogin,
+    watch: watchLogin,
   } = useForm<LoginFormData>({
     defaultValues: { email: "", password: "" },
   });
+  const loginEmail = watchLogin("email");
   const navigate = useRouter();
-  // Auth state local fallback
+  
+  // Auth Mutations
   const [login] = useLoginWithPasswordMutation();
+  const [sendOtp] = useSendOtpMutation();
+  const [verifyOtp] = useVerifyOtpMutation();
 
+  // Modal & OTP States
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const [authMode, setAuthMode] = useState<"otp" | "password">("otp");
+  const [otpSent, setOtpSent] = useState<boolean>(false);
+  const [otpCountdown, setOtpCountdown] = useState<number>(0);
+  const [otpEmail, setOtpEmail] = useState<string>("");
+  const [otpCode, setOtpCode] = useState<string>("");
+  const [otpLoading, setOtpLoading] = useState<boolean>(false);
+
+  // Countdown timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (otpCountdown > 0) {
+      interval = setInterval(() => {
+        setOtpCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpCountdown]);
+
+  // Reset modal state on close
+  useEffect(() => {
+    if (!showLoginModal) {
+      setOtpSent(false);
+      setOtpCountdown(0);
+      setOtpCode("");
+      setOtpEmail("");
+      setAuthMode("otp");
+      setLoginError(null);
+      resetLogin();
+    }
+  }, [showLoginModal, resetLogin]);
+
+  // Request OTP handler
+  const handleRequestOtp = async () => {
+    if (!loginEmail) {
+      setLoginError(isAr ? "يرجى إدخال البريد الإلكتروني" : "Please enter your email");
+      return;
+    }
+    setOtpLoading(true);
+    setLoginError(null);
+    try {
+      await sendOtp({ email: loginEmail, purpose: "login_otp" }).unwrap();
+      setOtpEmail(loginEmail);
+      setOtpSent(true);
+      setOtpCountdown(60);
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = typeof err?.data?.message === "string"
+        ? err.data.message
+        : typeof err?.data?.error === "string"
+          ? err.data.error
+          : typeof err?.data?.error?.message === "string"
+            ? err.data.error.message
+            : typeof err?.message === "string"
+              ? err.message
+              : "Failed to send verification code.";
+      setLoginError(errMsg);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Verify OTP handler
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.length !== 6) {
+      setLoginError(isAr ? "يرجى إدخال رمز التحقق المكون من 6 أرقام" : "Please enter a valid 6-digit verification code");
+      return;
+    }
+    setOtpLoading(true);
+    setLoginError(null);
+    try {
+      const result = await verifyOtp({ email: otpEmail, code: otpCode, purpose: "login_otp" }).unwrap();
+      if (result.success && result.token) {
+        dispatch(
+          setCredentials({ token: result.token, user: result.data.user }),
+        );
+        setShowLoginModal(false);
+        // Auto-submit the booking form on success
+        setTimeout(() => {
+          handleBookingSubmit(onSubmitBooking)();
+        }, 100);
+      }
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = typeof err?.data?.message === "string"
+        ? err.data.message
+        : typeof err?.data?.error === "string"
+          ? err.data.error
+          : typeof err?.data?.error?.message === "string"
+            ? err.data.error.message
+            : typeof err?.message === "string"
+              ? err.message
+              : "Invalid or expired verification code.";
+      setLoginError(errMsg);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
 
   // RTK Queries
   const { data: ticketTypesRes, isLoading: isLoadingTickets } =
@@ -340,6 +444,9 @@ export default function BookingFlow() {
             setCredentials({ token: result.token, user: result.data.user }),
           );
           setShowLoginModal(false);
+          setTimeout(() => {
+            handleBookingSubmit(onSubmitBooking)();
+          }, 100);
         }
         setIsLoggingIn(false);
       })
@@ -362,15 +469,20 @@ export default function BookingFlow() {
 
   const getBookingErrorMessage = () => {
     if (!bookingError) return null;
-    if ("data" in bookingError) {
-      return (
-        (bookingError as { data?: { error?: string } })?.data?.error ||
-        (isAr
-          ? "حدث خطأ أثناء إنشاء الحجز"
-          : "An error occurred during booking")
-      );
+    if (bookingError && typeof bookingError === "object" && "data" in bookingError) {
+      const dataObj = bookingError.data as any;
+      const errorMsg = typeof dataObj?.message === "string"
+        ? dataObj.message
+        : typeof dataObj?.error === "string"
+          ? dataObj.error
+          : typeof dataObj?.error?.message === "string"
+            ? dataObj.error.message
+            : null;
+      if (errorMsg) {
+        return errorMsg;
+      }
     }
-    if ("message" in bookingError && typeof bookingError.message === "string") {
+    if (bookingError && typeof bookingError === "object" && "message" in bookingError && typeof bookingError.message === "string") {
       return bookingError.message;
     }
     return isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
@@ -1267,87 +1379,225 @@ export default function BookingFlow() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowLoginModal(false)}
-              className="absolute inset-0 bg-[#2d2f2f]/40 backdrop-blur-[6px]"
+              className="absolute inset-0 bg-[#000000]/60 backdrop-blur-[8px]"
             />
 
-            {/* Modal Body */}
+            {/* Modal Body - Dark-Themed Premium Layout */}
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 30 }}
-              className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 shadow-2xl z-10 space-y-6"
+              className="relative w-full max-w-md bg-[#141516] text-white rounded-[2.5rem] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.8)] z-10 space-y-6 border border-[#2a2c2c]/30"
             >
+              {/* Header section */}
               <div className="text-center">
-                <div className="w-14 h-14 bg-secondary/10 text-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-14 h-14 bg-secondary/20 text-secondary rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(0,92,170,0.15)]">
                   <LogIn className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-black text-on-surface">
-                  {t("login_required")}
+                <h3 className="text-2xl font-black text-white leading-tight">
+                  {authMode === "otp"
+                    ? t("fast_checkout")
+                    : t("login_required")}
                 </h3>
-                <p className="text-sm text-on-surface/60 mt-1">
-                  {t("login_subtitle")}
+                <p className="text-xs text-white/50 mt-1.5 font-medium px-4">
+                  {authMode === "otp"
+                    ? otpSent
+                      ? t("enter_verification_code")
+                      : t("login_subtitle")
+                    : t("login_subtitle")}
                 </p>
               </div>
 
               {loginError && (
-                <div className="p-4 bg-[#fff0f1] text-[#b5161e] rounded-2xl text-xs flex items-center gap-2 font-bold shadow-sm">
+                <div className="p-4 bg-[#fff0f1]/10 border border-[#b5161e]/20 text-[#ff766d] rounded-2xl text-xs flex items-center gap-2 font-bold shadow-sm">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{loginError}</span>
                 </div>
               )}
 
-              <form
-                onSubmit={handleLoginSubmit(onSubmitLogin)}
-                className="space-y-4"
-              >
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black text-on-surface/50 uppercase tracking-wider block">
-                    {t("email")}
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    {...registerLogin("email", { required: true })}
-                    placeholder="e.g. test@example.com"
-                    className="w-full bg-[#f0f1f1] border-none rounded-xl p-4 text-on-surface font-sans text-sm focus:ring-4 focus:ring-secondary/15 outline-none transition-all shadow-inner"
-                  />
-                </div>
+              {/* Dynamic Authentication Flow Form switcher */}
+              {authMode === "otp" ? (
+                // OTP Fast Checkout Mode
+                <div className="space-y-4">
+                  {!otpSent ? (
+                    // Step 1: Input Email
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-black text-white/50 uppercase tracking-wider block">
+                          {t("email")}
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={loginEmail || ""}
+                          {...registerLogin("email", { required: true })}
+                          placeholder="e.g. test@example.com"
+                          className="w-full bg-[#1d1f20] border-none rounded-xl p-4 text-white placeholder-white/30 font-sans text-sm focus:ring-4 focus:ring-secondary/30 outline-none transition-all shadow-inner"
+                        />
+                      </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black text-on-surface/50 uppercase tracking-wider block">
-                    {t("password")}
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    {...registerLogin("password", { required: true })}
-                    placeholder="••••••••"
-                    className="w-full bg-[#f0f1f1] border-none rounded-xl p-4 text-on-surface font-sans text-sm focus:ring-4 focus:ring-secondary/15 outline-none transition-all shadow-inner"
-                  />
-                </div>
-
-                {/* Login Button (Strictly NO borders) */}
-                <button
-                  type="submit"
-                  disabled={isLoggingIn}
-                  className="w-full bg-secondary text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-secondary/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
-                >
-                  {isLoggingIn ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                      <button
+                        type="button"
+                        onClick={handleRequestOtp}
+                        disabled={otpLoading || !loginEmail}
+                        className="w-full bg-secondary text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-secondary/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                      >
+                        {otpLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          t("send_code")
+                        )}
+                      </button>
+                    </div>
                   ) : (
-                    <>
-                      <LogIn className="w-4 h-4" />
-                      {t("sign_in")}
-                    </>
-                  )}
-                </button>
-              </form>
+                    // Step 2: Verify OTP
+                    <form onSubmit={handleVerifyOtp} className="space-y-4">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-baseline">
+                          <label className="text-xs font-black text-white/50 uppercase tracking-wider block">
+                            {t("enter_verification_code")}
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setOtpSent(false)}
+                            className="text-[10px] font-bold text-secondary hover:underline"
+                          >
+                            {isAr ? "تغيير الإيميل" : "Change email"}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-white/40 pb-1">
+                          {isAr 
+                            ? `تم إرسال رمز مكون من 6 أرقام إلى ${otpEmail}`
+                            : `A 6-digit code has been sent to ${otpEmail}`}
+                        </p>
+                        <input
+                          type="text"
+                          required
+                          maxLength={6}
+                          pattern="\d{6}"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                          placeholder="••••••"
+                          className="w-full bg-[#1d1f20] border-none rounded-xl p-4 text-center tracking-[0.7em] font-sans text-lg font-black text-white placeholder-white/20 focus:ring-4 focus:ring-secondary/30 outline-none transition-all shadow-inner"
+                        />
+                      </div>
 
-              <div className="text-center pt-4 mt-4 bg-[#f0f1f1]/30 p-3 rounded-2xl">
+                      <div className="flex justify-between items-center text-xs px-1">
+                        <span className="text-white/40">
+                          {otpCountdown > 0 ? (
+                            isAr
+                              ? `إعادة الإرسال خلال ${otpCountdown} ثانية`
+                              : `Resend in ${otpCountdown}s`
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleRequestOtp}
+                              className="text-secondary font-black hover:underline"
+                            >
+                              {t("resend_otp")}
+                            </button>
+                          )}
+                        </span>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={otpLoading || otpCode.length !== 6}
+                        className="w-full bg-secondary text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-secondary/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                      >
+                        {otpLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          t("verify_and_continue")
+                        )}
+                      </button>
+                    </form>
+                  )}
+
+                  {/* Toggle Link to Password Login */}
+                  <div className="text-center pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("password");
+                        setLoginError(null);
+                      }}
+                      className="text-xs font-bold text-white/60 hover:text-white transition-colors"
+                    >
+                      {t("or_login_password")}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // Traditional Password Mode
+                <form
+                  onSubmit={handleLoginSubmit(onSubmitLogin)}
+                  className="space-y-4"
+                >
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-white/50 uppercase tracking-wider block">
+                      {t("email")}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      {...registerLogin("email", { required: true })}
+                      placeholder="e.g. test@example.com"
+                      className="w-full bg-[#1d1f20] border-none rounded-xl p-4 text-white placeholder-white/30 font-sans text-sm focus:ring-4 focus:ring-secondary/30 outline-none transition-all shadow-inner"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-white/50 uppercase tracking-wider block">
+                      {t("password")}
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      {...registerLogin("password", { required: true })}
+                      placeholder="••••••••"
+                      className="w-full bg-[#1d1f20] border-none rounded-xl p-4 text-white placeholder-white/30 font-sans text-sm focus:ring-4 focus:ring-secondary/30 outline-none transition-all shadow-inner"
+                    />
+                  </div>
+
+                  {/* Login Button (Strictly NO borders) */}
+                  <button
+                    type="submit"
+                    disabled={isLoggingIn}
+                    className="w-full bg-secondary text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-secondary/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                  >
+                    {isLoggingIn ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <LogIn className="w-4 h-4" />
+                        {t("sign_in")}
+                      </>
+                    )}
+                  </button>
+
+                  {/* Toggle Link to OTP Fast Checkout */}
+                  <div className="text-center pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("otp");
+                        setLoginError(null);
+                      }}
+                      className="text-xs font-bold text-white/60 hover:text-white transition-colors"
+                    >
+                      {t("back_to_otp")}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Close Modal Button */}
+              <div className="text-center pt-4 border-t border-[#2a2c2c]/30">
                 <button
                   type="button"
                   onClick={() => setShowLoginModal(false)}
-                  className="text-xs font-black text-on-surface/40 hover:text-on-surface/80"
+                  className="text-xs font-black text-white/40 hover:text-white/80 transition-colors"
                 >
                   {t("cancel_close")}
                 </button>

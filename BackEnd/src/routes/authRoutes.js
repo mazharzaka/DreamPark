@@ -128,6 +128,7 @@ router.post('/verify-otp', verifyOtpController);
  *         description: Invalid email or password
  */
 router.post('/login', login);
+router.post('/login-password', login);
 
 /**
  * @swagger
