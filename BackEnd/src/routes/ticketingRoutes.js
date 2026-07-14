@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getTicketTypes,
   createBooking,
+  createBookingGuest,
   verifyAndConfirmPayment,
   updateTicketPrice,
   getUserBookings,
@@ -83,6 +84,7 @@ router.get('/types', getTicketTypes);
  *         description: Ticket type not found
  */
 router.post('/bookings', protect, createBooking);
+router.post('/bookings/guest', createBookingGuest);
 
 /**
  * @swagger

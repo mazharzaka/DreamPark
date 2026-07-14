@@ -141,6 +141,25 @@ export const bookingsApi = createApi({
       }),
       invalidatesTags: ["Booking"],
     }),
+    createBookingGuest: builder.mutation<
+      CreateBookingResponse,
+      {
+        ticketTypeId: string;
+        targetDate: string;
+        quantity: number;
+        phoneNumber: string;
+        email: string;
+        name: string;
+        otpCode: string;
+      }
+    >({
+      query: (body) => ({
+        url: "/bookings/guest",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Booking"],
+    }),
 
     // ── Query: GET /api/tickets/bookings/user ──────────────────────────────
     getUserBookings: builder.query<ApiListResponse<Booking>, string | void>({
@@ -212,6 +231,7 @@ export const bookingsApi = createApi({
 export const {
   useGetTicketTypesQuery,
   useCreateBookingMutation,
+  useCreateBookingGuestMutation,
   useGetUserBookingsQuery,
   useVerifyAndConfirmPaymentMutation,
   useVerifyScanMutation,

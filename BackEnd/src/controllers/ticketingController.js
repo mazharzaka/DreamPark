@@ -2,6 +2,8 @@ import TicketType from "../models/TicketType.js";
 import Booking from "../models/Booking.js";
 import User from "../models/User.js";
 import ScanAuditLog from "../models/ScanAuditLog.js";
+import OtpToken from "../models/OtpToken.js";
+import { verifyOtp } from "../utils/otpUtils.js";
 
 export const getTicketTypes = async (req, res, next) => {
   try {
@@ -602,6 +604,112 @@ export const verifyCancel = async (req, res, next) => {
       data: {
         bookingId: booking._id,
         status: booking.status,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createBookingGuest = async (req, res, next) => {
+  try {
+    const { ticketTypeId, targetDate, quantity, phoneNumber, email, name, otpCode } = req.body;
+
+    // Validate essential guest fields
+    if (!email || !name || !phoneNumber || !otpCode) {
+      return res.status(400).json({
+        success: false,
+        error: "Email, name, phone number, and verification code are required.",
+      });
+    }
+
+    // Verify OTP first
+    const otpRecord = await OtpToken.findOne({ email, purpose: "login_otp" });
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid or expired verification code.",
+      });
+    }
+
+    const isValid = await verifyOtp(otpCode, otpRecord.codeHash);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid or expired verification code.",
+      });
+    }
+
+    // Delete the verified OTP record
+    await OtpToken.findByIdAndDelete(otpRecord._id);
+
+    // Date validation
+    const dateObj = new Date(targetDate);
+    dateObj.setUTCHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    if (isNaN(dateObj.getTime()) || dateObj < today) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid or past target date.",
+      });
+    }
+
+    // Quantity validation
+    if (!quantity || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        error: "Quantity must be at least 1.",
+      });
+    }
+
+    // Fetch ticket type
+    const ticketType = await TicketType.findById(ticketTypeId);
+    if (!ticketType) {
+      return res.status(404).json({
+        success: false,
+        error: "Ticket type not found.",
+      });
+    }
+
+    // Secure price calculation
+    const pricePerTicket = ticketType.price * (1 - (ticketType.discount || 0) / 100);
+    const totalPrice = pricePerTicket * quantity;
+
+    // Upsert Guest User record without changing login state
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        phoneNumber,
+        password: null,
+        isVerified: true,
+        role: "USER",
+      });
+    } else {
+      user.isVerified = true;
+      if (name) user.name = name;
+      if (phoneNumber) user.phoneNumber = phoneNumber;
+      await user.save({ validateBeforeSave: false });
+    }
+
+    // Create the booking linked to the guest user
+    const booking = await Booking.create({
+      userId: user._id,
+      ticketTypeId,
+      targetDate: dateObj,
+      totalPrice,
+      quantity,
+      phoneNumber,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        bookingId: booking._id,
+        qrCodeId: booking.qrCodeId,
       },
     });
   } catch (error) {

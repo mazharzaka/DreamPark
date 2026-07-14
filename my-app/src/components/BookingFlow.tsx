@@ -25,6 +25,7 @@ import {
 import {
   useGetTicketTypesQuery,
   useCreateBookingMutation,
+  useCreateBookingGuestMutation,
 } from "@/src/lib/features/api/bookingsApi";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
@@ -37,7 +38,11 @@ import {
   resetBookingFlow,
 } from "@/src/lib/features/booking/bookingSlice";
 import { setCredentials } from "@/src/lib/features/auth/authSlice";
-import { useLoginWithPasswordMutation, useSendOtpMutation, useVerifyOtpMutation } from "../lib/features/auth/authApi";
+import {
+  useLoginWithPasswordMutation,
+  useSendOtpMutation,
+  useVerifyOtpMutation,
+} from "../lib/features/auth/authApi";
 import { navigate } from "next/dist/client/components/segment-cache/navigation";
 
 type BookingFormData = {
@@ -174,7 +179,7 @@ export default function BookingFlow() {
   });
   const loginEmail = watchLogin("email");
   const navigate = useRouter();
-  
+
   // Auth Mutations
   const [login] = useLoginWithPasswordMutation();
   const [sendOtp] = useSendOtpMutation();
@@ -190,6 +195,8 @@ export default function BookingFlow() {
   const [otpEmail, setOtpEmail] = useState<string>("");
   const [otpCode, setOtpCode] = useState<string>("");
   const [otpLoading, setOtpLoading] = useState<boolean>(false);
+
+  const [guestName, setGuestName] = useState<string>("");
 
   // Countdown timer effect
   useEffect(() => {
@@ -209,6 +216,7 @@ export default function BookingFlow() {
       setOtpCountdown(0);
       setOtpCode("");
       setOtpEmail("");
+      setGuestName("");
       setAuthMode("otp");
       setLoginError(null);
       resetLogin();
@@ -217,8 +225,14 @@ export default function BookingFlow() {
 
   // Request OTP handler
   const handleRequestOtp = async () => {
+    if (!guestName.trim()) {
+      setLoginError(isAr ? "يرجى إدخال الاسم" : "Please enter your name");
+      return;
+    }
     if (!loginEmail) {
-      setLoginError(isAr ? "يرجى إدخال البريد الإلكتروني" : "Please enter your email");
+      setLoginError(
+        isAr ? "يرجى إدخال البريد الإلكتروني" : "Please enter your email",
+      );
       return;
     }
     setOtpLoading(true);
@@ -230,53 +244,80 @@ export default function BookingFlow() {
       setOtpCountdown(60);
     } catch (err: any) {
       console.error(err);
-      const errMsg = typeof err?.data?.message === "string"
-        ? err.data.message
-        : typeof err?.data?.error === "string"
-          ? err.data.error
-          : typeof err?.data?.error?.message === "string"
-            ? err.data.error.message
-            : typeof err?.message === "string"
-              ? err.message
-              : "Failed to send verification code.";
+      const errMsg =
+        typeof err?.data?.message === "string"
+          ? err.data.message
+          : typeof err?.data?.error === "string"
+            ? err.data.error
+            : typeof err?.data?.error?.message === "string"
+              ? err.data.error.message
+              : typeof err?.message === "string"
+                ? err.message
+                : "Failed to send verification code.";
       setLoginError(errMsg);
     } finally {
       setOtpLoading(false);
     }
   };
 
-  // Verify OTP handler
+  // Verify OTP handler (complete guest booking without logging in)
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode || otpCode.length !== 6) {
-      setLoginError(isAr ? "يرجى إدخال رمز التحقق المكون من 6 أرقام" : "Please enter a valid 6-digit verification code");
+      setLoginError(
+        isAr
+          ? "يرجى إدخال رمز التحقق المكون من 6 أرقام"
+          : "Please enter a valid 6-digit verification code",
+      );
+      return;
+    }
+    if (!selectedTicketId || !targetDate || !phoneNumber) {
+      setLoginError(
+        isAr ? "بيانات الحجز غير مكتملة" : "Booking details are incomplete.",
+      );
       return;
     }
     setOtpLoading(true);
     setLoginError(null);
     try {
-      const result = await verifyOtp({ email: otpEmail, code: otpCode, purpose: "login_otp" }).unwrap();
-      if (result.success && result.token) {
+      const result = await createBookingGuest({
+        ticketTypeId: selectedTicketId,
+        targetDate,
+        quantity,
+        phoneNumber,
+        email: otpEmail,
+        name: guestName,
+        otpCode,
+      }).unwrap();
+
+      if (result.success && result.data) {
         dispatch(
-          setCredentials({ token: result.token, user: result.data.user }),
+          setGeneratedPass({
+            bookingId: result.data.bookingId,
+            qrCodeId: result.data.qrCodeId,
+            targetDate,
+            ticketName: selectedTicket?.name || "Single-Day Pass",
+            ticketNameAr: selectedTicket?.nameAr || "تذكرة المرح",
+            quantity,
+            totalPrice: pricing.total,
+            color: selectedTicket?.color || "#b5161e",
+          }),
         );
         setShowLoginModal(false);
-        // Auto-submit the booking form on success
-        setTimeout(() => {
-          handleBookingSubmit(onSubmitBooking)();
-        }, 100);
+        dispatch(setStep(3)); // Direct to success ticket screen
       }
     } catch (err: any) {
       console.error(err);
-      const errMsg = typeof err?.data?.message === "string"
-        ? err.data.message
-        : typeof err?.data?.error === "string"
-          ? err.data.error
-          : typeof err?.data?.error?.message === "string"
-            ? err.data.error.message
-            : typeof err?.message === "string"
-              ? err.message
-              : "Invalid or expired verification code.";
+      const errMsg =
+        typeof err?.data?.message === "string"
+          ? err.data.message
+          : typeof err?.data?.error === "string"
+            ? err.data.error
+            : typeof err?.data?.error?.message === "string"
+              ? err.data.error.message
+              : typeof err?.message === "string"
+                ? err.message
+                : "Invalid or expired verification code.";
       setLoginError(errMsg);
     } finally {
       setOtpLoading(false);
@@ -288,6 +329,10 @@ export default function BookingFlow() {
     useGetTicketTypesQuery();
   const [createBooking, { isLoading: isBookingLoading, error: bookingError }] =
     useCreateBookingMutation();
+  const [
+    createBookingGuest,
+    { isLoading: isBookingGuestLoading, error: bookingGuestError },
+  ] = useCreateBookingGuestMutation();
 
   const ticketTypes = ticketTypesRes?.data ?? [];
   const filteredTickets = ticketTypes.filter(
@@ -468,22 +513,29 @@ export default function BookingFlow() {
   };
 
   const getBookingErrorMessage = () => {
-    if (!bookingError) return null;
-    if (bookingError && typeof bookingError === "object" && "data" in bookingError) {
-      const dataObj = bookingError.data as any;
-      const errorMsg = typeof dataObj?.message === "string"
-        ? dataObj.message
-        : typeof dataObj?.error === "string"
-          ? dataObj.error
-          : typeof dataObj?.error?.message === "string"
-            ? dataObj.error.message
-            : null;
+    const activeErr = bookingError || bookingGuestError;
+    if (!activeErr) return null;
+    if (activeErr && typeof activeErr === "object" && "data" in activeErr) {
+      const dataObj = activeErr.data as any;
+      const errorMsg =
+        typeof dataObj?.message === "string"
+          ? dataObj.message
+          : typeof dataObj?.error === "string"
+            ? dataObj.error
+            : typeof dataObj?.error?.message === "string"
+              ? dataObj.error.message
+              : null;
       if (errorMsg) {
         return errorMsg;
       }
     }
-    if (bookingError && typeof bookingError === "object" && "message" in bookingError && typeof bookingError.message === "string") {
-      return bookingError.message;
+    if (
+      activeErr &&
+      typeof activeErr === "object" &&
+      "message" in activeErr &&
+      typeof activeErr.message === "string"
+    ) {
+      return activeErr.message;
     }
     return isAr ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
   };
@@ -1420,8 +1472,26 @@ export default function BookingFlow() {
                 // OTP Fast Checkout Mode
                 <div className="space-y-4">
                   {!otpSent ? (
-                    // Step 1: Input Email
+                    // Step 1: Input Name & Email
                     <div className="space-y-4">
+                      {/* Name Field */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-black text-white/50 uppercase tracking-wider block">
+                          {isAr ? "الاسم الكامل" : "Full Name"}
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={guestName}
+                          onChange={(e) => setGuestName(e.target.value)}
+                          placeholder={
+                            isAr ? "مثال: أحمد محمد" : "e.g. John Doe"
+                          }
+                          className="w-full bg-[#1d1f20] border-none rounded-xl p-4 text-white placeholder-white/30 font-sans text-sm focus:ring-4 focus:ring-secondary/30 outline-none transition-all shadow-inner"
+                        />
+                      </div>
+
+                      {/* Email Field */}
                       <div className="space-y-1.5">
                         <label className="text-xs font-black text-white/50 uppercase tracking-wider block">
                           {t("email")}
@@ -1439,7 +1509,9 @@ export default function BookingFlow() {
                       <button
                         type="button"
                         onClick={handleRequestOtp}
-                        disabled={otpLoading || !loginEmail}
+                        disabled={
+                          otpLoading || !loginEmail || !guestName.trim()
+                        }
                         className="w-full bg-secondary text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-secondary/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
                       >
                         {otpLoading ? (
@@ -1466,7 +1538,7 @@ export default function BookingFlow() {
                           </button>
                         </div>
                         <p className="text-[11px] text-white/40 pb-1">
-                          {isAr 
+                          {isAr
                             ? `تم إرسال رمز مكون من 6 أرقام إلى ${otpEmail}`
                             : `A 6-digit code has been sent to ${otpEmail}`}
                         </p>
@@ -1476,7 +1548,9 @@ export default function BookingFlow() {
                           maxLength={6}
                           pattern="\d{6}"
                           value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                          onChange={(e) =>
+                            setOtpCode(e.target.value.replace(/\D/g, ""))
+                          }
                           placeholder="••••••"
                           className="w-full bg-[#1d1f20] border-none rounded-xl p-4 text-center tracking-[0.7em] font-sans text-lg font-black text-white placeholder-white/20 focus:ring-4 focus:ring-secondary/30 outline-none transition-all shadow-inner"
                         />
@@ -1485,9 +1559,11 @@ export default function BookingFlow() {
                       <div className="flex justify-between items-center text-xs px-1">
                         <span className="text-white/40">
                           {otpCountdown > 0 ? (
-                            isAr
-                              ? `إعادة الإرسال خلال ${otpCountdown} ثانية`
-                              : `Resend in ${otpCountdown}s`
+                            isAr ? (
+                              `إعادة الإرسال خلال ${otpCountdown} ثانية`
+                            ) : (
+                              `Resend in ${otpCountdown}s`
+                            )
                           ) : (
                             <button
                               type="button"
@@ -1502,10 +1578,14 @@ export default function BookingFlow() {
 
                       <button
                         type="submit"
-                        disabled={otpLoading || otpCode.length !== 6}
+                        disabled={
+                          otpLoading ||
+                          isBookingGuestLoading ||
+                          otpCode.length !== 6
+                        }
                         className="w-full bg-secondary text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-secondary/15 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
                       >
-                        {otpLoading ? (
+                        {otpLoading || isBookingGuestLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           t("verify_and_continue")
